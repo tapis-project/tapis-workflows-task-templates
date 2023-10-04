@@ -1,0 +1,14 @@
+{
+    "tapis-login": {
+        "path": "tapis-login/schema.json"
+    },
+    "tapis-etl-gen-manifests-lockfile": {
+        "path": "tapis-etl-lock-manifests/schema.json"
+    },
+    "tapis-etl-gen-manifests": {
+        "path": "tapis-etl-gen-manifests/schema.json"
+    },
+    "tapis-etl-globus-transfer": {
+        "path": "tapis-etl-globus-transfer/schema.json"
+    }
+}

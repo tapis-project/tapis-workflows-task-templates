@@ -1,0 +1,15 @@
+{
+    "description": "Creates all the ",
+    "tasks": [
+        {
+            "type": "template",
+            "uses": {
+                "name": "tapis-login",
+                "source": {
+                    "url": "https://github.com/tapis-project/tapis-owe-templates.git",
+                    "branch": "master"
+                }
+            }
+        }
+    ]
+}

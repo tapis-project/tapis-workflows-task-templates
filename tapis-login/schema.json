@@ -1,0 +1,39 @@
+{
+    "type": "function",
+    "execution_profile": {
+        "flavor": "c1tiny"
+    },
+    "installer": "pip",
+    "packages": ["tapipy"],
+    "entrypoint": "tapis-owe-functions/tapis-login/entrypoint.py",
+    "git_repositories": [
+        {
+            "url": "https://github.com/tapis-project/tapis-owe-functions.git",
+            "branch": "master",
+            "directory": "functions"
+        }
+    ],
+    "input": {
+        "TAPIS_BASE_URL": {
+            "type": "string",
+            "value_from": {
+                "env": "TAPIS_BASE_URL"
+            }
+        },
+        "TAPIS_USERNAME": {
+            "type": "string",
+            "value_from": {
+                "env": "TAPIS_USERNAME"
+            }
+        },
+        "TAPIS_PASSWORD": {
+            "type": "string",
+            "value_from": {
+                "env": "TAPIS_PASSWORD"
+            }
+        }
+    },
+    "output": {
+        "TAPIS_JWT": {"type": "string"}
+    }
+}

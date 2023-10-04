@@ -1,0 +1,9 @@
+{
+    "type": "function",
+    "execution_profile": {
+        "flavor": "c1tiny"
+    },
+    "installer": "pip",
+    "packages": ["requests", "globus==2.0.1"],
+    "entrypoint": "tapis-owe-functions/tapis-etl-globus-transfer/entrypoint.py"
+}

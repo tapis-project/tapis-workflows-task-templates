@@ -1,0 +1,9 @@
+{
+    "type": "function",
+    "execution_profile": {
+        "flavor": "c1tiny"
+    },
+    "installer": "pip",
+    "packages": ["tapipy"],
+    "entrypoint": "tapis-owe-functions/tapis-etl-gen-manifests-lockfile/entrypoint.py"
+}

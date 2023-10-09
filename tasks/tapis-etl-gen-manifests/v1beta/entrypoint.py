@@ -2,11 +2,13 @@
 from owe_python_sdk.runtime import execution_context as ctx
 #-------- Workflow Context import: DO NOT REMOVE ----------------
 
-import json, os
+import json, os, time
+
+from uuid import uuid4
 
 from tapipy.tapis import Tapis
 
-from ..utils import (
+from ...utils import (
     ETLManifestModel,
     EnumManifestStatus,
     EnumETLPhase,
@@ -14,14 +16,70 @@ from ..utils import (
 )
 
 
-# Fetch existing manifests and create new manifests
+tapis_base_url = ctx.get_input("TAPIS_BASE_URL")
+tapis_jwt = ctx.get_input("TAPIS_JWT")
 try:
     # Instantiate a Tapis client
     client = Tapis(
-        base_url=ctx.get_input("TAPIS_BASE_URL"),
-        jwt=ctx.get_input("TAPIS_JWT")
+        base_url=tapis_base_url,
+        jwt=tapis_jwt
+    )
+except Exception as e:
+    ctx.stderr(1, f"Failed to initialize Tapis client: {e}")
+
+try:
+    # Create the manifests directory if it doesn't exist. Equivalent
+    # to `mkdir -p`
+    local_iobox_system_id = ctx.get_input("LOCAL_IOBOX_SYSTEM_ID")
+    local_iobox_manifest_path = ctx.get_input("LOCAL_IOBOX_MANIFEST_PATH")
+    client.files.mkdir(
+        systemId=local_iobox_system_id,
+        path=local_iobox_manifest_path
     )
 
+    # Create the data directory if it doesn't exist. Equivalent
+    # to `mkdir -p`
+    local_iobox_data_path = ctx.get_input("LOCAL_IOBOX_DATA_PATH")
+    client.files.mkdir(
+        systemId=local_iobox_system_id,
+        path=local_iobox_data_path
+    )
+except Exception as e:
+    ctx.stderr(1, f"Failed to create directories: {e}")
+
+try:
+    # Wait for the Lockfile to disappear.
+    total_wait_time = 0
+    manfiests_locked = True
+    start_time = time.time()
+    max_wait_time = 300
+    lockfile_filename = ctx.get_input("LOCKFILE_FILENAME")
+    while manfiests_locked:
+        # Check if the total wait time was exceeded. If so, throw exception
+        if time.time() - start_time >= max_wait_time:
+            raise Exception(f"Max Wait Time Reached: {max_wait_time}") 
+    
+        # Fetch the all manifest files
+        files = client.files.listFiles(
+            systemId=local_iobox_system_id,
+            path=local_iobox_manifest_path
+        )
+
+        filenames = [file.name for file in files]
+        if lockfile_filename in filenames:
+            time.sleep(5)
+
+    # Create the lockfile
+    client.files.insert(
+        system_id=local_iobox_system_id,
+        path=os.path.join(local_iobox_manifest_path, lockfile_filename),
+        file=b""
+    )
+except Exception as e:
+    ctx.stderr(1, f"Failed to generate lockfile: {str(e)}")
+
+# Fetch existing manifests and create new manifests
+try:
     # Fetch the all manifest files
     local_system_id = ctx.get_input("LOCAL_SYSTEM_ID")
     local_manifest_path = ctx.get_input("LOCAL_MANIFEST_PATH")
@@ -68,10 +126,11 @@ for data_file in data_files:
 # data files should be added to a single manifest, or a manifest
 # should be generated for each new data file
 new_manifests = []
-manifest_filename = f"{ctx.get_input('_OWE_PIPELINE_RUN_UUID')}.json"
+# FIXME unique name for manifest if "one_per_file"
 local_manifest_generation_policy = ctx.get_input("LOCAL_MANFIEST_GENERATION_POLICY")
 if local_manifest_generation_policy == "one_per_file":
     for unregistered_data_file in unregistered_data_files:
+        manifest_filename = f"{str(uuid4())}.json"
         new_manifests.append(
             ETLManifestModel(
                 filename=manifest_filename,
@@ -80,6 +139,7 @@ if local_manifest_generation_policy == "one_per_file":
             )
         )
 elif local_manifest_generation_policy == "one_for_all":
+    manifest_filename = f"{str(uuid4())}.json" 
     new_manifests.append(
         ETLManifestModel(
             filename=manifest_filename,
@@ -109,7 +169,7 @@ lockfile_filename = ctx.get_input("LOCKFILE_FILENAME")
 if len(unprocessed_manifests) > 0:
     # TODO Somehow, we need to indicate that all subsequent tasks should be skipped.
     # A workable idea may be to produce some kind of SKIP_OUTPUT file
-    # TODO implement task skip keyword in the ctx
+    # TODO implement -1 exist code. handle in WorkflowExecutor
     # Delete the lock file
     try:
         client.files.delete(
@@ -120,8 +180,7 @@ if len(unprocessed_manifests) > 0:
     except Exception as e:
         ctx.stderr(1, f"Failed to delete lockfile: {e}")
 
-    ctx.stdout("Exiting: No new data to proces", skip_child_tasks=True)
-
+    ctx.stdout("Exiting: No new data to process", exit_code=-1)
 
 # Reorder the unprocessed manifests from oldest to newest
 unprocessed_manifests.sort(key=lambda m: m.created_at, reverse=True)
@@ -151,19 +210,24 @@ if len(next_manifest.files) > 0 and phase == EnumETLPhase.DataProcessing:
     for i, file in enumerate(next_manifest.files):
         # Set the file_input_arrays to output
         ctx.set_output(f"{i}-etl-data-file-ref.{tapis_system_file_ref_extension}", json.dumps({"file": file}))
+    # Delete the lock file
+    try:
+        client.files.delete(
+            system_id=local_system_id,
+            path=os.path.join(local_manifest_path, lockfile_filename),
+            file=b""
+        )
+    except Exception as e:
+        ctx.stderr(1, f"Failed to delete lockfile: {e}")
+
+    # End the function
+    ctx.stdout(f"Processing files: {next_manifest.files}")
 elif len(next_manifest.files) > 0 and phase == EnumETLPhase.Transfer:
-    # TODO do the globus transfer for the data files
-    pass
+        ctx.set_output(
+            "TRANSFER_DATA",
+            json.dumps({
+                "path_to_manifest": next_manifest.path,
+                "system_id": local_system_id
+            })
+        )
 
-# Delete the lock file
-try:
-    client.files.delete(
-        system_id=local_system_id,
-        path=os.path.join(local_manifest_path, lockfile_filename),
-        file=b""
-    )
-except Exception as e:
-    ctx.stderr(1, f"Failed to delete lockfile: {e}")
-
-# End the function
-ctx.stdout(f"Processing files: {next_manifest.files}")

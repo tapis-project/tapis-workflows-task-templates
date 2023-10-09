@@ -1,0 +1,280 @@
+{
+    "description": "ETL Pipeline",
+    "execution_profile": {
+        "duplicate_submission_policy": "deny"
+    },
+    "params": {
+        "TAPIS_BASE_URL": {
+            "type": "string",
+            "required": true
+        },
+        "TAPIS_USERNAME": {
+            "type": "string",
+            "required": true
+        },
+        "TAPIS_PASSWORD": {
+            "type": "string",
+            "required": true
+        },
+        "LOCAL_INBOX_SYSTEM_ID": {
+            "type": "string",
+            "required": true
+        },
+        "LOCAL_INBOX_DATA_PATH": {
+            "type": "string",
+            "required": true
+        },
+        "LOCAL_INBOX_MANIFEST_PATH": {
+            "type": "string",
+            "required": true
+        },
+        "LOCAL_OUTBOX_SYSTEM_ID": {
+            "type": "string",
+            "required": true
+        },
+        "LOCAL_OUTBOX_DATA_PATH": {
+            "type": "string",
+            "required": true
+        },
+        "LOCAL_OUTBOX_MANIFEST_PATH": {
+            "type": "string",
+            "required": true
+        },
+        "GLOBUS_SOURCE_ENDPOINT_ID": {
+            "type": "string",
+            "required": true
+        },
+        "GLOBUS_DESTINATION_ENDPOINT_ID": {
+            "type": "string",
+            "required": true
+        },
+        "GLOBUS_CLIENT_ID": {
+            "type": "string",
+            "required": true
+        },
+        "GLOBUS_ACCES_TOKEN": {
+            "type": "string",
+            "required": true
+        },
+        "GLOBUS_REFRESH_TOKEN": {
+            "type": "string",
+            "required": true
+        },
+        "RESUBMIT_FOR_INBOUND": {
+            "type": "string",
+            "required": false
+        },
+        "RESUBMIT_FOR_OUTBOUND": {
+            "type": "string",
+            "required": false
+        }
+    },
+    "env": {
+        "LOCKFILE_FILENAME": {
+            "type": "string",
+            "value": "TAPIS_ETL_MANIFEST.lock"
+        },
+        "TAPIS_SYSTEM_FILE_REF_EXTENSION": {
+            "type": "string",
+            "value": "TAPIS_SYSTEM_FILE_REF_EXTENSION"
+        }
+    },
+    "tasks": [
+        {
+            "id": "login",
+            "description": "Authenticates with Tapis using a username and password, outputting a Tapis JWT",
+            "type": "template",
+            "uses": {
+                "name": "tapis/login@beta",
+                "source": {
+                    "url": "https://github.com/tapis-project/tapis-owe-templates.git",
+                    "branch": "master"
+                }
+            },
+            "input": {
+                "TAPIS_BASE_URL": {
+                    "value_from": {
+                        "params": "TAPIS_BASE_URL"
+                    }
+                },
+                "TAPIS_USERNAME": {
+                    "value_from": {
+                        "params": "TAPIS_USERNAME"
+                    }
+                },
+                "TAPIS_PASSWORD": {
+                    "value_from": {
+                        "params": "TAPIS_PASSWORD"
+                    }
+                }
+            }
+        },
+        {
+            "id": "gen-inbound-manifests",
+            "description": "Generates a manifests for data files in the data directory of the local inbox system",
+            "type": "template",
+            "uses": {
+                "name": "tapis/etl-gen-manifests@beta",
+                "source": {
+                    "url": "https://github.com/tapis-project/tapis-owe-templates.git",
+                    "branch": "master"
+                }
+            },
+            "depends_on": [{"id": "login"}],
+            "input": {
+                "TAPIS_JWT": {
+                    "value_from": {
+                        "task_output": {
+                            "task_id": "login",
+                            "output_id": "TAPIS_JWT"
+                        }
+                    }
+                },
+                "TAPIS_BASE_URL": {
+                    "value_from": {
+                        "params": "TAPIS_BASE_URL"
+                    }
+                },
+                "LOCAL_SYSTEM_ID": {
+                    "value_from": {
+                        "params": "LOCAL_INBOX_SYSTEM_ID"
+                    }
+                },
+                "LOCAL_MANIFEST_PATH": {
+                    "value_from": {
+                        "params": "LOCAL_INBOX_MANIFEST_PATH"
+                    }
+                },
+                "LOCAL_DATA_PATH": {
+                    "value_from": {
+                        "params": "LOCAL_INBOX_DATA_PATH"
+                    }
+                },
+                "LOCKFILE_FILENAME": {
+                    "value_from": {
+                        "env": "LOCKFILE_FILENAME"
+                    }
+                },
+                "PHASE": {
+                    "value": "data_processing_prep"
+                },
+                "TAPIS_SYSTEM_FILE_REF_EXTENSION": {
+                    "value_from": {
+                        "env": "TAPIS_SYSTEM_FILE_REF_EXTENSION"
+                    }
+                }
+            }
+        },
+        {
+            "id": "gen-outbound-manifests",
+            "description": "Generates a manifests for data files in data directory of the local outbox system. Deletes lockfile once finished.",
+            "type": "template",
+            "uses": {
+                "name": "tapis/etl-gen-manifests@beta",
+                "source": {
+                    "url": "https://github.com/tapis-project/tapis-owe-templates.git",
+                    "branch": "master"
+                }
+            },
+            "depends_on": [{"id": "login"}],
+            "input": {
+                "TAPIS_JWT": {
+                    "value_from": {
+                        "task_output": {
+                            "task_id": "login",
+                            "output_id": "TAPIS_JWT"
+                        }
+                    }
+                },
+                "TAPIS_BASE_URL": {
+                    "value_from": {
+                        "params": "TAPIS_BASE_URL"
+                    }
+                },
+                "LOCAL_SYSTEM_ID": {
+                    "value_from": {
+                        "params": "LOCAL_OUTBOX_SYSTEM_ID"
+                    }
+                },
+                "LOCAL_MANIFEST_PATH": {
+                    "value_from": {
+                        "params": "LOCAL_OUTBOX_MANIFEST_PATH"
+                    }
+                },
+                "LOCAL_DATA_PATH": {
+                    "value_from": {
+                        "params": "LOCAL_OUTBOX_DATA_PATH"
+                    }
+                },
+                "LOCKFILE_FILENAME": {
+                    "value_from": {
+                        "env": "LOCKFILE_FILENAME"
+                    }
+                },
+                "PHASE": {
+                    "value": "transfer_prep"
+                }
+            }
+        },
+        {
+            "id": "globus-transfer-data-files",
+            "type": "template",
+            "uses": {
+                "name": "tapis/etl-globus-transfer@beta",
+                "source": {
+                    "url": "https://github.com/tapis-project/tapis-owe-templates.git",
+                    "branch": "master"
+                }
+            },
+            "input": {
+                "TAPIS_JWT": {
+                    "value_from": {
+                        "task_output": {
+                            "task_id": "login",
+                            "output_id": "TAPIS_JWT"
+                        }
+                    }
+                },
+                "TRANSER_DATA": {
+                    "required": true,
+                    "value_from": {
+                        "task_output": {
+                            "task_id": "gen-outbound-manifests",
+                            "output_id": "TRANSER_DATA"
+                        }
+                    }
+                },
+                "GLOBUS_SOURCE_ENDPOINT_ID": {
+                    "required": true,
+                    "value_from": {
+                        "params": "GLOBUS_SOURCE_ENDPOINT_ID"
+                    }
+                },
+                "GLOBUS_DESTINATION_ENDPOINT_ID": {
+                    "required": true,
+                    "value_from": {
+                        "params": "GLOBUS_DESTINATION_ENDPOINT_ID"
+                    }
+                },
+                "GLOBUS_CLIENT_ID": {
+                    "required": true,
+                    "value_from": {
+                        "params": "GLOBUS_CLIENT_ID"
+                    }
+                },
+                "GLOBUS_ACCES_TOKEN": {
+                    "required": true,
+                    "value_from": {
+                        "params": "GLOBUS_ACCESS_TOKEN"
+                    }
+                },
+                "GLOBUS_REFRESH_TOKEN": {
+                    "required": true,
+                    "value_from": {
+                        "params": "GLOBUS_REFRESH_TOKEN"
+                    }
+                }
+            }
+        }
+    ]
+}

@@ -8,12 +8,11 @@ import requests
 
 from tapipy.tapis import Tapis
 
-from ..utils import ETLManifestModel
+from ...utils import ETLManifestModel
 
 
 tapis_base_url = ctx.get_input("TAPIS_BASE_URL")
 globus_proxy_base_url = os.path.join(tapis_base_url, "v3/globus-proxy/")
-tapis_jwt = ctx.get_input("TAPIS_JWT")
 transfer_data = ctx.get_input("TRANSFER_DATA")
 destination_endpoint_id = ctx.get_input("DESTINATION_ENDPOINT_ID")
 source_endpoint_id = ctx.get_input("SOURCE_ENDPOINT_ID")
@@ -24,7 +23,7 @@ globus_refresh_token = ctx.get_input("GLOBUS_REFRESH_TOKEN")
 try:
     # Instantiate a Tapis client
     client = Tapis(
-        base_url=ctx.get_input("TAPIS_BASE_URL"),
+        base_url=tapis_base_url,
         jwt=ctx.get_input("TAPIS_JWT")
     )
 except Exception as e:

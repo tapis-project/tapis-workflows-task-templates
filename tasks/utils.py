@@ -8,8 +8,8 @@ class EnumManifestStatus(str, enum.Enum):
     Failed = "Failed"
 
 class EnumETLPhase(str, enum.Enum):
-    DataProcessing = "data_processing"
-    Transfer = "transfer"
+    DataProcessing = "data_processing_prep"
+    Transfer = "transfer_prep"
 
 class ETLManifestModel:
     def __init__(

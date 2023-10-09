@@ -1,14 +1,14 @@
 {
-    "tapis-login": {
-        "path": "tapis-login/schema.json"
+    "tapis/etl-pipeline@v1beta": {
+        "path": "pipelines/etl/beta/schema.json"
     },
-    "tapis-etl-gen-manifests-lockfile": {
-        "path": "tapis-etl-lock-manifests/schema.json"
+    "tapis/login@v1beta": {
+        "path": "tasks/tapis-login/schema.json"
     },
-    "tapis-etl-gen-manifests": {
-        "path": "tapis-etl-gen-manifests/schema.json"
+    "tapis/etl-gen-manifests@v1beta": {
+        "path": "tasks/tapis-etl-gen-manifests/schema.json"
     },
-    "tapis-etl-globus-transfer": {
-        "path": "tapis-etl-globus-transfer/schema.json"
+    "tapis/etl-globus-transfer@v1beta": {
+        "path": "tasks/tapis-etl-globus-transfer/schema.json"
     }
 }

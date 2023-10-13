@@ -30,19 +30,19 @@ except Exception as e:
 try:
     # Create the manifests directory if it doesn't exist. Equivalent
     # to `mkdir -p`
-    local_iobox_system_id = ctx.get_input("LOCAL_IOBOX_SYSTEM_ID")
-    local_iobox_manifest_path = ctx.get_input("LOCAL_IOBOX_MANIFEST_PATH")
+    local_system_id = ctx.get_input("LOCAL_SYSTEM_ID")
+    local_manifest_path = ctx.get_input("LOCAL_MANIFEST_PATH")
     client.files.mkdir(
-        systemId=local_iobox_system_id,
-        path=local_iobox_manifest_path
+        systemId=local_system_id,
+        path=local_manifest_path
     )
 
     # Create the data directory if it doesn't exist. Equivalent
     # to `mkdir -p`
-    local_iobox_data_path = ctx.get_input("LOCAL_IOBOX_DATA_PATH")
+    local_data_path = ctx.get_input("LOCAL_DATA_PATH")
     client.files.mkdir(
-        systemId=local_iobox_system_id,
-        path=local_iobox_data_path
+        systemId=local_system_id,
+        path=local_data_path
     )
 except Exception as e:
     ctx.stderr(1, f"Failed to create directories: {e}")
@@ -61,8 +61,8 @@ try:
     
         # Fetch the all manifest files
         files = client.files.listFiles(
-            systemId=local_iobox_system_id,
-            path=local_iobox_manifest_path
+            systemId=local_system_id,
+            path=local_manifest_path
         )
 
         filenames = [file.name for file in files]
@@ -71,8 +71,8 @@ try:
 
     # Create the lockfile
     client.files.insert(
-        system_id=local_iobox_system_id,
-        path=os.path.join(local_iobox_manifest_path, lockfile_filename),
+        system_id=local_system_id,
+        path=os.path.join(local_manifest_path, lockfile_filename),
         file=b""
     )
 except Exception as e:
@@ -127,7 +127,7 @@ for data_file in data_files:
 # should be generated for each new data file
 new_manifests = []
 # FIXME unique name for manifest if "one_per_file"
-local_manifest_generation_policy = ctx.get_input("LOCAL_MANFIEST_GENERATION_POLICY")
+local_manifest_generation_policy = ctx.get_input("MANFIEST_GENERATION_POLICY")
 if local_manifest_generation_policy == "one_per_file":
     for unregistered_data_file in unregistered_data_files:
         manifest_filename = f"{str(uuid4())}.json"
@@ -187,7 +187,7 @@ unprocessed_manifests.sort(key=lambda m: m.created_at, reverse=True)
 
 # Default to oldest manifest
 next_manifest = unprocessed_manifests[0]
-local_manifest_priority = ctx.get_input("LOCAL_MANFIEST_PRIORITY")
+local_manifest_priority = ctx.get_input("MANFIEST_PRIORITY")
 if local_manifest_priority in ["newest", "any"]:
     next_manifest = unprocessed_manifests[-1]
 

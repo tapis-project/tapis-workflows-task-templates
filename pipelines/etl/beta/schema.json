@@ -3,7 +3,7 @@
     "execution_profile": {
         "duplicate_submission_policy": "deny"
     },
-    "params": {
+    "args": {
         "TAPIS_BASE_URL": {
             "type": "string",
             "required": true
@@ -16,43 +16,7 @@
             "type": "string",
             "required": true
         },
-        "LOCAL_INBOX_SYSTEM_ID": {
-            "type": "string",
-            "required": true
-        },
-        "LOCAL_INBOX_DATA_PATH": {
-            "type": "string",
-            "required": true
-        },
-        "LOCAL_INBOX_MANIFEST_PATH": {
-            "type": "string",
-            "required": true
-        },
-        "LOCAL_OUTBOX_SYSTEM_ID": {
-            "type": "string",
-            "required": true
-        },
-        "LOCAL_OUTBOX_DATA_PATH": {
-            "type": "string",
-            "required": true
-        },
-        "LOCAL_OUTBOX_MANIFEST_PATH": {
-            "type": "string",
-            "required": true
-        },
-        "GLOBUS_SOURCE_ENDPOINT_ID": {
-            "type": "string",
-            "required": true
-        },
-        "GLOBUS_DESTINATION_ENDPOINT_ID": {
-            "type": "string",
-            "required": true
-        },
-        "GLOBUS_CLIENT_ID": {
-            "type": "string",
-            "required": true
-        },
-        "GLOBUS_ACCES_TOKEN": {
+        "GLOBUS_ACCESS_TOKEN": {
             "type": "string",
             "required": true
         },
@@ -94,17 +58,17 @@
             "input": {
                 "TAPIS_BASE_URL": {
                     "value_from": {
-                        "params": "TAPIS_BASE_URL"
+                        "args": "TAPIS_BASE_URL"
                     }
                 },
                 "TAPIS_USERNAME": {
                     "value_from": {
-                        "params": "TAPIS_USERNAME"
+                        "args": "TAPIS_USERNAME"
                     }
                 },
                 "TAPIS_PASSWORD": {
                     "value_from": {
-                        "params": "TAPIS_PASSWORD"
+                        "args": "TAPIS_PASSWORD"
                     }
                 }
             }
@@ -132,22 +96,32 @@
                 },
                 "TAPIS_BASE_URL": {
                     "value_from": {
-                        "params": "TAPIS_BASE_URL"
+                        "args": "TAPIS_BASE_URL"
                     }
                 },
                 "LOCAL_SYSTEM_ID": {
                     "value_from": {
-                        "params": "LOCAL_INBOX_SYSTEM_ID"
+                        "env": "LOCAL_INBOX_SYSTEM_ID"
                     }
                 },
                 "LOCAL_MANIFEST_PATH": {
                     "value_from": {
-                        "params": "LOCAL_INBOX_MANIFEST_PATH"
+                        "env": "LOCAL_INBOX_MANIFEST_PATH"
+                    }
+                },
+                "MANIFEST_GENERATION_POLICY": {
+                    "value_from": {
+                        "env": "LOCAL_INBOX_MANIFEST_GENERATION_POLICY"
+                    }
+                },
+                "MANIFEST_PRIORITY": {
+                    "value_from": {
+                        "env": "LOCAL_INBOX_MANIFEST_PRIORITY"
                     }
                 },
                 "LOCAL_DATA_PATH": {
                     "value_from": {
-                        "params": "LOCAL_INBOX_DATA_PATH"
+                        "env": "LOCAL_INBOX_DATA_PATH"
                     }
                 },
                 "LOCKFILE_FILENAME": {
@@ -188,22 +162,32 @@
                 },
                 "TAPIS_BASE_URL": {
                     "value_from": {
-                        "params": "TAPIS_BASE_URL"
+                        "args": "TAPIS_BASE_URL"
                     }
                 },
                 "LOCAL_SYSTEM_ID": {
                     "value_from": {
-                        "params": "LOCAL_OUTBOX_SYSTEM_ID"
+                        "env": "LOCAL_OUTBOX_SYSTEM_ID"
                     }
                 },
                 "LOCAL_MANIFEST_PATH": {
                     "value_from": {
-                        "params": "LOCAL_OUTBOX_MANIFEST_PATH"
+                        "env": "LOCAL_OUTBOX_MANIFEST_PATH"
+                    }
+                },
+                "MANIFEST_GENERATION_POLICY": {
+                    "value_from": {
+                        "env": "LOCAL_OUTBOX_MANIFEST_GENERATION_POLICY"
+                    }
+                },
+                "MANIFEST_PRIORITY": {
+                    "value_from": {
+                        "env": "LOCAL_OUTBOX_MANIFEST_PRIORITY"
                     }
                 },
                 "LOCAL_DATA_PATH": {
                     "value_from": {
-                        "params": "LOCAL_OUTBOX_DATA_PATH"
+                        "env": "LOCAL_OUTBOX_DATA_PATH"
                     }
                 },
                 "LOCKFILE_FILENAME": {
@@ -236,7 +220,6 @@
                     }
                 },
                 "TRANSER_DATA": {
-                    "required": true,
                     "value_from": {
                         "task_output": {
                             "task_id": "gen-outbound-manifests",
@@ -245,33 +228,28 @@
                     }
                 },
                 "GLOBUS_SOURCE_ENDPOINT_ID": {
-                    "required": true,
                     "value_from": {
-                        "params": "GLOBUS_SOURCE_ENDPOINT_ID"
+                        "env": "GLOBUS_SOURCE_ENDPOINT_ID"
                     }
                 },
                 "GLOBUS_DESTINATION_ENDPOINT_ID": {
-                    "required": true,
                     "value_from": {
-                        "params": "GLOBUS_DESTINATION_ENDPOINT_ID"
+                        "env": "GLOBUS_DESTINATION_ENDPOINT_ID"
                     }
                 },
                 "GLOBUS_CLIENT_ID": {
-                    "required": true,
                     "value_from": {
-                        "params": "GLOBUS_CLIENT_ID"
+                        "env": "GLOBUS_CLIENT_ID"
                     }
                 },
                 "GLOBUS_ACCES_TOKEN": {
-                    "required": true,
                     "value_from": {
-                        "params": "GLOBUS_ACCESS_TOKEN"
+                        "args": "GLOBUS_ACCESS_TOKEN"
                     }
                 },
                 "GLOBUS_REFRESH_TOKEN": {
-                    "required": true,
                     "value_from": {
-                        "params": "GLOBUS_REFRESH_TOKEN"
+                        "args": "GLOBUS_REFRESH_TOKEN"
                     }
                 }
             }

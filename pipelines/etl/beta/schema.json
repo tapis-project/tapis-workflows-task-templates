@@ -210,6 +210,10 @@
                     "branch": "master"
                 }
             },
+            "depends_on": [
+                {"id": "login"},
+                {"id": "gen-outbound-manifests"}
+            ],
             "input": {
                 "TAPIS_JWT": {
                     "value_from": {

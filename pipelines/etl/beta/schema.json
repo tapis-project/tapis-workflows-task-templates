@@ -3,7 +3,7 @@
     "execution_profile": {
         "duplicate_submission_policy": "deny"
     },
-    "args": {
+    "params": {
         "TAPIS_BASE_URL": {
             "type": "string",
             "required": true

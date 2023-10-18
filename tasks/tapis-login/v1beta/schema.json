@@ -10,7 +10,7 @@
         {
             "url": "https://github.com/tapis-project/tapis-owe-functions.git",
             "branch": "master",
-            "directory": "functions"
+            "directory": "tapis-owe-functions"
         }
     ],
     "input": {

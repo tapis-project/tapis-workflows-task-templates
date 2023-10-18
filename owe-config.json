@@ -1,14 +1,14 @@
 {
     "tapis/etl-pipeline@v1beta": {
-        "path": "pipelines/etl/beta/schema.json"
+        "path": "pipelines/etl/v1beta/schema.json"
     },
     "tapis/login@v1beta": {
-        "path": "tasks/tapis-login/schema.json"
+        "path": "tasks/tapis-login/v1beta/schema.json"
     },
     "tapis/etl-gen-manifests@v1beta": {
-        "path": "tasks/tapis-etl-gen-manifests/schema.json"
+        "path": "tasks/tapis-etl-gen-manifests/v1beta/schema.json"
     },
     "tapis/etl-globus-transfer@v1beta": {
-        "path": "tasks/tapis-etl-globus-transfer/schema.json"
+        "path": "tasks/tapis-etl-globus-transfer/v1beta/schema.json"
     }
 }

@@ -49,7 +49,7 @@
             "description": "Authenticates with Tapis using a username and password, outputting a Tapis JWT",
             "type": "template",
             "uses": {
-                "name": "tapis/login@beta",
+                "name": "tapis/login@v1beta",
                 "source": {
                     "url": "https://github.com/tapis-project/tapis-owe-templates.git",
                     "branch": "master"
@@ -78,7 +78,7 @@
             "description": "Generates a manifests for data files in the data directory of the local inbox system",
             "type": "template",
             "uses": {
-                "name": "tapis/etl-gen-manifests@beta",
+                "name": "tapis/etl-gen-manifests@v1beta",
                 "source": {
                     "url": "https://github.com/tapis-project/tapis-owe-templates.git",
                     "branch": "master"
@@ -144,7 +144,7 @@
             "description": "Generates a manifests for data files in data directory of the local outbox system. Deletes lockfile once finished.",
             "type": "template",
             "uses": {
-                "name": "tapis/etl-gen-manifests@beta",
+                "name": "tapis/etl-gen-manifests@v1beta",
                 "source": {
                     "url": "https://github.com/tapis-project/tapis-owe-templates.git",
                     "branch": "master"
@@ -204,7 +204,7 @@
             "id": "globus-transfer-data-files",
             "type": "template",
             "uses": {
-                "name": "tapis/etl-globus-transfer@beta",
+                "name": "tapis/etl-globus-transfer@v1beta",
                 "source": {
                     "url": "https://github.com/tapis-project/tapis-owe-templates.git",
                     "branch": "master"

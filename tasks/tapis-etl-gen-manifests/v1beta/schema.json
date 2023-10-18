@@ -5,5 +5,6 @@
     },
     "installer": "pip",
     "packages": ["tapipy"],
+    "runtime": "python:3.9",
     "entrypoint": "tapis-owe-functions/tapis-etl-gen-manifests/v1beta/entrypoint.py"
 }

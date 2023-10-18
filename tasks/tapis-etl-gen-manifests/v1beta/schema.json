@@ -5,5 +5,5 @@
     },
     "installer": "pip",
     "packages": ["tapipy"],
-    "entrypoint": "python3 tapis-owe-functions/tapis-etl-gen-manifests/entrypoint.py"
+    "entrypoint": "tapis-owe-functions/tapis-etl-gen-manifests/v1beta/entrypoint.py"
 }

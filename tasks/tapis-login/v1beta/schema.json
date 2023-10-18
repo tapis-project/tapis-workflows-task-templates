@@ -5,7 +5,7 @@
     },
     "installer": "pip",
     "packages": ["tapipy"],
-    "entrypoint": "tapis-owe-functions/tapis-login/entrypoint.py",
+    "entrypoint": "tapis-owe-functions/tapis-login/v1beta/entrypoint.py",
     "git_repositories": [
         {
             "url": "https://github.com/tapis-project/tapis-owe-functions.git",

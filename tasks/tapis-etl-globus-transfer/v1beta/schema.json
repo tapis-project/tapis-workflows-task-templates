@@ -6,7 +6,7 @@
     "installer": "pip",
     "packages": ["requests", "globus==2.0.1"],
     "runtime": "python:3.9",
-    "entrypoint": "tapis-owe-functions/tapis-etl-globus-transfer/v1beta/entrypoint.py",
+    "entrypoint": "tapis-owe-functions/tasks/tapis-etl-globus-transfer/v1beta/entrypoint.py",
     "git_repositories": [
         {
             "url": "https://github.com/tapis-project/tapis-owe-templates.git",

@@ -9,7 +9,7 @@
     "entrypoint": "tapis-owe-functions/tapis-etl-gen-manifests/v1beta/entrypoint.py",
     "git_repositories": [
         {
-            "url": "https://github.com/tapis-project/tapis-owe-functions.git",
+            "url": "https://github.com/tapis-project/tapis-owe-templates.git",
             "branch": "master",
             "directory": "tapis-owe-functions"
         }

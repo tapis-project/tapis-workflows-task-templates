@@ -6,7 +6,7 @@
     "installer": "pip",
     "packages": ["tapipy"],
     "runtime": "python:3.9",
-    "entrypoint": "tapis-owe-functions/tasks/tapis-etl-gen-manifests/v1beta/entrypoint.py",
+    "entrypoint": "tapis-owe-functions/tasks/tapis-etl-gen-manifests.py",
     "git_repositories": [
         {
             "url": "https://github.com/tapis-project/tapis-owe-templates.git",

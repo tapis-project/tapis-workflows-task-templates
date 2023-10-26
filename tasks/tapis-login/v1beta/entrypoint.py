@@ -1,5 +1,5 @@
 #-------- Workflow Context import: DO NOT REMOVE ----------------
-from ....owe_python_sdk.runtime import execution_context as ctx
+from owe_python_sdk.runtime import execution_context as ctx
 #-------- Workflow Context import: DO NOT REMOVE ----------------
 
 from tapipy.tapis import Tapis

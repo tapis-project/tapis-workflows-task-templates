@@ -8,7 +8,7 @@ import requests
 
 from tapipy.tapis import Tapis
 
-from .utils import ETLManifestModel
+from tasks.utils import ETLManifestModel
 
 
 tapis_base_url = ctx.get_input("TAPIS_BASE_URL")

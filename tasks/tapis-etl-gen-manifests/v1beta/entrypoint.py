@@ -8,7 +8,7 @@ from uuid import uuid4
 
 from tapipy.tapis import Tapis
 
-from tasks.utils import (
+from utils import (
     ETLManifestModel,
     EnumManifestStatus,
     EnumETLPhase,

@@ -96,11 +96,11 @@ try:
         manifest = ETLManifestModel(
             filename=manifest_file.name,
             path=manifest_file.path,
-            **json.loads(get_tapis_file_contents_json(local_system_id, manifest_file.path))
+            **json.loads(get_tapis_file_contents_json(client, local_system_id, manifest_file.path))
         )
         manifests.append(manifest)
 except Exception as e:
-    ctx.stderr(f"Failed to fetch manifest files: {e}")
+    ctx.stderr(1, f"Failed to fetch manifest files: {e}")
 
 try:
     # Fetch the all data files

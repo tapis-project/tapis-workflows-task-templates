@@ -160,7 +160,7 @@ except Exception as e:
     ctx.stderr(1, f"Falied to create manifests: {e}")
 
 # Make a list of all manifests
-all_manifests = manifests.extend(new_manifest)
+all_manifests = manifests.extend(new_manifests)
 
 # Collect all of the new and existing manifests with a status
 # of 'pending' into a single list

@@ -54,7 +54,6 @@ try:
     start_time = time.time()
     max_wait_time = 300
     lockfile_filename = ctx.get_input("LOCKFILE_FILENAME")
-    print("LOCKFILE_FILENAME", lockfile_filename)
     while manfiests_locked:
         # Check if the total wait time was exceeded. If so, throw exception
         if time.time() - start_time >= max_wait_time:
@@ -67,8 +66,10 @@ try:
         )
 
         filenames = [file.name for file in files]
-        if lockfile_filename in filenames:
-            time.sleep(5)
+        if lockfile_filename not in filenames:
+            manfiests_locked = False
+            
+        time.sleep(5)
 
     # Create the lockfile
     client.files.insert(

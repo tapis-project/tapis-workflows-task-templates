@@ -73,7 +73,7 @@ try:
 
     # Create the lockfile
     client.files.insert(
-        system_id=local_system_id,
+        systemId=local_system_id,
         path=os.path.join(local_manifest_path, lockfile_filename),
         file=b""
     )
@@ -175,7 +175,7 @@ if len(unprocessed_manifests) > 0:
     # Delete the lock file
     try:
         client.files.delete(
-            system_id=local_system_id,
+            systemId=local_system_id,
             path=os.path.join(local_manifest_path, lockfile_filename),
             file=b""
         )
@@ -215,7 +215,7 @@ if len(next_manifest.files) > 0 and phase == EnumETLPhase.DataProcessing:
     # Delete the lock file
     try:
         client.files.delete(
-            system_id=local_system_id,
+            systemId=local_system_id,
             path=os.path.join(local_manifest_path, lockfile_filename),
             file=b""
         )

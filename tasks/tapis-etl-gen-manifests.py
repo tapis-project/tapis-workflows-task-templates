@@ -4,9 +4,6 @@ from owe_python_sdk.runtime import execution_context as ctx
 
 import json, os, time
 
-print(os.getcwd())
-time.sleep(6000)
-
 from uuid import uuid4
 
 from tapipy.tapis import Tapis

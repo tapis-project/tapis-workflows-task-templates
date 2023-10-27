@@ -131,7 +131,6 @@ for data_file in data_files:
 # data files should be added to a single manifest, or a manifest
 # should be generated for each new data file
 new_manifests = []
-# FIXME unique name for manifest if "one_per_file"
 local_manifest_generation_policy = ctx.get_input("MANFIEST_GENERATION_POLICY")
 if local_manifest_generation_policy == "one_per_file":
     for unregistered_data_file in unregistered_data_files:

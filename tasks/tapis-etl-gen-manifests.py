@@ -96,7 +96,7 @@ try:
         manifest = ETLManifestModel(
             filename=manifest_file.name,
             path=manifest_file.path,
-            **json.loads(get_tapis_file_contents_json(manifest_file.path))
+            **json.loads(get_tapis_file_contents_json(local_system_id, manifest_file.path))
         )
         manifests.append(manifest)
 except Exception as e:

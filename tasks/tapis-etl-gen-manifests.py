@@ -115,23 +115,27 @@ try:
 except Exception as e:
     ctx.stderr(1, f"Falied to fetch data files: {str(e)}")
 
+print(data_files)
+
 # Create a list of all registered files
 registered_data_files = []
 for manifest in manifests:
     for registered_data_file in manifest.files:
         registered_data_files.append(registered_data_file.path)
-
+print("REGISTERED_DATA_FILES", registered_data_files)
 # Find all data files that have not yet been registered with a manifest
 unregistered_data_files = []
 for data_file in data_files:
     if data_file.path not in registered_data_files:
         unregistered_data_files.append(data_file.path)
+print("UNREGISTERED_DATA_FILES", unregistered_data_files)
 
 # Check the manifest generation policy to determine whether all new
 # data files should be added to a single manifest, or a manifest
 # should be generated for each new data file
 new_manifests = []
 local_manifest_generation_policy = ctx.get_input("MANFIEST_GENERATION_POLICY")
+print("mani gen policy", local_manifest_generation_policy)
 if local_manifest_generation_policy == "one_per_file":
     for unregistered_data_file in unregistered_data_files:
         manifest_filename = f"{str(uuid4())}.json"
@@ -151,7 +155,7 @@ elif local_manifest_generation_policy == "one_for_all":
             files=unregistered_data_files
         )
     )
-
+print("NEW_MANFIESTS", new_manifests)
 try:
     # Persist all of the new manifests
     for new_manifest in new_manifests:

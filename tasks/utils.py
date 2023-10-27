@@ -34,6 +34,7 @@ class ETLManifestModel:
         self.last_modified = self.created_at
 
         # Upload the contents of the manifest file to the tapis system
+        print("CREATING MANIFEST", self.files)
         client.files.insert(
             systemId=system_id,
             path=self.path,

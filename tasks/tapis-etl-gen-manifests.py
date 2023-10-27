@@ -50,11 +50,11 @@ except Exception as e:
 try:
     # Wait for the Lockfile to disappear.
     total_wait_time = 0
-    manfiests_locked = True
+    manifests_locked = True
     start_time = time.time()
     max_wait_time = 300
     lockfile_filename = ctx.get_input("LOCKFILE_FILENAME")
-    while manfiests_locked:
+    while manifests_locked:
         # Check if the total wait time was exceeded. If so, throw exception
         if time.time() - start_time >= max_wait_time:
             raise Exception(f"Max Wait Time Reached: {max_wait_time}") 
@@ -67,7 +67,7 @@ try:
 
         filenames = [file.name for file in files]
         if lockfile_filename not in filenames:
-            manfiests_locked = False
+            manifests_locked = False
             
         time.sleep(5)
 
@@ -134,7 +134,7 @@ print("UNREGISTERED_DATA_FILES", unregistered_data_files)
 # data files should be added to a single manifest, or a manifest
 # should be generated for each new data file
 new_manifests = []
-local_manifest_generation_policy = ctx.get_input("MANFIEST_GENERATION_POLICY")
+local_manifest_generation_policy = ctx.get_input("MANIFEST_GENERATION_POLICY")
 print("mani gen policy", local_manifest_generation_policy)
 if local_manifest_generation_policy == "one_per_file":
     for unregistered_data_file in unregistered_data_files:
@@ -155,7 +155,7 @@ elif local_manifest_generation_policy == "one_for_all":
             files=unregistered_data_files
         )
     )
-print("NEW_MANFIESTS", new_manifests)
+print("NEW_MANIFESTS", new_manifests)
 try:
     # Persist all of the new manifests
     for new_manifest in new_manifests:
@@ -195,11 +195,11 @@ unprocessed_manifests.sort(key=lambda m: m.created_at, reverse=True)
 
 # Default to oldest manifest
 next_manifest = unprocessed_manifests[0]
-local_manifest_priority = ctx.get_input("MANFIEST_PRIORITY")
+local_manifest_priority = ctx.get_input("MANIFEST_PRIORITY")
 if local_manifest_priority in ["newest", "any"]:
     next_manifest = unprocessed_manifests[-1]
 
-# Change the next manfiest to the manfiest associated with the resubmission
+# Change the next manifest to the manifest associated with the resubmission
 resubmit = ctx.get_input("RESUBMIT")
 if resubmit != None:
     next_manifest = next(filter(lambda m: m.name == resubmit + ".json", all_manifests))

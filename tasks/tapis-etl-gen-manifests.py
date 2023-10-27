@@ -91,7 +91,7 @@ try:
     )
     
     # Remove the lockfile from the list of manifest files
-    manifest_file = [manifest_file for manifest_file in manifest_files if manifest_file.name != lockfile_filename]
+    manifest_files = [manifest_file for manifest_file in manifest_files if manifest_file.name != lockfile_filename]
 
     # Get all of the contents of each manifest file
     manifests = []

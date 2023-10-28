@@ -15,7 +15,7 @@ from utils import (
     get_tapis_file_contents_json
 )
 
-
+#TODO add rollbacks on execptions; i.e. delete the LOCKFILE
 tapis_base_url = ctx.get_input("TAPIS_BASE_URL")
 tapis_jwt = ctx.get_input("TAPIS_JWT")
 try:
@@ -115,27 +115,23 @@ try:
 except Exception as e:
     ctx.stderr(1, f"Falied to fetch data files: {str(e)}")
 
-print(data_files)
-
 # Create a list of all registered files
 registered_data_files = []
 for manifest in manifests:
     for registered_data_file in manifest.files:
         registered_data_files.append(registered_data_file.path)
-print("REGISTERED_DATA_FILES", registered_data_files)
+
 # Find all data files that have not yet been registered with a manifest
 unregistered_data_files = []
 for data_file in data_files:
     if data_file.path not in registered_data_files:
         unregistered_data_files.append(data_file.path)
-print("UNREGISTERED_DATA_FILES", unregistered_data_files)
 
 # Check the manifest generation policy to determine whether all new
 # data files should be added to a single manifest, or a manifest
 # should be generated for each new data file
 new_manifests = []
 local_manifest_generation_policy = ctx.get_input("MANIFEST_GENERATION_POLICY")
-print("mani gen policy", local_manifest_generation_policy)
 if local_manifest_generation_policy == "one_per_file":
     for unregistered_data_file in unregistered_data_files:
         manifest_filename = f"{str(uuid4())}.json"
@@ -155,7 +151,7 @@ elif local_manifest_generation_policy == "one_for_all":
             files=unregistered_data_files
         )
     )
-print("NEW_MANIFESTS", new_manifests)
+
 try:
     # Persist all of the new manifests
     for new_manifest in new_manifests:
@@ -164,7 +160,7 @@ except Exception as e:
     ctx.stderr(1, f"Falied to create manifests: {e}")
 
 # Make a list of all manifests
-all_manifests = manifests.extend(new_manifests)
+all_manifests = manifests + new_manifests
 
 # Collect all of the new and existing manifests with a status
 # of 'pending' into a single list
@@ -173,8 +169,7 @@ unprocessed_manifests = [
     if manifest.status == EnumManifestStatus.Pending
 ]
 
-lockfile_filename = ctx.get_input("LOCKFILE_FILENAME")
-if len(unprocessed_manifests) > 0:
+if len(unprocessed_manifests) == 0:
     # TODO Somehow, we need to indicate that all subsequent tasks should be skipped.
     # A workable idea may be to produce some kind of SKIP_OUTPUT file
     # TODO implement -1 exist code. handle in WorkflowExecutor

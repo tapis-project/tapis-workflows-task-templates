@@ -5,7 +5,7 @@ class EnumManifestStatus(str, enum.Enum):
     Pending = "pending"
     Active = "active"
     Completed = "completed"
-    Failed = "Failed"
+    Failed = "failed"
 
 class EnumETLPhase(str, enum.Enum):
     DataProcessing = "data_processing_prep"
@@ -34,7 +34,6 @@ class ETLManifestModel:
         self.last_modified = self.created_at
 
         # Upload the contents of the manifest file to the tapis system
-        print("CREATING MANIFEST", self.files)
         client.files.insert(
             systemId=system_id,
             path=self.path,

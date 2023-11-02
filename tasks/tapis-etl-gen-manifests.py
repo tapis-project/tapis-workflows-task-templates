@@ -130,6 +130,8 @@ for data_file in data_files:
 # Check the manifest generation policy to determine whether all new
 # data files should be added to a single manifest, or a manifest
 # should be generated for each new data file
+# TODO consider querying for the file(s) sizes 2 times in a row at some interval and if
+# the size is different, keep polling until the last 2 sizes(for the same file(s)) are the same
 new_manifests = []
 local_manifest_generation_policy = ctx.get_input("MANIFEST_GENERATION_POLICY")
 if local_manifest_generation_policy == "one_per_file":
@@ -213,6 +215,7 @@ if len(next_manifest.files) > 0 and phase == EnumETLPhase.DataProcessing:
     for i, file in enumerate(next_manifest.files):
         # Set the file_input_arrays to output
         ctx.set_output(f"{i}-etl-data-file-ref.{tapis_system_file_ref_extension}", json.dumps({"file": file}))
+
     # Delete the lock file
     try:
         client.files.delete(
@@ -226,11 +229,11 @@ if len(next_manifest.files) > 0 and phase == EnumETLPhase.DataProcessing:
     # End the function
     ctx.stdout(f"Processing files: {next_manifest.files}")
 elif len(next_manifest.files) > 0 and phase == EnumETLPhase.Transfer:
-        ctx.set_output(
-            "TRANSFER_DATA",
-            json.dumps({
-                "path_to_manifest": next_manifest.path,
-                "system_id": local_system_id
-            })
-        )
+    ctx.set_output(
+        "TRANSFER_DATA",
+        json.dumps({
+            "path_to_manifest": next_manifest.path,
+            "system_id": local_system_id
+        })
+    )
 

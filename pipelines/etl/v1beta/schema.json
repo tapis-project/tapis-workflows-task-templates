@@ -40,7 +40,7 @@
         },
         "TAPIS_SYSTEM_FILE_REF_EXTENSION": {
             "type": "string",
-            "value": "TAPIS_SYSTEM_FILE_REF_EXTENSION"
+            "value": "TapisSystemFile.json"
         }
     },
     "tasks": [

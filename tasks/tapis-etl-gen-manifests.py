@@ -185,7 +185,7 @@ if len(unprocessed_manifests) == 0:
     except Exception as e:
         ctx.stderr(1, f"Failed to delete lockfile: {e}")
 
-    ctx.stdout("Exiting: No new data to process", exit_code=-1)
+    ctx.stdout("Exiting: No new data to process", code=-1)
 
 # Reorder the unprocessed manifests from oldest to newest
 unprocessed_manifests.sort(key=lambda m: m.created_at, reverse=True)

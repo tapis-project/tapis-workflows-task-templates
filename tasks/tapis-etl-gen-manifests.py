@@ -207,7 +207,7 @@ if len(next_manifest.files) > 0 and phase == EnumETLPhase.DataProcessing:
     tapis_system_file_ref_extension = ctx.get_input("TAPIS_SYSTEM_FILE_REF_EXTENSION")
     for i, file in enumerate(next_manifest.files):
         # Set the file_input_arrays to output
-        ctx.set_output(f"{i}-etl-data-file-ref.{tapis_system_file_ref_extension}", json.dumps({"file": file}))
+        ctx.set_output(f"{i}-etl-data-file-ref.{tapis_system_file_ref_extension}", json.dumps({"file": file.__dict__}))
 
     # Delete the lock file
     try:

@@ -223,11 +223,11 @@
                         }
                     }
                 },
-                "TRANSER_DATA": {
+                "TRANSFER_DATA": {
                     "value_from": {
                         "task_output": {
                             "task_id": "gen-outbound-manifests",
-                            "output_id": "TRANSER_DATA"
+                            "output_id": "TRANSFER_DATA"
                         }
                     }
                 },

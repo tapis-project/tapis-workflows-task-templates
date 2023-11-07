@@ -60,14 +60,12 @@ try:
             raise Exception(f"Max Wait Time Reached: {max_wait_time}") 
     
         # Fetch the all manifest files
-        files = client.files.listFiles(
+        manifest_files = client.files.listFiles(
             systemId=local_system_id,
             path=local_manifest_path
         )
 
-        filenames = [file.name for file in files]
-        if lockfile_filename not in filenames:
-            manifests_locked = False
+        manifests_locked = lockfile_filename in [file.name for file in manifest_files]
             
         time.sleep(5)
 
@@ -82,26 +80,16 @@ except Exception as e:
 
 # Fetch existing manifests and create new manifests
 try:
-    # Fetch the all manifest files
-    local_system_id = ctx.get_input("LOCAL_SYSTEM_ID")
-    local_manifest_path = ctx.get_input("LOCAL_MANIFEST_PATH")
-    manifest_files = client.files.listFiles(
-        systemId=local_system_id,
-        path=local_manifest_path
-    )
-    
-    # Remove the lockfile from the list of manifest files
-    manifest_files = [manifest_file for manifest_file in manifest_files if manifest_file.name != lockfile_filename]
-
     # Get all of the contents of each manifest file
     manifests = []
     for manifest_file in manifest_files:
-        manifest = ETLManifestModel(
-            filename=manifest_file.name,
-            path=manifest_file.path,
-            **json.loads(get_tapis_file_contents_json(client, local_system_id, manifest_file.path))
+        manifests.append(
+            ETLManifestModel(
+                filename=manifest_file.name,
+                path=manifest_file.path,
+                **json.loads(get_tapis_file_contents_json(client, local_system_id, manifest_file.path))
+            )
         )
-        manifests.append(manifest)
 except Exception as e:
     ctx.stderr(1, f"Failed to fetch manifest files: {e}")
 
@@ -116,16 +104,21 @@ except Exception as e:
     ctx.stderr(1, f"Falied to fetch data files: {str(e)}")
 
 # Create a list of all registered files
-registered_data_files = []
+registered_data_file_paths = []
 for manifest in manifests:
-    for registered_data_file in manifest.files:
-        registered_data_files.append(registered_data_file.path)
+    for manifest_data_file in manifest.files:
+        registered_data_file_paths.append(manifest_data_file.path)
+
+registered_data_files = [
+    data_file for data_file in data_files
+    if data_file.path in registered_data_file_paths
+]
 
 # Find all data files that have not yet been registered with a manifest
-unregistered_data_files = []
-for data_file in data_files:
-    if data_file.path not in registered_data_files:
-        unregistered_data_files.append(data_file.path)
+unregistered_data_files = [
+    data_file for data_file in data_files
+    if data_file.path not in registered_data_file_paths
+]
 
 # Check the manifest generation policy to determine whether all new
 # data files should be added to a single manifest, or a manifest

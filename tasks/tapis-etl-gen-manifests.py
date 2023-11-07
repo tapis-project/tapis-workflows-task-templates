@@ -101,7 +101,7 @@ try:
         path=local_data_path
     )
 except Exception as e:
-    ctx.stderr(1, f"Falied to fetch data files: {str(e)}")
+    ctx.stderr(1, f"Failed to fetch data files: {str(e)}")
 
 # Create a list of all registered files
 registered_data_file_paths = []

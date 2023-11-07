@@ -39,7 +39,7 @@ class ETLManifestModel:
             path=self.path,
             file=json.dumps({
                 "status": self.status,
-                "files": self.files,
+                "files": [f.__dict__ for f in self.files],
                 "created_at": self.created_at,
                 "last_modified": self.last_modified
             })
@@ -52,7 +52,7 @@ class ETLManifestModel:
             path=self.path,
             file=json.dumps({
                 "status": self.status,
-                "files": self.files,
+                "files": [f.__dict__ for f in self.files],
                 "created_at": self.created_at,
                 "last_modified": self.last_modified
             })

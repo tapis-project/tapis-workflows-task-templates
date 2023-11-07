@@ -152,7 +152,7 @@ try:
     for new_manifest in new_manifests:
         new_manifest.create(local_system_id, client)
 except Exception as e:
-    ctx.stderr(1, f"Falied to create manifests: {e}")
+    ctx.stderr(1, f"Failed to create manifests: {e}")
 
 # Make a list of all manifests
 all_manifests = manifests + new_manifests

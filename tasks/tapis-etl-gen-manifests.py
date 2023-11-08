@@ -219,8 +219,8 @@ if len(next_manifest.files) > 0 and phase == EnumETLPhase.DataProcessing:
     except Exception as e:
         ctx.stderr(1, f"Failed to delete lockfile: {e}")
 
-    # End the function
-    ctx.stdout(f"Processing files: {next_manifest.files}")
+    ctx.set_output("CURRENT_MANIFEST", dict(next_manifest))
+
 elif len(next_manifest.files) > 0 and phase == EnumETLPhase.Transfer:
     ctx.set_output(
         "TRANSFER_DATA",
@@ -229,4 +229,5 @@ elif len(next_manifest.files) > 0 and phase == EnumETLPhase.Transfer:
             "system_id": local_system_id
         })
     )
+    ctx.set_output("CURRENT_MANIFEST", dict(next_manifest))
 

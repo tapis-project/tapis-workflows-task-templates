@@ -24,6 +24,7 @@ class ETLManifestModel:
         ):
         self.filename = filename
         self.path = path
+        self.files = []
         for file in files:
             if type(file) == dict:
                 self.files.append(file)

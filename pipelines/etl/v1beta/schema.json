@@ -112,13 +112,14 @@
                 }
             }
         },
+        
         {
             "id": "update-inbound-manifest",
-            "description": "Sets the status of the inbound manifest to completed/failed",
+            "description": "Sets the status of the inbound manifest currently being processed to completed/failed",
             "type": "template",
             "depends_on": [{"id": "gen-inbound-manifests"}],
             "uses": {
-                "name": "tapis/etl-update-manifests@v1beta",
+                "name": "tapis/etl-update-manifest@v1beta",
                 "source": {
                     "url": "https://github.com/tapis-project/tapis-owe-templates.git",
                     "branch": "master"

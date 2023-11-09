@@ -26,18 +26,7 @@ except Exception as e:
     ctx.stderr(1, f"Failed to initialize Tapis client: {e}")
 
 try:
-    transfer_data = ctx.get_input("TRANSFER_DATA")
-    tranfer_data = json.loads(transfer_data)
-    path_to_manifest = transfer_data.get("path_to_manifest")
-    system_id = transfer_data.get("system_id")
-    manifest = ETLManifestModel(
-        **json.loads(
-            client.files.getContents(
-                systemId=system_id,
-                path=path_to_manifest
-            )
-        )
-    )
+    manifest = ETLManifestModel(**json.loads(ctx.get_input("MANIFEST")))
 
     system = client.systems.getSystem(systemId=system_id)
 

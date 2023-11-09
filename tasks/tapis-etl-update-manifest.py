@@ -63,3 +63,13 @@ try:
     manifest.update(system_id, client)
 except Exception as e:
     ctx.stderr(1, f"Failed to update last active manifest: {e}")
+
+# Delete the lock file
+try:
+    client.files.delete(
+        systemId=system_id,
+        path=os.path.join(manifest_path, lockfile_filename),
+        file=b""
+    )
+except Exception as e:
+    ctx.stderr(1, f"Failed to delete lockfile: {e}")

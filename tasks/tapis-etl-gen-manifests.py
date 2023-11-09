@@ -222,15 +222,6 @@ if len(next_manifest.files) > 0 and phase == EnumETLPhase.DataProcessing:
     except Exception as e:
         ctx.stderr(1, f"Failed to delete lockfile: {e}")
 
-elif len(next_manifest.files) > 0 and phase == EnumETLPhase.Transfer:
-    ctx.set_output(
-        "TRANSFER_DATA",
-        json.dumps({
-            "path_to_manifest": next_manifest.path,
-            "system_id": system_id
-        })
-    )
-
 # Output the json of the current manifest
 ctx.set_output("ACTIVE_MANIFEST", json.dumps(vars(next_manifest)))
 

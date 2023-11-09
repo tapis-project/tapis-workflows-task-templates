@@ -258,11 +258,11 @@
                         "args": "TAPIS_PASSWORD"
                     }
                 },
-                "TRANSFER_DATA": {
+                "MANIFEST": {
                     "value_from": {
                         "task_output": {
                             "task_id": "gen-outbound-manifests",
-                            "output_id": "TRANSFER_DATA"
+                            "output_id": "ACTIVE_MANIFEST"
                         }
                     }
                 },

@@ -4,7 +4,7 @@
         "flavor": "c1tiny"
     },
     "installer": "pip",
-    "packages": ["requests", "globus==2.0.1"],
+    "packages": ["requests"],
     "runtime": "python:3.9",
     "entrypoint": "tapis-owe-functions/tasks/tapis-etl-update-manifest.py",
     "git_repositories": [

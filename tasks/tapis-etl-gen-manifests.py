@@ -231,5 +231,9 @@ elif len(next_manifest.files) > 0 and phase == EnumETLPhase.Transfer:
         })
     )
 
+# Make tapis files refs in manifest json serializable
+next_manifest.files = [f.__dict__ for f in next_manifest.files]
+
+# Output the json of the current manifest
 ctx.set_output("ACTIVE_MANIFEST", json.dumps(vars(next_manifest)))
 

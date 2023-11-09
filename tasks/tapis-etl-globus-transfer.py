@@ -28,7 +28,7 @@ except Exception as e:
 try:
     manifest = ETLManifestModel(**json.loads(ctx.get_input("MANIFEST")))
 
-    system = client.systems.getSystem(systemId=system_id)
+    system = client.systems.getSystem(systemId=manifest.system_id)
 
     files_to_transfer = []
     for file in manifest.files:
@@ -36,7 +36,7 @@ try:
         files_to_transfer.append(os.path.join(system.rootDir, path))
 
 except Exception as e:
-    ctx.stderr(1, f"Error fetching contents of manifest file '{path_to_manifest}': {e}")
+    ctx.stderr(1, f"Error fetching contents of manifest file '{manifest.path}': {e}")
 
 try:
     # Create transfer task

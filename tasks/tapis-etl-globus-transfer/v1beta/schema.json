@@ -6,7 +6,7 @@
     "installer": "pip",
     "packages": ["requests", "globus==2.0.1"],
     "runtime": "python:3.9",
-    "entrypoint": "tapis-owe-functions/tasks/tapis-etl-update-manifestsß.py",
+    "entrypoint": "tapis-owe-functions/tasks/tapis-etl-update-manifest.py",
     "git_repositories": [
         {
             "url": "https://github.com/tapis-project/tapis-owe-templates.git",

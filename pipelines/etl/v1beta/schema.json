@@ -304,7 +304,7 @@
                 }
             ],
             "uses": {
-                "name": "tapis/etl-update-manifests@v1beta",
+                "name": "tapis/etl-update-manifest@v1beta",
                 "source": {
                     "url": "https://github.com/tapis-project/tapis-owe-templates.git",
                     "branch": "master"

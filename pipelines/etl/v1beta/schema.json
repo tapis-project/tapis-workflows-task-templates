@@ -179,17 +179,19 @@
             },
             "depends_on": [{"id": "update-inbound-manifest"}],
             "input": {
-                "TAPIS_JWT": {
-                    "value_from": {
-                        "task_output": {
-                            "task_id": "login",
-                            "output_id": "TAPIS_JWT"
-                        }
-                    }
-                },
                 "TAPIS_BASE_URL": {
                     "value_from": {
                         "args": "TAPIS_BASE_URL"
+                    }
+                },
+                "TAPIS_USERNAME": {
+                    "value_from": {
+                        "args": "TAPIS_USERNAME"
+                    }
+                },
+                "TAPIS_PASSWORD": {
+                    "value_from": {
+                        "args": "TAPIS_PASSWORD"
                     }
                 },
                 "SYSTEM_ID": {
@@ -228,7 +230,7 @@
             }
         },
         {
-            "id": "globus-transfer-data-files",
+            "id": "globus-transfer-results",
             "type": "template",
             "uses": {
                 "name": "tapis/etl-globus-transfer@v1beta",
@@ -238,16 +240,22 @@
                 }
             },
             "depends_on": [
-                {"id": "login"},
                 {"id": "gen-outbound-manifests"}
             ],
             "input": {
-                "TAPIS_JWT": {
+                "TAPIS_BASE_URL": {
                     "value_from": {
-                        "task_output": {
-                            "task_id": "login",
-                            "output_id": "TAPIS_JWT"
-                        }
+                        "args": "TAPIS_BASE_URL"
+                    }
+                },
+                "TAPIS_USERNAME": {
+                    "value_from": {
+                        "args": "TAPIS_USERNAME"
+                    }
+                },
+                "TAPIS_PASSWORD": {
+                    "value_from": {
+                        "args": "TAPIS_PASSWORD"
                     }
                 },
                 "TRANSFER_DATA": {
@@ -290,8 +298,10 @@
             "description": "Sets the status of the outbound manifest to completed/failed",
             "type": "template",
             "depends_on": [
-                {"id": "login"},
-                {"id": "gen-inbound-manifests"}
+                {
+                    "id": "globus-transfer-results",
+                    "can_fail": true
+                }
             ],
             "uses": {
                 "name": "tapis/etl-update-manifests@v1beta",
@@ -301,14 +311,6 @@
                 }
             },
             "input": {
-                "TAPIS_JWT": {
-                    "value_from": {
-                        "task_output": {
-                            "task_id": "login",
-                            "output_id": "TAPIS_JWT"
-                        }
-                    }
-                },
                 "TAPIS_BASE_URL": {
                     "value_from": {
                         "args": "TAPIS_BASE_URL"

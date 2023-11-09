@@ -212,15 +212,15 @@ if len(next_manifest.files) > 0 and phase == EnumETLPhase.DataProcessing:
         # Set the file_input_arrays to output
         ctx.set_output(f"{i}-etl-data-file-ref.{tapis_system_file_ref_extension}", json.dumps({"file": file}))
 
-    # Delete the lock file
-    try:
-        client.files.delete(
-            systemId=system_id,
-            path=os.path.join(manifest_path, lockfile_filename),
-            file=b""
-        )
-    except Exception as e:
-        ctx.stderr(1, f"Failed to delete lockfile: {e}")
+# Delete the lock file
+try:
+    client.files.delete(
+        systemId=system_id,
+        path=os.path.join(manifest_path, lockfile_filename),
+        file=b""
+    )
+except Exception as e:
+    ctx.stderr(1, f"Failed to delete lockfile: {e}")
 
 # Output the json of the current manifest
 ctx.set_output("ACTIVE_MANIFEST", json.dumps(vars(next_manifest)))

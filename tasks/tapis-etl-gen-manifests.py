@@ -110,7 +110,7 @@ except Exception as e:
 registered_data_file_paths = []
 for manifest in manifests:
     for manifest_data_file in manifest.files:
-        registered_data_file_paths.append(manifest_data_file.path)
+        registered_data_file_paths.append(manifest_data_file["path"])
 
 registered_data_files = [
     data_file for data_file in data_files
@@ -210,7 +210,7 @@ if len(next_manifest.files) > 0 and phase == EnumETLPhase.DataProcessing:
     tapis_system_file_ref_extension = ctx.get_input("TAPIS_SYSTEM_FILE_REF_EXTENSION")
     for i, file in enumerate(next_manifest.files):
         # Set the file_input_arrays to output
-        ctx.set_output(f"{i}-etl-data-file-ref.{tapis_system_file_ref_extension}", json.dumps({"file": file.__dict__}))
+        ctx.set_output(f"{i}-etl-data-file-ref.{tapis_system_file_ref_extension}", json.dumps({"file": file}))
 
     # Delete the lock file
     try:
@@ -230,9 +230,6 @@ elif len(next_manifest.files) > 0 and phase == EnumETLPhase.Transfer:
             "system_id": system_id
         })
     )
-
-# Make tapis files refs in manifest json serializable
-next_manifest.files = [f.__dict__ for f in next_manifest.files]
 
 # Output the json of the current manifest
 ctx.set_output("ACTIVE_MANIFEST", json.dumps(vars(next_manifest)))

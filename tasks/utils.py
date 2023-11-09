@@ -24,7 +24,12 @@ class ETLManifestModel:
         ):
         self.filename = filename
         self.path = path
-        self.files = files
+        for file in self.files:
+            if type(file) == dict:
+                self.files.append(file)
+                continue
+
+            self.files.append(file.__dict__)
         self.status = status
         self.created_at = created_at
         self.last_modified = last_modified
@@ -38,7 +43,7 @@ class ETLManifestModel:
             path=self.path,
             file=json.dumps({
                 "status": self.status,
-                "files": [f.__dict__ for f in self.files],
+                "files": self.files,
                 "created_at": self.created_at,
                 "last_modified": self.last_modified
             })
@@ -51,7 +56,7 @@ class ETLManifestModel:
             path=self.path,
             file=json.dumps({
                 "status": self.status,
-                "files": [f.__dict__ for f in self.files],
+                "files": self.files,
                 "created_at": self.created_at,
                 "last_modified": self.last_modified
             })

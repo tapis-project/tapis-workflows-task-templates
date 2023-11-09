@@ -12,48 +12,51 @@ from utils import ETLManifestModel
 
 
 tapis_base_url = ctx.get_input("TAPIS_BASE_URL")
-globus_proxy_base_url = os.path.join(tapis_base_url, "v3/globus-proxy/")
-transfer_data = ctx.get_input("TRANSFER_DATA")
-destination_endpoint_id = ctx.get_input("DESTINATION_ENDPOINT_ID")
-source_endpoint_id = ctx.get_input("SOURCE_ENDPOINT_ID")
-globus_client_id = ctx.get_input("GLOBUS_CLIENT_ID")
-globus_access_token = ctx.get_input("GLOBUS_ACCESS_TOKEN")
-globus_refresh_token = ctx.get_input("GLOBUS_REFRESH_TOKEN")
-
+tapis_username = ctx.get_input("TAPIS_USERNAME")
+tapis_password = ctx.get_input("TAPIS_PASSWORD")
 try:
     # Instantiate a Tapis client
     client = Tapis(
         base_url=tapis_base_url,
-        jwt=ctx.get_input("TAPIS_JWT")
+        username=tapis_username,
+        password=tapis_password,
     )
+    client.get_tokens()
 except Exception as e:
-    ctx.stderr(1, f"Error instantiating Tapis client: {e}")
+    ctx.stderr(1, f"Failed to initialize Tapis client: {e}")
 
 try:
+    transfer_data = ctx.get_input("TRANSFER_DATA")
     tranfer_data = json.loads(transfer_data)
     path_to_manifest = transfer_data.get("path_to_manifest")
-    local_system_id = transfer_data.get("system_id")
+    system_id = transfer_data.get("system_id")
     manifest = ETLManifestModel(
         **json.loads(
             client.files.getContents(
-                systemId=local_system_id,
+                systemId=system_id,
                 path=path_to_manifest
             )
         )
     )
 
-    local_system = client.systems.getSystem(systemId=local_system_id)
+    system = client.systems.getSystem(systemId=system_id)
 
     files_to_transfer = []
     for file in manifest.files:
-        path = file.get("path").replace(f"tapis://{local_system}/", "")
-        files_to_transfer.append(os.path.join(local_system.rootDir, path))
+        path = file.get("path").replace(f"tapis://{system}/", "")
+        files_to_transfer.append(os.path.join(system.rootDir, path))
 
 except Exception as e:
     ctx.stderr(1, f"Error fetching contents of manifest file '{path_to_manifest}': {e}")
 
 try:
     # Create transfer task
+    globus_proxy_base_url = os.path.join(tapis_base_url, "v3/globus-proxy/")
+    destination_endpoint_id = ctx.get_input("DESTINATION_ENDPOINT_ID")
+    source_endpoint_id = ctx.get_input("SOURCE_ENDPOINT_ID")
+    globus_client_id = ctx.get_input("GLOBUS_CLIENT_ID")
+    globus_access_token = ctx.get_input("GLOBUS_ACCESS_TOKEN")
+    globus_refresh_token = ctx.get_input("GLOBUS_REFRESH_TOKEN")
     response = requests.post(
         url=os.path.join(globus_proxy_base_url, "transfers", globus_client_id),
         data={

@@ -1,0 +1,29 @@
+{
+    "id": "login",
+    "description": "Authenticates with Tapis using a username and password, outputting a Tapis JWT",
+    "type": "template",
+    "uses": {
+        "name": "tapis/login@v1beta",
+        "source": {
+            "url": "https://github.com/tapis-project/tapis-owe-templates.git",
+            "branch": "master"
+        }
+    },
+    "input": {
+        "TAPIS_BASE_URL": {
+            "value_from": {
+                "args": "TAPIS_BASE_URL"
+            }
+        },
+        "TAPIS_USERNAME": {
+            "value_from": {
+                "args": "TAPIS_USERNAME"
+            }
+        },
+        "TAPIS_PASSWORD": {
+            "value_from": {
+                "args": "TAPIS_PASSWORD"
+            }
+        }
+    }
+}

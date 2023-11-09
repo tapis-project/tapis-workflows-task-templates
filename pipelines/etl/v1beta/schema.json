@@ -45,16 +45,17 @@
     },
     "tasks": [
         {
-            "id": "login",
-            "description": "Authenticates with Tapis using a username and password, outputting a Tapis JWT",
+            "id": "gen-inbound-manifests",
+            "description": "Generates a manifests for data files in the data directory of the local inbox system",
             "type": "template",
             "uses": {
-                "name": "tapis/login@v1beta",
+                "name": "tapis/etl-gen-manifests@v1beta",
                 "source": {
                     "url": "https://github.com/tapis-project/tapis-owe-templates.git",
                     "branch": "master"
                 }
             },
+            "depends_on": [],
             "input": {
                 "TAPIS_BASE_URL": {
                     "value_from": {
@@ -70,41 +71,13 @@
                     "value_from": {
                         "args": "TAPIS_PASSWORD"
                     }
-                }
-            }
-        },
-        {
-            "id": "gen-inbound-manifests",
-            "description": "Generates a manifests for data files in the data directory of the local inbox system",
-            "type": "template",
-            "uses": {
-                "name": "tapis/etl-gen-manifests@v1beta",
-                "source": {
-                    "url": "https://github.com/tapis-project/tapis-owe-templates.git",
-                    "branch": "master"
-                }
-            },
-            "depends_on": [{"id": "login"}],
-            "input": {
-                "TAPIS_JWT": {
-                    "value_from": {
-                        "task_output": {
-                            "task_id": "login",
-                            "output_id": "TAPIS_JWT"
-                        }
-                    }
                 },
-                "TAPIS_BASE_URL": {
-                    "value_from": {
-                        "args": "TAPIS_BASE_URL"
-                    }
-                },
-                "LOCAL_SYSTEM_ID": {
+                "SYSTEM_ID": {
                     "value_from": {
                         "env": "LOCAL_INBOX_SYSTEM_ID"
                     }
                 },
-                "LOCAL_MANIFEST_PATH": {
+                "MANIFEST_PATH": {
                     "value_from": {
                         "env": "LOCAL_INBOX_MANIFEST_PATH"
                     }
@@ -140,6 +113,59 @@
             }
         },
         {
+            "id": "update-inbound-manifest",
+            "description": "Sets the status of the inbound manifest to completed/failed",
+            "type": "template",
+            "depends_on": [{"id": "gen-inbound-manifests"}],
+            "uses": {
+                "name": "tapis/etl-update-manifests@v1beta",
+                "source": {
+                    "url": "https://github.com/tapis-project/tapis-owe-templates.git",
+                    "branch": "master"
+                }
+            },
+            "input": {
+                "TAPIS_BASE_URL": {
+                    "value_from": {
+                        "args": "TAPIS_BASE_URL"
+                    }
+                },
+                "TAPIS_USERNAME": {
+                    "value_from": {
+                        "args": "TAPIS_USERNAME"
+                    }
+                },
+                "TAPIS_PASSWORD": {
+                    "value_from": {
+                        "args": "TAPIS_PASSWORD"
+                    }
+                },
+                "SYSTEM_ID": {
+                    "value_from": {
+                        "env": "LOCAL_INBOX_SYSTEM_ID"
+                    }
+                },
+                "MANIFEST_PATH": {
+                    "value_from": {
+                        "env": "LOCAL_INBOX_MANIFEST_PATH"
+                    }
+                },
+                "LOCKFILE_FILENAME": {
+                    "value_from": {
+                        "env": "LOCKFILE_FILENAME"
+                    }
+                },
+                "MANIFEST": {
+                    "value_from": {
+                        "task_output": {
+                            "task_id": "gen-inbound-manifests",
+                            "output_id": "ACTIVE_MANIFEST"
+                        }
+                    }
+                }
+            }
+        },
+        {
             "id": "gen-outbound-manifests",
             "description": "Generates a manifests for data files in data directory of the local outbox system. Deletes lockfile once finished.",
             "type": "template",
@@ -150,7 +176,7 @@
                     "branch": "master"
                 }
             },
-            "depends_on": [{"id": "login"}],
+            "depends_on": [{"id": "update-inbound-manifest"}],
             "input": {
                 "TAPIS_JWT": {
                     "value_from": {
@@ -165,12 +191,12 @@
                         "args": "TAPIS_BASE_URL"
                     }
                 },
-                "LOCAL_SYSTEM_ID": {
+                "SYSTEM_ID": {
                     "value_from": {
                         "env": "LOCAL_OUTBOX_SYSTEM_ID"
                     }
                 },
-                "LOCAL_MANIFEST_PATH": {
+                "MANIFEST_PATH": {
                     "value_from": {
                         "env": "LOCAL_OUTBOX_MANIFEST_PATH"
                     }
@@ -254,6 +280,63 @@
                 "GLOBUS_REFRESH_TOKEN": {
                     "value_from": {
                         "args": "GLOBUS_REFRESH_TOKEN"
+                    }
+                }
+            }
+        },
+        {
+            "id": "update-outbound-manifest",
+            "description": "Sets the status of the outbound manifest to completed/failed",
+            "type": "template",
+            "depends_on": [
+                {"id": "login"},
+                {"id": "gen-inbound-manifests"}
+            ],
+            "uses": {
+                "name": "tapis/etl-update-manifests@v1beta",
+                "source": {
+                    "url": "https://github.com/tapis-project/tapis-owe-templates.git",
+                    "branch": "master"
+                }
+            },
+            "input": {
+                "TAPIS_JWT": {
+                    "value_from": {
+                        "task_output": {
+                            "task_id": "login",
+                            "output_id": "TAPIS_JWT"
+                        }
+                    }
+                },
+                "TAPIS_BASE_URL": {
+                    "value_from": {
+                        "args": "TAPIS_BASE_URL"
+                    }
+                },
+                "SYSTEM_ID": {
+                    "value_from": {
+                        "env": "LOCAL_INBOX_SYSTEM_ID"
+                    }
+                },
+                "MANIFEST_PATH": {
+                    "value_from": {
+                        "env": "LOCAL_INBOX_MANIFEST_PATH"
+                    }
+                },
+                "LOCKFILE_FILENAME": {
+                    "value_from": {
+                        "env": "LOCKFILE_FILENAME"
+                    }
+                },
+                "PHASE": {
+                    "value": "data_processing_prep"
+                },
+                "MANIFEST": {
+                    "value_from": {
+                        "task_output": {
+                            "task_id": "gen-inbound-manifests",
+                            "output_id": "ACTIVE_MANIFEST"
+                        }
                     }
                 }
             }

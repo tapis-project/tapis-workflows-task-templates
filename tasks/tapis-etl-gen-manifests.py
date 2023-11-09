@@ -17,31 +17,34 @@ from utils import (
 
 #TODO add rollbacks on execptions; i.e. delete the LOCKFILE
 tapis_base_url = ctx.get_input("TAPIS_BASE_URL")
-tapis_jwt = ctx.get_input("TAPIS_JWT")
+tapis_username = ctx.get_input("TAPIS_USERNAME")
+tapis_password = ctx.get_input("TAPIS_PASSWORD")
 try:
     # Instantiate a Tapis client
     client = Tapis(
         base_url=tapis_base_url,
-        jwt=tapis_jwt
+        username=tapis_username,
+        password=tapis_password,
     )
+    client.get_tokens()
 except Exception as e:
     ctx.stderr(1, f"Failed to initialize Tapis client: {e}")
 
 try:
     # Create the manifests directory if it doesn't exist. Equivalent
     # to `mkdir -p`
-    local_system_id = ctx.get_input("LOCAL_SYSTEM_ID")
-    local_manifest_path = ctx.get_input("LOCAL_MANIFEST_PATH")
+    system_id = ctx.get_input("SYSTEM_ID")
+    manifest_path = ctx.get_input("MANIFEST_PATH")
     client.files.mkdir(
-        systemId=local_system_id,
-        path=local_manifest_path
+        systemId=system_id,
+        path=manifest_path
     )
 
     # Create the data directory if it doesn't exist. Equivalent
     # to `mkdir -p`
     local_data_path = ctx.get_input("LOCAL_DATA_PATH")
     client.files.mkdir(
-        systemId=local_system_id,
+        systemId=system_id,
         path=local_data_path
     )
 except Exception as e:
@@ -61,8 +64,8 @@ try:
     
         # Fetch the all manifest files
         manifest_files = client.files.listFiles(
-            systemId=local_system_id,
-            path=local_manifest_path
+            systemId=system_id,
+            path=manifest_path
         )
 
         manifests_locked = lockfile_filename in [file.name for file in manifest_files]
@@ -71,8 +74,8 @@ try:
 
     # Create the lockfile
     client.files.insert(
-        systemId=local_system_id,
-        path=os.path.join(local_manifest_path, lockfile_filename),
+        systemId=system_id,
+        path=os.path.join(manifest_path, lockfile_filename),
         file=b""
     )
 except Exception as e:
@@ -87,7 +90,7 @@ try:
             ETLManifestModel(
                 filename=manifest_file.name,
                 path=manifest_file.path,
-                **json.loads(get_tapis_file_contents_json(client, local_system_id, manifest_file.path))
+                **json.loads(get_tapis_file_contents_json(client, system_id, manifest_file.path))
             )
         )
 except Exception as e:
@@ -97,7 +100,7 @@ try:
     # Fetch the all data files
     local_data_path = ctx.get_input("LOCAL_DATA_PATH")
     data_files = client.files.listFiles(
-        systemId=local_system_id,
+        systemId=system_id,
         path=local_data_path
     )
 except Exception as e:
@@ -126,23 +129,23 @@ unregistered_data_files = [
 # TODO consider querying for the file(s) sizes 2 times in a row at some interval and if
 # the size is different, keep polling until the last 2 sizes(for the same file(s)) are the same
 new_manifests = []
-local_manifest_generation_policy = ctx.get_input("MANIFEST_GENERATION_POLICY")
-if local_manifest_generation_policy == "one_per_file":
+manifest_generation_policy = ctx.get_input("MANIFEST_GENERATION_POLICY")
+if manifest_generation_policy == "one_per_file":
     for unregistered_data_file in unregistered_data_files:
         manifest_filename = f"{str(uuid4())}.json"
         new_manifests.append(
             ETLManifestModel(
                 filename=manifest_filename,
-                path=os.path.join(local_manifest_path, manifest_filename),
+                path=os.path.join(manifest_path, manifest_filename),
                 files=[unregistered_data_file]
             )
         )
-elif local_manifest_generation_policy == "one_for_all":
+elif manifest_generation_policy == "one_for_all":
     manifest_filename = f"{str(uuid4())}.json" 
     new_manifests.append(
         ETLManifestModel(
             filename=manifest_filename,
-            path=os.path.join(local_manifest_path, manifest_filename),
+            path=os.path.join(manifest_path, manifest_filename),
             files=unregistered_data_files
         )
     )
@@ -150,7 +153,7 @@ elif local_manifest_generation_policy == "one_for_all":
 try:
     # Persist all of the new manifests
     for new_manifest in new_manifests:
-        new_manifest.create(local_system_id, client)
+        new_manifest.create(system_id, client)
 except Exception as e:
     ctx.stderr(1, f"Failed to create manifests: {e}")
 
@@ -171,8 +174,8 @@ if len(unprocessed_manifests) == 0:
     # Delete the lock file
     try:
         client.files.delete(
-            systemId=local_system_id,
-            path=os.path.join(local_manifest_path, lockfile_filename),
+            systemId=system_id,
+            path=os.path.join(manifest_path, lockfile_filename),
             file=b""
         )
     except Exception as e:
@@ -185,8 +188,8 @@ unprocessed_manifests.sort(key=lambda m: m.created_at, reverse=True)
 
 # Default to oldest manifest
 next_manifest = unprocessed_manifests[0]
-local_manifest_priority = ctx.get_input("MANIFEST_PRIORITY")
-if local_manifest_priority in ["newest", "any"]:
+manifest_priority = ctx.get_input("MANIFEST_PRIORITY")
+if manifest_priority in ["newest", "any"]:
     next_manifest = unprocessed_manifests[-1]
 
 # Change the next manifest to the manifest associated with the resubmission
@@ -197,7 +200,7 @@ if resubmit != None:
 # Update the status of the next manifest to 'active'
 try:
     next_manifest.status = EnumManifestStatus.Active
-    next_manifest.update(local_system_id, client)
+    next_manifest.update(system_id, client)
 except Exception as e:
     ctx.set_stderr(1, f"Failed to update manifest to 'active': {e}")
 
@@ -212,22 +215,21 @@ if len(next_manifest.files) > 0 and phase == EnumETLPhase.DataProcessing:
     # Delete the lock file
     try:
         client.files.delete(
-            systemId=local_system_id,
-            path=os.path.join(local_manifest_path, lockfile_filename),
+            systemId=system_id,
+            path=os.path.join(manifest_path, lockfile_filename),
             file=b""
         )
     except Exception as e:
         ctx.stderr(1, f"Failed to delete lockfile: {e}")
-
-    ctx.set_output("CURRENT_MANIFEST", json.dumps(vars(next_manifest)))
 
 elif len(next_manifest.files) > 0 and phase == EnumETLPhase.Transfer:
     ctx.set_output(
         "TRANSFER_DATA",
         json.dumps({
             "path_to_manifest": next_manifest.path,
-            "system_id": local_system_id
+            "system_id": system_id
         })
     )
-    ctx.set_output("CURRENT_MANIFEST", json.dumps(vars(next_manifest)))
+
+ctx.set_output("ACTIVE_MANIFEST", json.dumps(vars(next_manifest)))
 

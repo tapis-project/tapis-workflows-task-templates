@@ -31,9 +31,16 @@ try:
     system = client.systems.getSystem(systemId=manifest.system_id)
 
     files_to_transfer = []
+    transfer_items_include_dirs = False
     for file in manifest.files:
         path = file.get("path").replace(f"tapis://{system}/", "")
         files_to_transfer.append(os.path.join(system.rootDir, path))
+        
+        # Set the transfer_items_include_dirs if a file in the manifest is a dir.
+        # This will be used to tell the globus proxy api to recurse through dirs
+        # and transfer the files and dirs therein
+        if transfer_items_include_dirs == False and file.get("type") == "dir":
+            transfer_items_include_dirs = True 
 
 except Exception as e:
     ctx.stderr(1, f"Error fetching contents of manifest file '{manifest.path}': {e}")
@@ -42,6 +49,7 @@ try:
     # Create transfer task
     globus_proxy_base_url = os.path.join(tapis_base_url, "v3/globus-proxy/")
     destination_endpoint_id = ctx.get_input("DESTINATION_ENDPOINT_ID")
+    destination_path = ctx.get_input("DESTINATION_PATH")
     source_endpoint_id = ctx.get_input("SOURCE_ENDPOINT_ID")
     globus_client_id = ctx.get_input("GLOBUS_CLIENT_ID")
     globus_access_token = ctx.get_input("GLOBUS_ACCESS_TOKEN")
@@ -54,8 +62,8 @@ try:
             "transfer_items": [
                 {
                     "source_path": path,
-                    "destination_path": "", # TODO Allow user to provide dir, then we say where data goes
-                    "recursive": False # TODO reconsider. Do we want to allow dirs?
+                    "destination_path": destination_path,
+                    "recursive": transfer_items_include_dirs
                 } for path in files_to_transfer
             ]
         }

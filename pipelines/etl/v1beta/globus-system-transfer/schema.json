@@ -270,6 +270,11 @@
                     "value_from": {
                         "env": "GLOBUS_DESTINATION_PATH"
                     }
+                },
+                "SYSTEM_ID": {
+                    "value_from": {
+                        "env": "REMOTE_INBOX_SYSTEM_ID"
+                    }
                 }
             }
         },

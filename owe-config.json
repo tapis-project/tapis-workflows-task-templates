@@ -1,6 +1,6 @@
 {
     "tapis/etl-pipeline@v1beta": {
-        "path": "pipelines/etl/v1beta/schema.json"
+        "path": "pipelines/etl/v1beta/globus-system-transfer/schema.json"
     },
     "tapis/login@v1beta": {
         "path": "tasks/tapis-login/v1beta/schema.json"

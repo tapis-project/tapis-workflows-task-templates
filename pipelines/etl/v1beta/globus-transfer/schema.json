@@ -266,6 +266,11 @@
                         }
                     }
                 },
+                "DESTINATION_PATH": {
+                    "value_from": {
+                        "env": "GLOBUS_DESTINATION_PATH"
+                    }
+                },
                 "SOURCE_ENDPOINT_ID": {
                     "value_from": {
                         "env": "GLOBUS_SOURCE_ENDPOINT_ID"
@@ -274,11 +279,6 @@
                 "DESTINATION_ENDPOINT_ID": {
                     "value_from": {
                         "env": "GLOBUS_DESTINATION_ENDPOINT_ID"
-                    }
-                },
-                "DESTINATION_PATH": {
-                    "value_from": {
-                        "env": "GLOBUS_DESTINATION_PATH"
                     }
                 },
                 "GLOBUS_CLIENT_ID": {

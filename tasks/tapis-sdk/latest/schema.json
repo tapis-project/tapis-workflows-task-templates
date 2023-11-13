@@ -1,0 +1,40 @@
+{
+    "type": "function",
+    "execution_profile": {
+        "flavor": "c1tiny"
+    },
+    "installer": "pip",
+    "packages": ["tapipy"],
+    "runtime": "python:3.9",
+    "entrypoint": "tapis-owe-functions/tasks/tapis-sdk.py",
+    "git_repositories": [
+        {
+            "url": "https://github.com/tapis-project/tapis-owe-templates.git",
+            "branch": "master",
+            "directory": "tapis-owe-functions"
+        }
+    ],
+    "input": {
+        "TAPIS_BASE_URL": {
+            "type": "string",
+            "value_from": {
+                "env": "TAPIS_BASE_URL"
+            }
+        },
+        "TAPIS_USERNAME": {
+            "type": "string",
+            "value_from": {
+                "env": "TAPIS_USERNAME"
+            }
+        },
+        "TAPIS_PASSWORD": {
+            "type": "string",
+            "value_from": {
+                "env": "TAPIS_PASSWORD"
+            }
+        }
+    },
+    "output": {
+        "RESPONSE": {"type": "string"}
+    }
+}

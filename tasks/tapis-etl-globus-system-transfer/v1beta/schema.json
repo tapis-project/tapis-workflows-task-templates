@@ -4,9 +4,9 @@
         "flavor": "c1tiny"
     },
     "installer": "pip",
-    "packages": ["tapipy", "requests"],
+    "packages": ["tapipy"],
     "runtime": "python:3.9",
-    "entrypoint": "tapis-owe-functions/tasks/tapis-etl-globus-transfer.py",
+    "entrypoint": "tapis-owe-functions/tasks/tapis-etl-globus-system-transfer.py",
     "git_repositories": [
         {
             "url": "https://github.com/tapis-project/tapis-owe-templates.git",

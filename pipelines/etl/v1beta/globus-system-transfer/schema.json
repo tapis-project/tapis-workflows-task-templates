@@ -1,0 +1,328 @@
+{
+    "description": "ETL Pipeline",
+    "execution_profile": {
+        "duplicate_submission_policy": "deny"
+    },
+    "params": {
+        "TAPIS_BASE_URL": {
+            "type": "string",
+            "required": true
+        },
+        "TAPIS_USERNAME": {
+            "type": "string",
+            "required": true
+        },
+        "TAPIS_PASSWORD": {
+            "type": "string",
+            "required": true
+        },
+        "GLOBUS_ACCESS_TOKEN": {
+            "type": "string",
+            "required": true
+        },
+        "GLOBUS_REFRESH_TOKEN": {
+            "type": "string",
+            "required": true
+        },
+        "RESUBMIT_FOR_INBOUND": {
+            "type": "string",
+            "required": false
+        },
+        "RESUBMIT_FOR_OUTBOUND": {
+            "type": "string",
+            "required": false
+        }
+    },
+    "env": {
+        "LOCKFILE_FILENAME": {
+            "type": "string",
+            "value": "TAPIS_ETL_MANIFEST.lock"
+        },
+        "TAPIS_SYSTEM_FILE_REF_EXTENSION": {
+            "type": "string",
+            "value": "TapisSystemFile.json"
+        }
+    },
+    "tasks": [
+        {
+            "id": "gen-inbound-manifests",
+            "description": "Generates a manifests for data files in the data directory of the local inbox system",
+            "type": "template",
+            "uses": {
+                "name": "tapis/etl-gen-manifests@v1beta",
+                "source": {
+                    "url": "https://github.com/tapis-project/tapis-owe-templates.git",
+                    "branch": "master"
+                }
+            },
+            "depends_on": [],
+            "input": {
+                "TAPIS_BASE_URL": {
+                    "value_from": {
+                        "args": "TAPIS_BASE_URL"
+                    }
+                },
+                "TAPIS_USERNAME": {
+                    "value_from": {
+                        "args": "TAPIS_USERNAME"
+                    }
+                },
+                "TAPIS_PASSWORD": {
+                    "value_from": {
+                        "args": "TAPIS_PASSWORD"
+                    }
+                },
+                "SYSTEM_ID": {
+                    "value_from": {
+                        "env": "LOCAL_INBOX_SYSTEM_ID"
+                    }
+                },
+                "MANIFEST_PATH": {
+                    "value_from": {
+                        "env": "LOCAL_INBOX_MANIFEST_PATH"
+                    }
+                },
+                "MANIFEST_GENERATION_POLICY": {
+                    "value_from": {
+                        "env": "LOCAL_INBOX_MANIFEST_GENERATION_POLICY"
+                    }
+                },
+                "MANIFEST_PRIORITY": {
+                    "value_from": {
+                        "env": "LOCAL_INBOX_MANIFEST_PRIORITY"
+                    }
+                },
+                "LOCAL_DATA_PATH": {
+                    "value_from": {
+                        "env": "LOCAL_INBOX_DATA_PATH"
+                    }
+                },
+                "LOCKFILE_FILENAME": {
+                    "value_from": {
+                        "env": "LOCKFILE_FILENAME"
+                    }
+                },
+                "PHASE": {
+                    "value": "data_processing_prep"
+                },
+                "TAPIS_SYSTEM_FILE_REF_EXTENSION": {
+                    "value_from": {
+                        "env": "TAPIS_SYSTEM_FILE_REF_EXTENSION"
+                    }
+                }
+            }
+        },
+        
+        {
+            "id": "update-inbound-manifest",
+            "description": "Sets the status of the inbound manifest currently being processed to completed/failed",
+            "type": "template",
+            "depends_on": [{"id": "gen-inbound-manifests"}],
+            "uses": {
+                "name": "tapis/etl-update-manifest@v1beta",
+                "source": {
+                    "url": "https://github.com/tapis-project/tapis-owe-templates.git",
+                    "branch": "master"
+                }
+            },
+            "input": {
+                "TAPIS_BASE_URL": {
+                    "value_from": {
+                        "args": "TAPIS_BASE_URL"
+                    }
+                },
+                "TAPIS_USERNAME": {
+                    "value_from": {
+                        "args": "TAPIS_USERNAME"
+                    }
+                },
+                "TAPIS_PASSWORD": {
+                    "value_from": {
+                        "args": "TAPIS_PASSWORD"
+                    }
+                },
+                "SYSTEM_ID": {
+                    "value_from": {
+                        "env": "LOCAL_INBOX_SYSTEM_ID"
+                    }
+                },
+                "MANIFEST_PATH": {
+                    "value_from": {
+                        "env": "LOCAL_INBOX_MANIFEST_PATH"
+                    }
+                },
+                "LOCKFILE_FILENAME": {
+                    "value_from": {
+                        "env": "LOCKFILE_FILENAME"
+                    }
+                },
+                "MANIFEST": {
+                    "value_from": {
+                        "task_output": {
+                            "task_id": "gen-inbound-manifests",
+                            "output_id": "ACTIVE_MANIFEST"
+                        }
+                    }
+                }
+            }
+        },
+        {
+            "id": "gen-outbound-manifests",
+            "description": "Generates a manifests for data files in data directory of the local outbox system. Deletes lockfile once finished.",
+            "type": "template",
+            "uses": {
+                "name": "tapis/etl-gen-manifests@v1beta",
+                "source": {
+                    "url": "https://github.com/tapis-project/tapis-owe-templates.git",
+                    "branch": "master"
+                }
+            },
+            "depends_on": [{"id": "update-inbound-manifest"}],
+            "input": {
+                "TAPIS_BASE_URL": {
+                    "value_from": {
+                        "args": "TAPIS_BASE_URL"
+                    }
+                },
+                "TAPIS_USERNAME": {
+                    "value_from": {
+                        "args": "TAPIS_USERNAME"
+                    }
+                },
+                "TAPIS_PASSWORD": {
+                    "value_from": {
+                        "args": "TAPIS_PASSWORD"
+                    }
+                },
+                "SYSTEM_ID": {
+                    "value_from": {
+                        "env": "LOCAL_OUTBOX_SYSTEM_ID"
+                    }
+                },
+                "MANIFEST_PATH": {
+                    "value_from": {
+                        "env": "LOCAL_OUTBOX_MANIFEST_PATH"
+                    }
+                },
+                "MANIFEST_GENERATION_POLICY": {
+                    "value_from": {
+                        "env": "LOCAL_OUTBOX_MANIFEST_GENERATION_POLICY"
+                    }
+                },
+                "MANIFEST_PRIORITY": {
+                    "value_from": {
+                        "env": "LOCAL_OUTBOX_MANIFEST_PRIORITY"
+                    }
+                },
+                "LOCAL_DATA_PATH": {
+                    "value_from": {
+                        "env": "LOCAL_OUTBOX_DATA_PATH"
+                    }
+                },
+                "LOCKFILE_FILENAME": {
+                    "value_from": {
+                        "env": "LOCKFILE_FILENAME"
+                    }
+                },
+                "PHASE": {
+                    "value": "transfer_prep"
+                }
+            }
+        },
+        {
+            "id": "globus-transfer-results",
+            "type": "template",
+            "uses": {
+                "name": "tapis/etl-globus-transfer@v1beta",
+                "source": {
+                    "url": "https://github.com/tapis-project/tapis-owe-templates.git",
+                    "branch": "master"
+                }
+            },
+            "depends_on": [
+                {"id": "gen-outbound-manifests"}
+            ],
+            "input": {
+                "TAPIS_BASE_URL": {
+                    "value_from": {
+                        "args": "TAPIS_BASE_URL"
+                    }
+                },
+                "TAPIS_USERNAME": {
+                    "value_from": {
+                        "args": "TAPIS_USERNAME"
+                    }
+                },
+                "TAPIS_PASSWORD": {
+                    "value_from": {
+                        "args": "TAPIS_PASSWORD"
+                    }
+                },
+                "MANIFEST": {
+                    "value_from": {
+                        "task_output": {
+                            "task_id": "gen-outbound-manifests",
+                            "output_id": "ACTIVE_MANIFEST"
+                        }
+                    }
+                },
+                "DESTINATION_PATH": {
+                    "value_from": {
+                        "env": "GLOBUS_DESTINATION_PATH"
+                    }
+                }
+            }
+        },
+        {
+            "id": "update-outbound-manifest",
+            "description": "Sets the status of the outbound manifest to completed/failed",
+            "type": "template",
+            "depends_on": [
+                {
+                    "id": "globus-transfer-results",
+                    "can_fail": true
+                }
+            ],
+            "uses": {
+                "name": "tapis/etl-update-manifest@v1beta",
+                "source": {
+                    "url": "https://github.com/tapis-project/tapis-owe-templates.git",
+                    "branch": "master"
+                }
+            },
+            "input": {
+                "TAPIS_BASE_URL": {
+                    "value_from": {
+                        "args": "TAPIS_BASE_URL"
+                    }
+                },
+                "SYSTEM_ID": {
+                    "value_from": {
+                        "env": "LOCAL_INBOX_SYSTEM_ID"
+                    }
+                },
+                "MANIFEST_PATH": {
+                    "value_from": {
+                        "env": "LOCAL_INBOX_MANIFEST_PATH"
+                    }
+                },
+                "LOCKFILE_FILENAME": {
+                    "value_from": {
+                        "env": "LOCKFILE_FILENAME"
+                    }
+                },
+                "PHASE": {
+                    "value": "data_processing_prep"
+                },
+                "MANIFEST": {
+                    "value_from": {
+                        "task_output": {
+                            "task_id": "gen-inbound-manifests",
+                            "output_id": "ACTIVE_MANIFEST"
+                        }
+                    }
+                }
+            }
+        }
+    ]
+}

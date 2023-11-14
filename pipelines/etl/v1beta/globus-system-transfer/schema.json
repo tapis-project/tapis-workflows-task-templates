@@ -16,14 +16,6 @@
             "type": "string",
             "required": true
         },
-        "GLOBUS_ACCESS_TOKEN": {
-            "type": "string",
-            "required": true
-        },
-        "GLOBUS_REFRESH_TOKEN": {
-            "type": "string",
-            "required": true
-        },
         "RESUBMIT_FOR_INBOUND": {
             "type": "string",
             "required": false

@@ -63,16 +63,19 @@ try:
             raise Exception(f"Max Wait Time Reached: {max_wait_time}") 
     
         # Fetch the all manifest files
+        print("LISTING FILES")
         manifest_files = client.files.listFiles(
             systemId=system_id,
             path=manifest_path
         )
+        print("FILES LISTED")
 
         manifests_locked = lockfile_filename in [file.name for file in manifest_files]
             
         time.sleep(5)
 
     # Create the lockfile
+    print("TRY TO INSERT FILE")
     client.files.insert(
         systemId=system_id,
         path=os.path.join(manifest_path, lockfile_filename),

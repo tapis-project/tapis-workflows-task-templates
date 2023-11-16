@@ -35,6 +35,8 @@ try:
     # to `mkdir -p`
     system_id = ctx.get_input("SYSTEM_ID")
     manifest_path = ctx.get_input("MANIFEST_PATH")
+    print(f"SYSTEM ID: {system_id}\n")
+    print(f"MANIFEST PATH: {manifest_path}\n")
     client.files.mkdir(
         systemId=system_id,
         path=manifest_path
@@ -43,6 +45,8 @@ try:
     # Create the data directory if it doesn't exist. Equivalent
     # to `mkdir -p`
     local_data_path = ctx.get_input("LOCAL_DATA_PATH")
+    print(f"SYSTEM ID: {system_id}\n")
+    print(f"LOCAL DATA PATH: {local_data_path}\n")
     client.files.mkdir(
         systemId=system_id,
         path=local_data_path

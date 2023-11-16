@@ -29,5 +29,4 @@
     "tapis/etl/update-manifest@v1beta": {
         "path": "schemas/tasks/workflows/etl/v1beta/etl-update-manifest.json"
     }
-    
 }

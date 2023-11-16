@@ -41,9 +41,9 @@
             "description": "Generates a manifests for data files in the data directory of the local inbox system",
             "type": "template",
             "uses": {
-                "name": "tapis/etl-gen-manifests@v1beta",
+                "name": "tapis/etl/gen-manifests@v1beta",
                 "source": {
-                    "url": "https://github.com/tapis-project/tapis-owe-templates.git",
+                    "url": "https://github.com/tapis-project/tapis-workflows-task-templates.git",
                     "branch": "master"
                 }
             },
@@ -111,9 +111,9 @@
             "type": "template",
             "depends_on": [{"id": "gen-inbound-manifests"}],
             "uses": {
-                "name": "tapis/etl-update-manifest@v1beta",
+                "name": "tapis/etl/update-manifest@v1beta",
                 "source": {
-                    "url": "https://github.com/tapis-project/tapis-owe-templates.git",
+                    "url": "https://github.com/tapis-project/tapis-workflows-task-templates.git",
                     "branch": "master"
                 }
             },
@@ -163,9 +163,9 @@
             "description": "Generates a manifests for data files in data directory of the local outbox system. Deletes lockfile once finished.",
             "type": "template",
             "uses": {
-                "name": "tapis/etl-gen-manifests@v1beta",
+                "name": "tapis/etl/gen-manifests@v1beta",
                 "source": {
-                    "url": "https://github.com/tapis-project/tapis-owe-templates.git",
+                    "url": "https://github.com/tapis-project/tapis-workflows-task-templates.git",
                     "branch": "master"
                 }
             },
@@ -225,9 +225,9 @@
             "id": "globus-transfer-results",
             "type": "template",
             "uses": {
-                "name": "tapis/etl-globus-transfer@v1beta",
+                "name": "tapis/etl/globus-transfer@v1beta",
                 "source": {
-                    "url": "https://github.com/tapis-project/tapis-owe-templates.git",
+                    "url": "https://github.com/tapis-project/tapis-workflows-task-templates.git",
                     "branch": "master"
                 }
             },
@@ -281,9 +281,9 @@
                 }
             ],
             "uses": {
-                "name": "tapis/etl-update-manifest@v1beta",
+                "name": "tapis/etl/update-manifest@v1beta",
                 "source": {
-                    "url": "https://github.com/tapis-project/tapis-owe-templates.git",
+                    "url": "https://github.com/tapis-project/tapis-workflows-task-templates.git",
                     "branch": "master"
                 }
             },

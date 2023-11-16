@@ -51,7 +51,7 @@
             "uses": {
                 "name": "tapis/etl-gen-manifests@v1beta",
                 "source": {
-                    "url": "https://github.com/tapis-project/tapis-owe-templates.git",
+                    "url": "https://github.com/tapis-project/tapis-workflows-task-templates.git",
                     "branch": "master"
                 }
             },
@@ -121,7 +121,7 @@
             "uses": {
                 "name": "tapis/etl-update-manifest@v1beta",
                 "source": {
-                    "url": "https://github.com/tapis-project/tapis-owe-templates.git",
+                    "url": "https://github.com/tapis-project/tapis-workflows-task-templates.git",
                     "branch": "master"
                 }
             },
@@ -173,7 +173,7 @@
             "uses": {
                 "name": "tapis/etl-gen-manifests@v1beta",
                 "source": {
-                    "url": "https://github.com/tapis-project/tapis-owe-templates.git",
+                    "url": "https://github.com/tapis-project/tapis-workflows-task-templates.git",
                     "branch": "master"
                 }
             },
@@ -235,7 +235,7 @@
             "uses": {
                 "name": "tapis/etl-globus-transfer@v1beta",
                 "source": {
-                    "url": "https://github.com/tapis-project/tapis-owe-templates.git",
+                    "url": "https://github.com/tapis-project/tapis-workflows-task-templates.git",
                     "branch": "master"
                 }
             },
@@ -311,7 +311,7 @@
             "uses": {
                 "name": "tapis/etl-update-manifest@v1beta",
                 "source": {
-                    "url": "https://github.com/tapis-project/tapis-owe-templates.git",
+                    "url": "https://github.com/tapis-project/tapis-workflows-task-templates.git",
                     "branch": "master"
                 }
             },

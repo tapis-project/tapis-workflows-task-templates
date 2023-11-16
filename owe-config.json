@@ -1,23 +1,32 @@
 {
     "tapis/etl-pipeline@v1beta": {
-        "path": "pipelines/etl/v1beta/globus-system-transfer/schema.json"
+        "path": "schemas/pipelines/etl/v1beta/globus-system-transfer.json"
     },
-    "tapis/login@v1beta": {
-        "path": "tasks/tapis-login/v1beta/schema.json"
+    "tapis/login@vlatest": {
+        "path": "schemas/tasks/sdk/latest/login.json"
     },
-    "tapis/etl-gen-manifests@v1beta": {
-        "path": "tasks/tapis-etl-gen-manifests/v1beta/schema.json"
+    "tapis/sdk@latest": {
+        "path": "schemas/tasks/sdk/latest/tapipy.json"
     },
-    "tapis/etl-globus-transfer@v1beta": {
-        "path": "tasks/tapis-etl-globus-transfer/v1beta/schema.json"
+    "tapis/pods/start@latest": {
+        "path": "schemas/tasks/pods/latest/start.json"
     },
-    "tapis/etl-globus-system-transfer@v1beta": {
-        "path": "tasks/tapis-etl-globus-system-transfer/v1beta/schema.json"
+    "tapis/pods/stop@v1beta": {
+        "path": "schemas/tasks/pods/latest/stop.json"
     },
-    "tapis/tapis-sdk@latest": {
-        "path": "tasks/tapis-sdk/latest/schema.json"
+    "tapis/pods/restart@v1beta": {
+        "path": "schemas/tasks/pods/latest/restart.json"
     },
-    "tapis/etl-update-manifest@v1beta": {
-        "path": "tasks/tapis-etl-update-manifest/v1beta/schema.json"
+    "tapis/etl/gen-manifests@v1beta": {
+        "path": "schemas/tasks/workflows/etl/v1beta/gen-manifests.json"
+    },
+    "tapis/etl/globus-transfer@v1beta": {
+        "path": "schemas/tasks/workflows/etl/v1beta/globus-transfer.json"
+    },
+    "tapis/etl/globus-system-transfer@v1beta": {
+        "path": "schemas/tasks/workflows/etl/v1beta/globus-system-transfer.json"
+    },
+    "tapis/etl/update-manifest@v1beta": {
+        "path": "schemas/tasks/workflows/etl/v1beta/etl-update-manifest.json"
     }
 }

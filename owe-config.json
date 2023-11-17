@@ -1,32 +1,32 @@
 {
     "tapis/etl-pipeline@v1beta": {
-        "path": "schemas/pipelines/etl/v1beta/globus-system-transfer.json"
+        "path": "schemas/workflows/etl/v1beta/pipelines/globus-system-transfer.json"
     },
     "tapis/login@vlatest": {
-        "path": "schemas/tasks/sdk/latest/login.json"
+        "path": "schemas/sdk/latest/login.json"
     },
     "tapis/sdk@latest": {
-        "path": "schemas/tasks/sdk/latest/tapipy.json"
+        "path": "schemas/sdk/latest/tapipy.json"
     },
     "tapis/pods/start@latest": {
-        "path": "schemas/tasks/pods/latest/start.json"
+        "path": "schemas/pods/latest/start.json"
     },
     "tapis/pods/stop@v1beta": {
-        "path": "schemas/tasks/pods/latest/stop.json"
+        "path": "schemas/pods/latest/stop.json"
     },
     "tapis/pods/restart@v1beta": {
-        "path": "schemas/tasks/pods/latest/restart.json"
+        "path": "schemas/pods/latest/restart.json"
     },
     "tapis/etl/gen-manifests@v1beta": {
-        "path": "schemas/tasks/workflows/etl/v1beta/gen-manifests.json"
+        "path": "schemas/workflows/etl/v1beta/gen-manifests.json"
     },
     "tapis/etl/globus-transfer@v1beta": {
-        "path": "schemas/tasks/workflows/etl/v1beta/globus-transfer.json"
+        "path": "schemas/workflows/etl/v1beta/globus-transfer.json"
     },
     "tapis/etl/globus-system-transfer@v1beta": {
-        "path": "schemas/tasks/workflows/etl/v1beta/globus-system-transfer.json"
+        "path": "schemas/workflows/etl/v1beta/globus-system-transfer.json"
     },
     "tapis/etl/update-manifest@v1beta": {
-        "path": "schemas/tasks/workflows/etl/v1beta/update-manifest.json"
+        "path": "schemas/workflows/etl/v1beta/update-manifest.json"
     }
 }

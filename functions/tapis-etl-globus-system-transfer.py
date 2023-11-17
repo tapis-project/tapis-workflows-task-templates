@@ -2,7 +2,7 @@
 from owe_python_sdk.runtime import execution_context as ctx
 #-------- Workflow Context import: DO NOT REMOVE ----------------
 
-import os, json, time
+import os, json, time, re
 
 from tapipy.tapis import Tapis
 
@@ -34,17 +34,19 @@ try:
     remote_inbox_system_id = ctx.get_input("SYSTEM_ID")
 
     # Create transfer task
-    task = client.files.createTransferTask(
-        elements=[
-            {
-                "sourceURI": f.get("url"),
-                "destinationURI": os.path.join(
-                    f.get("url").replace(manifest.system, remote_inbox_system_id),
-                    destination_path.lstrip("/")
-                )
-            } for f in manifest.files
-        ]
-    )
+    elements = []
+    for f in manifest.files:
+        # FIXME perhaps it would be better to pass the system id in the manifest
+        from_system_id = re.search(r"^tapis:\/{2}([^/]+)\/[\s\S]*$", f.get("url")).group(1)
+        elements.append({
+            "sourceURI": f.get("url"),
+            "destinationURI": os.path.join(
+                f.get("url").replace(from_system_id, remote_inbox_system_id),
+                destination_path.lstrip("/")
+            )
+        })
+
+    task = client.files.createTransferTask(elements=elements)
 except Exception as e:
     ctx.stderr(f"Failed to create transfer task: {e}")
 

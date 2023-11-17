@@ -35,8 +35,6 @@ try:
     # to `mkdir -p`
     system_id = ctx.get_input("SYSTEM_ID")
     manifest_path = ctx.get_input("MANIFEST_PATH")
-    print(f"SYSTEM ID: {system_id}\n")
-    print(f"MANIFEST PATH: {manifest_path}\n")
     client.files.mkdir(
         systemId=system_id,
         path=manifest_path
@@ -45,8 +43,6 @@ try:
     # Create the data directory if it doesn't exist. Equivalent
     # to `mkdir -p`
     local_data_path = ctx.get_input("LOCAL_DATA_PATH")
-    print(f"SYSTEM ID: {system_id}\n")
-    print(f"LOCAL DATA PATH: {local_data_path}\n")
     client.files.mkdir(
         systemId=system_id,
         path=local_data_path
@@ -67,19 +63,16 @@ try:
             raise Exception(f"Max Wait Time Reached: {max_wait_time}") 
     
         # Fetch the all manifest files
-        print("LISTING FILES")
         manifest_files = client.files.listFiles(
             systemId=system_id,
             path=manifest_path
         )
-        print("FILES LISTED")
 
         manifests_locked = lockfile_filename in [file.name for file in manifest_files]
             
         time.sleep(5)
 
     # Create the lockfile
-    print("TRY TO INSERT FILE")
     client.files.insert(
         systemId=system_id,
         path=os.path.join(manifest_path, lockfile_filename),

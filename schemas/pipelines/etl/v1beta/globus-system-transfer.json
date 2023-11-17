@@ -225,7 +225,7 @@
             "id": "globus-transfer-results",
             "type": "template",
             "uses": {
-                "name": "tapis/etl/globus-transfer@v1beta",
+                "name": "tapis/etl/globus-system-transfer@v1beta",
                 "source": {
                     "url": "https://github.com/tapis-project/tapis-workflows-task-templates.git",
                     "branch": "master"

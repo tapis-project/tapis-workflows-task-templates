@@ -61,7 +61,7 @@ try:
         task = client.files.getTransferTask(
             transferTaskId=task.uuid
         )
+
+    ctx.set_output("TRANSFER_TASK", task.__dict__)
 except Exception as e:
     ctx.stderr(1, e)
-
-# TODO handle fail/success

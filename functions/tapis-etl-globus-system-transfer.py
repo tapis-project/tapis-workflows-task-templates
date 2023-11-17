@@ -58,7 +58,7 @@ except Exception as e:
 try:
     while task.status not in ["COMPLETED", "FAILED"]:
         time.sleep(5)
-        task = client.files.createTransferTask(
+        task = client.files.getTransferTask(
             transferTaskId=task.uuid
         )
 except Exception as e:

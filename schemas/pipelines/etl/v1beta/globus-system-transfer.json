@@ -309,7 +309,19 @@
                 },
                 "SYSTEM_ID": {
                     "value_from": {
+                        "env": "REMOTE_INBOX_SYSTEM_ID"
+                    }
+                },
+                "LOCAL_INBOX_SYSTEM_ID": {
+                    "description": "NOTE: remove this input as soon as insert operation is available for Globus-type systems",
+                    "value_from": {
                         "env": "LOCAL_INBOX_SYSTEM_ID"
+                    }
+                },
+                "LOCAL_OUTBOX_SYSTEM_ID": {
+                    "description": "NOTE: remove this input as soon as insert operation is available for Globus-type systems",
+                    "value_from": {
+                        "env": "LOCAL_OUTBOX_SYSTEM_ID"
                     }
                 },
                 "MANIFEST_PATH": {

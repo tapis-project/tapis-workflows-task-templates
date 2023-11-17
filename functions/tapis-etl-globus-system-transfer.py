@@ -2,8 +2,7 @@
 from owe_python_sdk.runtime import execution_context as ctx
 #-------- Workflow Context import: DO NOT REMOVE ----------------
 
-import os, json, time, re
-
+import os, json, time
 from tapipy.tapis import Tapis
 
 from utils import ETLManifestModel

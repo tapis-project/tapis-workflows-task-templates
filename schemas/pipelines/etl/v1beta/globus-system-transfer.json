@@ -280,7 +280,7 @@
                     "can_fail": true
                 },
                 {
-                    "id": "gen-outbound-mainfests",
+                    "id": "gen-outbound-manifests",
                     "can_fail": false
                 }
             ],

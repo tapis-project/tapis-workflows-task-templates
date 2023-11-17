@@ -42,12 +42,11 @@ try:
         local_outbox_system_id = ctx.get_input("LOCAL_OUTBOX_SYSTEM_ID")
         remote_inbox_system_id = ctx.get_input("REMOTE_INBOX_SYSTEM_ID")
         elements.append({
-            # FIXME perhaps it would be better to pass the system id in the manifest
-            # TODO FIXME .replace of system name in destinationURI should be deleted as soon as the insert
+            # FIXME .replace of system name in destinationURI should be deleted as soon as the insert
             # operation is available for Globus-type systems
             "sourceURI": f.get("url").replace(local_inbox_system_id, remote_inbox_system_id), # NOTE See 'NOTE' above
             "destinationURI": os.path.join(
-                f.get("url").rsplit("/", 2)[0].replace(local_inbox_system_id, remote_inbox_system_id),
+                f.get("url").rsplit("/", 2)[0].replace(local_inbox_system_id, remote_inbox_system_id), # NOTE See 'NOTE' and 'FIXME' above
                 destination_path.lstrip("/"),
                 f.get("name")
             )

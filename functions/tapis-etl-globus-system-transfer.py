@@ -30,9 +30,13 @@ except Exception as e:
     ctx.stderr(1, f"Error initializing manifest: {e}")
 
 try:
-    # Create transfer task
+    # Create the destination dir on the remote inbox if it doesn't exist
+    remote_inbox_system_id = ctx.get_input("REMOTE_INBOX_SYSTEM_ID")
     destination_path = ctx.get_input("DESTINATION_PATH")
-    remote_inbox_system_id = ctx.get_input("SYSTEM_ID")
+    client.files.mkdir(
+        systemId=remote_inbox_system_id,
+        path=destination_path
+    )
 
     # Create transfer task
     elements = []
@@ -40,7 +44,6 @@ try:
         # NOTE: remove this input as soon as insert operation is available for Globus-type systems
         local_inbox_system_id = ctx.get_input("LOCAL_INBOX_SYSTEM_ID")
         local_outbox_system_id = ctx.get_input("LOCAL_OUTBOX_SYSTEM_ID")
-        remote_inbox_system_id = ctx.get_input("REMOTE_INBOX_SYSTEM_ID")
         elements.append({
             # FIXME .replace of system name in destinationURI should be deleted as soon as the insert
             # operation is available for Globus-type systems

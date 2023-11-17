@@ -44,12 +44,12 @@ try:
             # operation is available for Globus-type systems
             "sourceURI": f.get("url").replace(from_system_id, remote_inbox_system_id),
             "destinationURI": os.path.join(
-                f.get("url").rstrip("/", 2)[0].replace(from_system_id, remote_inbox_system_id),
+                f.get("url").rsplit("/", 2)[0].replace(from_system_id, remote_inbox_system_id),
                 destination_path.lstrip("/"),
                 f.get("name")
             )
         })
-        
+
     task = client.files.createTransferTask(elements=elements)
 except Exception as e:
     ctx.stderr(1, f"Failed to create transfer task: {e}")

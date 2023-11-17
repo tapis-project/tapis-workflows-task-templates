@@ -20,9 +20,6 @@
     "tapis/etl/gen-manifests@v1beta": {
         "path": "schemas/workflows/etl/v1beta/gen-manifests.json"
     },
-    "tapis/etl/globus-transfer@v1beta": {
-        "path": "schemas/workflows/etl/v1beta/globus-transfer.json"
-    },
     "tapis/etl/globus-system-transfer@v1beta": {
         "path": "schemas/workflows/etl/v1beta/globus-system-transfer.json"
     },

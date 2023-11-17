@@ -38,11 +38,15 @@ try:
     for f in manifest.files:
         # FIXME perhaps it would be better to pass the system id in the manifest
         from_system_id = re.search(r"^tapis:\/{2}([^/]+)\/[\s\S]*$", f.get("url")).group(1)
+        file_path = f.get("url").replace(from_system_id, remote_inbox_system_id).replace(f.get("url").replace(f.get("name"), "")),
         elements.append({
-            "sourceURI": f.get("url"),
+            # TODO FIXME Everything from .replace onward should be delete as soon as the insert
+            # operation is available on Globus-type endpoints
+            "sourceURI": f.get("url").replace(from_system_id, remote_inbox_system_id),
             "destinationURI": os.path.join(
-                f.get("url").replace(from_system_id, remote_inbox_system_id),
-                destination_path.lstrip("/")
+                file_path,
+                destination_path.lstrip("/"),
+                f.get("name").lstrip("/")
             )
         })
 

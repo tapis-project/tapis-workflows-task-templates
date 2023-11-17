@@ -49,7 +49,7 @@ try:
                 f.get("name")
             )
         })
-    pprint(elements)
+        
     task = client.files.createTransferTask(elements=elements)
 except Exception as e:
     ctx.stderr(1, f"Failed to create transfer task: {e}")

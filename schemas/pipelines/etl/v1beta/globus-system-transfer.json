@@ -278,6 +278,10 @@
                 {
                     "id": "globus-transfer-results",
                     "can_fail": true
+                },
+                {
+                    "id": "gen-outbound-mainfests",
+                    "can_fail": false
                 }
             ],
             "uses": {
@@ -310,7 +314,7 @@
                 },
                 "MANIFEST_PATH": {
                     "value_from": {
-                        "env": "LOCAL_INBOX_MANIFEST_PATH"
+                        "env": "LOCAL_OUTBOX_MANIFEST_PATH"
                     }
                 },
                 "LOCKFILE_FILENAME": {
@@ -318,13 +322,10 @@
                         "env": "LOCKFILE_FILENAME"
                     }
                 },
-                "PHASE": {
-                    "value": "data_processing_prep"
-                },
                 "MANIFEST": {
                     "value_from": {
                         "task_output": {
-                            "task_id": "gen-inbound-manifests",
+                            "task_id": "gen-outbound-manifests",
                             "output_id": "ACTIVE_MANIFEST"
                         }
                     }

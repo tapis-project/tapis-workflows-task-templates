@@ -44,7 +44,7 @@ try:
         elements.append({
             # FIXME .replace of system name in destinationURI should be deleted as soon as the insert
             # operation is available for Globus-type systems
-            "sourceURI": f.get("url").replace(local_inbox_system_id, remote_inbox_system_id), # NOTE See 'NOTE' above
+            "sourceURI": f.get("url").replace(local_inbox_system_id, local_outbox_system_id), # NOTE See 'NOTE' above
             "destinationURI": os.path.join(
                 f.get("url").rsplit("/", 2)[0].replace(local_inbox_system_id, remote_inbox_system_id), # NOTE See 'NOTE' and 'FIXME' above
                 destination_path.lstrip("/"),

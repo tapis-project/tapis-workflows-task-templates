@@ -293,6 +293,16 @@
                         "args": "TAPIS_BASE_URL"
                     }
                 },
+                "TAPIS_USERNAME": {
+                    "value_from": {
+                        "args": "TAPIS_USERNAME"
+                    }
+                },
+                "TAPIS_PASSWORD": {
+                    "value_from": {
+                        "args": "TAPIS_PASSWORD"
+                    }
+                },
                 "SYSTEM_ID": {
                     "value_from": {
                         "env": "LOCAL_INBOX_SYSTEM_ID"

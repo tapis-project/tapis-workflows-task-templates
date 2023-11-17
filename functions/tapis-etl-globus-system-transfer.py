@@ -7,7 +7,7 @@ import os, json, time, re
 from tapipy.tapis import Tapis
 
 from utils import ETLManifestModel
-import pprint
+from pprint import pprint
 
 
 tapis_base_url = ctx.get_input("TAPIS_BASE_URL")

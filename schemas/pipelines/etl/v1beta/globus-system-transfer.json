@@ -187,8 +187,9 @@
                     }
                 },
                 "SYSTEM_ID": {
+                    "description": "NOTE: change this input from LOCAL_INBOX_SYSTEM_ID to LOCAL_OUTBOX_SYSTEM_ID as soon as insert operation is available for Globus-type systems",
                     "value_from": {
-                        "env": "LOCAL_OUTBOX_SYSTEM_ID"
+                        "env": "LOCAL_INBOX_SYSTEM_ID"
                     }
                 },
                 "MANIFEST_PATH": {

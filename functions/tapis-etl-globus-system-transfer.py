@@ -7,6 +7,7 @@ import os, json, time, re
 from tapipy.tapis import Tapis
 
 from utils import ETLManifestModel
+import pprint
 
 
 tapis_base_url = ctx.get_input("TAPIS_BASE_URL")
@@ -49,7 +50,7 @@ try:
                 f.get("name").lstrip("/")
             )
         })
-
+    pprint(elements)
     task = client.files.createTransferTask(elements=elements)
 except Exception as e:
     ctx.stderr(1, f"Failed to create transfer task: {e}")

@@ -25,5 +25,8 @@
     },
     "tapis/etl/update-manifest@v1beta": {
         "path": "schemas/workflows/etl/v1beta/update-manifest.json"
+    },
+    "tapis/workflows/tapis-job@v1beta": {
+        "path": "schemas/workflows/latest/tapis-job.json"
     }
 }

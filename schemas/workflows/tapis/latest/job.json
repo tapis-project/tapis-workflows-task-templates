@@ -1,0 +1,17 @@
+{
+    "type": "function",
+    "execution_profile": {
+        "flavor": "c1tiny"
+    },
+    "installer": "pip",
+    "packages": ["tapipy", "pydantic==1.9.0"],
+    "runtime": "python:3.9",
+    "entrypoint": "tapis-owe-functions/functions/workflow-engine-tapis-job.py",
+    "git_repositories": [
+        {
+            "url": "https://github.com/tapis-project/tapis-workflows-task-templates.git",
+            "branch": "master",
+            "directory": "tapis-owe-functions"
+        }
+    ]
+}

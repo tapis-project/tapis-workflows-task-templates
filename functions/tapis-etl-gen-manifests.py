@@ -193,9 +193,9 @@ if manifest_priority in ["newest", "any"]:
     next_manifest = unprocessed_manifests[-1]
 
 # Change the next manifest to the manifest associated with the resubmission
-resubmit = ctx.get_input("RESUBMIT")
-if resubmit != None:
-    next_manifest = next(filter(lambda m: m.name == resubmit + ".json", all_manifests))
+resubmit_manifest = ctx.get_input("RESUBMIT_INBOUND")
+if resubmit_manifest != None:
+    next_manifest = next(filter(lambda m: m.name == resubmit_manifest + ".json", all_manifests))
 
 # Update the status of the next manifest to 'active'
 try:

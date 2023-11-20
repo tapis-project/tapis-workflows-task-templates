@@ -16,11 +16,11 @@
             "type": "string",
             "required": true
         },
-        "RESUBMIT_FOR_INBOUND": {
+        "RESUBMIT_INBOUND": {
             "type": "string",
             "required": false
         },
-        "RESUBMIT_FOR_OUTBOUND": {
+        "RESUBMIT_OUTBOUND": {
             "type": "string",
             "required": false
         }

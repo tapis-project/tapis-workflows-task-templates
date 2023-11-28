@@ -48,6 +48,11 @@
                 }
             },
             "depends_on": [],
+            "conditions": [
+                {
+                    "eq": [0, 1]
+                }
+            ],
             "input": {
                 "TAPIS_BASE_URL": {
                     "value_from": {

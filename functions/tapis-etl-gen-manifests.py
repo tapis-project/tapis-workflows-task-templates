@@ -15,6 +15,17 @@ from utils import (
     get_tapis_file_contents_json
 )
 
+# Set the variables related to resubmission.
+phase = ctx.get_input("PHASE")
+resubmit_manifest_name = None
+resubmit_inbound_manfiest_name = ctx.get_input("RESUBMIT_INBOUND")
+resubmit_outbound_manfiest_name = ctx.get_input("RESUBMIT_OUTBOUND")
+if phase == EnumETLPhase.DataProcessing and resubmit_inbound_manfiest_name != None:
+    resubmit_manifest_name = resubmit_inbound_manfiest_name
+
+if phase == EnumETLPhase.Transfer and resubmit_outbound_manfiest_name != None:
+    resubmit_manifest_name = resubmit_outbound_manfiest_name
+
 #TODO add rollbacks on execptions; i.e. delete the LOCKFILE
 tapis_base_url = ctx.get_input("TAPIS_BASE_URL")
 tapis_username = ctx.get_input("TAPIS_USERNAME")
@@ -164,10 +175,10 @@ all_manifests = manifests + new_manifests
 # of 'pending' into a single list
 unprocessed_manifests = [
     manifest for manifest in all_manifests
-    if manifest.status == EnumManifestStatus.Pending
+    if manifest.status == EnumManifestStatus.Pending or manifest.name == resubmit_manifest_name
 ]
 
-if len(unprocessed_manifests) == 0:
+if len(unprocessed_manifests):
     # TODO Somehow, we need to indicate that all subsequent tasks should be skipped.
     # A workable idea may be to produce some kind of SKIP_OUTPUT file
     # TODO implement -1 exist code. handle in WorkflowExecutor
@@ -193,9 +204,8 @@ if manifest_priority in ["newest", "any"]:
     next_manifest = unprocessed_manifests[-1]
 
 # Change the next manifest to the manifest associated with the resubmission
-resubmit_manifest = ctx.get_input("RESUBMIT_INBOUND")
-if resubmit_manifest != None:
-    next_manifest = next(filter(lambda m: m.name == resubmit_manifest + ".json", all_manifests))
+if resubmit_manifest_name != None:
+    next_manifest = next(filter(lambda m: m.name == resubmit_manifest_name + ".json", all_manifests))
 
 # Update the status of the next manifest to 'active'
 try:
@@ -205,7 +215,6 @@ except Exception as e:
     ctx.set_stderr(1, f"Failed to update manifest to 'active': {e}")
 
 # Create an output to be used by the first job in the etl pipeline
-phase = ctx.get_input("PHASE")
 if len(next_manifest.files) > 0 and phase == EnumETLPhase.DataProcessing:
     tapis_system_file_ref_extension = ctx.get_input("TAPIS_SYSTEM_FILE_REF_EXTENSION")
     for i, file in enumerate(next_manifest.files):

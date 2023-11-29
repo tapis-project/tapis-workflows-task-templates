@@ -167,9 +167,24 @@
             },
             "conditions": [
                 {
-                    "eq": [
-                        {"args": "RESUBMIT_OUTBOUND"},
-                        null
+                    "and": [
+                        {
+                            "eq": [
+                                {"args": "RESUBMIT_OUTBOUND"},
+                                null
+                            ]
+                        },
+                        {
+                            "neq": [
+                                {
+                                    "task_output": {
+                                        "task_id": "gen-inbound-manifests",
+                                        "output_id": "ACTIVE_MANIFEST"
+                                    }
+                                },
+                                null
+                            ]
+                        }
                     ]
                 }
             ]
@@ -236,7 +251,15 @@
                 "PHASE": {
                     "value": "transfer_prep"
                 }
-            }
+            },
+            "conditions": [
+                {
+                    "eq": [
+                        {"args": "RESUBMIT_INBOUND"},
+                        null
+                    ]
+                }
+            ]
         },
         {
             "id": "globus-transfer-results",

@@ -179,9 +179,6 @@ unprocessed_manifests = [
 ]
 
 if len(unprocessed_manifests):
-    # TODO Somehow, we need to indicate that all subsequent tasks should be skipped.
-    # A workable idea may be to produce some kind of SKIP_OUTPUT file
-    # TODO implement -1 exist code. handle in WorkflowExecutor
     # Delete the lock file
     try:
         client.files.delete(
@@ -192,7 +189,7 @@ if len(unprocessed_manifests):
     except Exception as e:
         ctx.stderr(1, f"Failed to delete lockfile: {e}")
 
-    ctx.stdout("Exiting: No new data to process", code=-1)
+    ctx.stdout("Exiting: No new data to process")
 
 # Reorder the unprocessed manifests from oldest to newest
 unprocessed_manifests.sort(key=lambda m: m.created_at, reverse=True)
@@ -205,14 +202,16 @@ if manifest_priority in ["newest", "any"]:
 
 # Change the next manifest to the manifest associated with the resubmission
 if resubmit_manifest_name != None:
-    next_manifest = next(filter(lambda m: m.name == resubmit_manifest_name + ".json", all_manifests))
+    next_manifest = next(filter(lambda m: m.name == resubmit_manifest_name + ".json", all_manifests), None)
+    if next_manifest == None:
+        ctx.stderr(1, f"Resubmit failed: Manifest {resubmit_manifest_name + '.json'} does not exist")
 
 # Update the status of the next manifest to 'active'
 try:
     next_manifest.status = EnumManifestStatus.Active
     next_manifest.update(system_id, client)
 except Exception as e:
-    ctx.set_stderr(1, f"Failed to update manifest to 'active': {e}")
+    ctx.stderr(1, f"Failed to update manifest to 'active': {e}")
 
 # Create an output to be used by the first job in the etl pipeline
 if len(next_manifest.files) > 0 and phase == EnumETLPhase.DataProcessing:

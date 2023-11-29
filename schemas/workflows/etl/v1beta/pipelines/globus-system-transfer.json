@@ -48,11 +48,6 @@
                 }
             },
             "depends_on": [],
-            "conditions": [
-                {
-                    "eq": [0, 1]
-                }
-            ],
             "input": {
                 "TAPIS_BASE_URL": {
                     "value_from": {
@@ -107,7 +102,15 @@
                         "env": "TAPIS_SYSTEM_FILE_REF_EXTENSION"
                     }
                 }
-            }
+            },
+            "conditions": [
+                {
+                    "eq": [
+                        {"args": "RESUBMIT_OUTBOUND"},
+                        null
+                    ]
+                }
+            ]
         },
         
         {
@@ -161,7 +164,15 @@
                         }
                     }
                 }
-            }
+            },
+            "conditions": [
+                {
+                    "eq": [
+                        {"args": "RESUBMIT_OUTBOUND"},
+                        null
+                    ]
+                }
+            ]
         },
         {
             "id": "gen-outbound-manifests",
@@ -287,7 +298,15 @@
                         "env": "LOCAL_OUTBOX_SYSTEM_ID"
                     }
                 }
-            }
+            },
+            "conditions": [
+                {
+                    "eq": [
+                        {"args": "RESUBMIT_INBOUND"},
+                        null
+                    ]
+                }
+            ]
         },
         {
             "id": "update-outbound-manifest",
@@ -349,7 +368,15 @@
                         }
                     }
                 }
-            }
+            },
+            "conditions": [
+                {
+                    "eq": [
+                        {"args": "RESUBMIT_INBOUND"},
+                        null
+                    ]
+                }
+            ]
         }
     ]
 }

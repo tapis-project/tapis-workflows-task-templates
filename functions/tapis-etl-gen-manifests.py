@@ -71,7 +71,7 @@ try:
     while manifests_locked:
         # Check if the total wait time was exceeded. If so, throw exception
         if time.time() - start_time >= max_wait_time:
-            raise Exception(f"Max Wait Time Reached: {max_wait_time}") 
+            raise Exception(f"Max Wait Time Reached: {max_wait_time}")
     
         # Fetch the all manifest files
         manifest_files = client.files.listFiles(

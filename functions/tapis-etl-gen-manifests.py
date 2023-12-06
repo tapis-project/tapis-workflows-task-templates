@@ -209,6 +209,7 @@ if resubmit_manifest_name != None:
 # Update the status of the next manifest to 'active'
 try:
     next_manifest.status = EnumManifestStatus.Active
+    print(dict(next_manifest))
     next_manifest.update(system_id, client)
 except Exception as e:
     ctx.stderr(1, f"Failed to update manifest to 'active': {e}")

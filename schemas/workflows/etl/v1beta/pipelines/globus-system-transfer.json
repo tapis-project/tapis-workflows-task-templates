@@ -175,7 +175,7 @@
                             ]
                         },
                         {
-                            "neq": [
+                            "ne": [
                                 {
                                     "task_output": {
                                         "task_id": "gen-inbound-manifests",

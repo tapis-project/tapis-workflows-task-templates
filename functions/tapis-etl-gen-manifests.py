@@ -114,6 +114,7 @@ try:
         systemId=system_id,
         path=local_data_path
     )
+    print("DATA FILES", data_files, "\n")
 except Exception as e:
     ctx.stderr(1, f"Failed to fetch data files: {str(e)}")
 
@@ -128,11 +129,15 @@ registered_data_files = [
     if data_file.path in registered_data_file_paths
 ]
 
+print("REGISTERED DATA FILES", registered_data_files, "\n")
+
 # Find all data files that have not yet been registered with a manifest
 unregistered_data_files = [
     data_file for data_file in data_files
     if data_file.path not in registered_data_file_paths
 ]
+
+print("UNREGISTERED DATA FILES", unregistered_data_files, "\n")
 
 # Check the manifest generation policy to determine whether all new
 # data files should be added to a single manifest, or a manifest
@@ -209,7 +214,6 @@ if resubmit_manifest_name != None:
 # Update the status of the next manifest to 'active'
 try:
     next_manifest.status = EnumManifestStatus.Active
-    print(dict(next_manifest))
     next_manifest.update(system_id, client)
 except Exception as e:
     ctx.stderr(1, f"Failed to update manifest to 'active': {e}")

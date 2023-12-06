@@ -114,7 +114,6 @@ try:
         systemId=system_id,
         path=local_data_path
     )
-    print("DATA FILES", data_files, "\n")
 except Exception as e:
     ctx.stderr(1, f"Failed to fetch data files: {str(e)}")
 
@@ -129,15 +128,11 @@ registered_data_files = [
     if data_file.path in registered_data_file_paths
 ]
 
-print("REGISTERED DATA FILES", registered_data_files, "\n")
-
 # Find all data files that have not yet been registered with a manifest
 unregistered_data_files = [
     data_file for data_file in data_files
     if data_file.path not in registered_data_file_paths
 ]
-
-print("UNREGISTERED DATA FILES", unregistered_data_files, "\n")
 
 # Check the manifest generation policy to determine whether all new
 # data files should be added to a single manifest, or a manifest
@@ -183,7 +178,7 @@ unprocessed_manifests = [
     if manifest.status == EnumManifestStatus.Pending or manifest.name == resubmit_manifest_name
 ]
 
-if len(unprocessed_manifests):
+if len(unprocessed_manifests) == 0:
     # Delete the lock file
     try:
         client.files.delete(

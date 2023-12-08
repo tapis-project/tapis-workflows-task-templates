@@ -175,7 +175,7 @@ all_manifests = manifests + new_manifests
 # of 'pending' into a single list
 unprocessed_manifests = [
     manifest for manifest in all_manifests
-    if manifest.status == EnumManifestStatus.Pending or manifest.name == resubmit_manifest_name
+    if manifest.status == EnumManifestStatus.Pending or manifest.filename == resubmit_manifest_name
 ]
 
 if len(unprocessed_manifests) == 0:
@@ -202,7 +202,7 @@ if manifest_priority in ["newest", "any"]:
 
 # Change the next manifest to the manifest associated with the resubmission
 if resubmit_manifest_name != None:
-    next_manifest = next(filter(lambda m: m.name == resubmit_manifest_name + ".json", all_manifests), None)
+    next_manifest = next(filter(lambda m: m.filename == resubmit_manifest_name + ".json", all_manifests), None)
     if next_manifest == None:
         ctx.stderr(1, f"Resubmit failed: Manifest {resubmit_manifest_name + '.json'} does not exist")
 

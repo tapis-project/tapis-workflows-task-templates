@@ -188,6 +188,8 @@ if len(unprocessed_manifests) == 0:
         )
     except Exception as e:
         ctx.stderr(1, f"Failed to delete lockfile: {e}")
+    
+    ctx.set_output("ACTIVE_MANIFEST", json.dumps(None))
 
     ctx.stdout("Exiting: No new data to process")
 

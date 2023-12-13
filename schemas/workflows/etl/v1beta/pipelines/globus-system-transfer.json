@@ -338,7 +338,7 @@
             "depends_on": [
                 {
                     "id": "globus-transfer-results",
-                    "can_fail": true
+                    "can_fail": false
                 },
                 {
                     "id": "gen-outbound-manifests",
@@ -381,6 +381,14 @@
                 "LOCKFILE_FILENAME": {
                     "value_from": {
                         "env": "LOCKFILE_FILENAME"
+                    }
+                },
+                "LAST_TASK_STATUS": {
+                    "value_from": {
+                        "task_output": {
+                            "task_id": "globus-transfer-results",
+                            "output_id": "STATUS"
+                        }
                     }
                 },
                 "MANIFEST": {

@@ -57,9 +57,14 @@ except Exception as e:
     ctx.stderr(1, f"Failed to generate lockfile: {str(e)}")
 
 try:
-    # Load the last active manifest
+    # Determine what the manifest status should be based on the previous task
+    new_manifest_status = EnumManifestStatus.Failed
+    if ctx.get_input("LAST_TASK_STATUS") == "COMPLETE":
+        new_manifest_status = EnumManifestStatus.Completed
+
+    # Load the manifest and update it with the current status
     manifest = ETLManifestModel(**json.loads(ctx.get_input("MANIFEST")))
-    manifest.status = EnumManifestStatus.Completed
+    manifest.status = new_manifest_status
     manifest.update(system_id, client)
 except Exception as e:
     ctx.stderr(1, f"Failed to update last active manifest: {e}")

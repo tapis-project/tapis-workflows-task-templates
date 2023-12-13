@@ -27,6 +27,9 @@ try:
 except Exception as e:
     ctx.stderr(1, f"Error initializing manifest: {e}")
 
+# Default the transfer success flag to false.
+ctx.set_output("STATUS", "FAILED")
+
 try:
     # Create the destination dir on the remote inbox if it doesn't exist
     remote_inbox_system_id = ctx.get_input("REMOTE_INBOX_SYSTEM_ID")
@@ -55,7 +58,7 @@ try:
 
     task = client.files.createTransferTask(elements=elements)
 except Exception as e:
-    ctx.stderr(1, f"Failed to create transfer task: {e}")
+    ctx.stdout(f"Failed to create transfer task: {e}")
 
 # Poll the transfer task until it reaches a terminal state
 try:
@@ -68,6 +71,8 @@ try:
     ctx.set_output("TRANSFER_TASK", task.__dict__)
 
     if task.status == "FAILED":
-        ctx.stderr(1, f"Error message for transfer task: {task.errorMessage}")
+        ctx.stdout(f"Error message for transfer task: {task.errorMessage}")
 except Exception as e:
-    ctx.stderr(1, e)
+    ctx.stdout(str(e))
+
+ctx.set_output("STATUS", "COMPLETED")

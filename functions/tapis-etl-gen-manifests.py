@@ -20,10 +20,10 @@ phase = ctx.get_input("PHASE")
 resubmit_manifest_name = None
 resubmit_inbound_manfiest_name = ctx.get_input("RESUBMIT_INBOUND")
 resubmit_outbound_manfiest_name = ctx.get_input("RESUBMIT_OUTBOUND")
-if phase == EnumETLPhase.DataProcessing and resubmit_inbound_manfiest_name != None:
+if phase == EnumETLPhase.Inbound and resubmit_inbound_manfiest_name != None:
     resubmit_manifest_name = resubmit_inbound_manfiest_name
 
-if phase == EnumETLPhase.Transfer and resubmit_outbound_manfiest_name != None:
+if phase == EnumETLPhase.Outbound and resubmit_outbound_manfiest_name != None:
     resubmit_manifest_name = resubmit_outbound_manfiest_name
 
 #TODO add rollbacks on execptions; i.e. delete the LOCKFILE
@@ -216,7 +216,7 @@ except Exception as e:
     ctx.stderr(1, f"Failed to update manifest to 'active': {e}")
 
 # Create an output to be used by the first job in the etl pipeline
-if len(next_manifest.files) > 0 and phase == EnumETLPhase.DataProcessing:
+if len(next_manifest.files) > 0 and phase == EnumETLPhase.Inbound:
     tapis_system_file_ref_extension = ctx.get_input("TAPIS_SYSTEM_FILE_REF_EXTENSION")
     for i, file in enumerate(next_manifest.files):
         # Set the file_input_arrays to output

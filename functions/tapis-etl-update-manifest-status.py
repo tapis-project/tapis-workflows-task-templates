@@ -59,7 +59,7 @@ except Exception as e:
 try:
     # Determine what the manifest status should be based on the previous task
     new_manifest_status = EnumManifestStatus.Failed
-    if ctx.get_input("LAST_TASK_STATUS") == "COMPLETE":
+    if ctx.get_input("STATUS") == "COMPLETE":
         new_manifest_status = EnumManifestStatus.Completed
 
     # Load the manifest and update it with the current status

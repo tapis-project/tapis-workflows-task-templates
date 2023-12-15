@@ -23,8 +23,11 @@
     "tapis/etl/globus-system-transfer@v1beta": {
         "path": "schemas/workflows/etl/v1beta/globus-system-transfer.json"
     },
-    "tapis/etl/update-manifest@v1beta": {
-        "path": "schemas/workflows/etl/v1beta/update-manifest.json"
+    "tapis/etl/update-manifest-status@v1beta": {
+        "path": "schemas/workflows/etl/v1beta/update-manifest-status.json"
+    },
+    "tapis/etl/reduce@v1beta": {
+        "path": "schemas/workflows/etl/v1beta/reduce.json"
     },
     "tapis/workflows/tapis/job@latest": {
         "path": "schemas/workflows/tapis/latest/job.json"

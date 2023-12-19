@@ -205,6 +205,7 @@ if manifest_priority in ["newest", "any"]:
 # Change the next manifest to the manifest associated with the resubmission
 if resubmit_manifest_name != None:
     next_manifest = next(filter(lambda m: m.filename == resubmit_manifest_name + ".json", all_manifests), None)
+    print(next_manifest)
     if next_manifest == None:
         ctx.stderr(1, f"Resubmit failed: Manifest {resubmit_manifest_name + '.json'} does not exist")
 

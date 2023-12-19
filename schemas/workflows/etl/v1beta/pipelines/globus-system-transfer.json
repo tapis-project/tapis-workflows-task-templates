@@ -95,7 +95,7 @@
                     }
                 },
                 "PHASE": {
-                    "value": "data_processing_prep"
+                    "value": "inbound"
                 },
                 "TAPIS_SYSTEM_FILE_REF_EXTENSION": {
                     "value_from": {
@@ -292,7 +292,7 @@
                     }
                 },
                 "PHASE": {
-                    "value": "transfer_prep"
+                    "value": "outbound"
                 }
             },
             "conditions": [

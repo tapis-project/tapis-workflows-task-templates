@@ -135,7 +135,7 @@
                     "value": "FINISHED"
                 },
                 "CONTAINS": {
-                    "value": "_TAPIS_JOB_STATUS"
+                    "value": "_JOB_STATUS"
                 },
                 "DEFAULT": {
                     "value": "FAILED"

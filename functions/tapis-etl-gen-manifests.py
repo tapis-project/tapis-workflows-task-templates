@@ -198,18 +198,17 @@ if len(unprocessed_manifests) == 0 and resubmit_manifest_name == None:
 # Reorder the unprocessed manifests from oldest to newest
 unprocessed_manifests.sort(key=lambda m: m.created_at, reverse=True)
 
-# Default to oldest manifest
-next_manifest = unprocessed_manifests[0]
-manifest_priority = ctx.get_input("MANIFEST_PRIORITY")
-if manifest_priority in ["newest", "any"]:
-    next_manifest = unprocessed_manifests[-1]
-
 # Change the next manifest to the manifest associated with the resubmission
-if resubmit_manifest_name != None:
+if resubmit_manifest_name != None: # Is resubmission
     next_manifest = next(filter(lambda m: m.filename == resubmit_manifest_name + ".json", all_manifests), None)
-    print(next_manifest)
     if next_manifest == None:
         ctx.stderr(1, f"Resubmit failed: Manifest {resubmit_manifest_name + '.json'} does not exist")
+else: # Not resubmission
+    # Default to oldest manifest
+    next_manifest = unprocessed_manifests[0]
+    manifest_priority = ctx.get_input("MANIFEST_PRIORITY")
+    if manifest_priority in ["newest", "any"]:
+        next_manifest = unprocessed_manifests[-1]
 
 # Update the status of the next manifest to 'active'
 try:

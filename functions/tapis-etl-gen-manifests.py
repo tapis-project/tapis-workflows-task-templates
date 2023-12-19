@@ -20,6 +20,7 @@ phase = ctx.get_input("PHASE")
 resubmit_manifest_name = None
 resubmit_inbound_manfiest_name = ctx.get_input("RESUBMIT_INBOUND")
 resubmit_outbound_manfiest_name = ctx.get_input("RESUBMIT_OUTBOUND")
+print("RESUBMIT_INBOUND_MANIFEST_NAME")
 if phase == EnumETLPhase.Inbound and resubmit_inbound_manfiest_name != None:
     resubmit_manifest_name = resubmit_inbound_manfiest_name
 

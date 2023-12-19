@@ -97,6 +97,11 @@
                 "PHASE": {
                     "value": "inbound"
                 },
+                "RESUBMIT_INBOUND": {
+                    "value_from": {
+                        "args": "RESUBMIT_INBOUND"
+                    }
+                },
                 "TAPIS_SYSTEM_FILE_REF_EXTENSION": {
                     "value_from": {
                         "env": "TAPIS_SYSTEM_FILE_REF_EXTENSION"
@@ -293,6 +298,11 @@
                 },
                 "PHASE": {
                     "value": "outbound"
+                },
+                "RESUBMIT_OUTBOUND": {
+                    "value_from": {
+                        "args": "RESUBMIT_OUTBOUND"
+                    }
                 }
             },
             "conditions": [

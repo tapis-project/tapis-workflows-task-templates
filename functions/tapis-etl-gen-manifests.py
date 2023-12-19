@@ -178,7 +178,7 @@ unprocessed_manifests = [
     if manifest.status == EnumManifestStatus.Pending or manifest.filename == resubmit_manifest_name
 ]
 
-if len(unprocessed_manifests) == 0:
+if len(unprocessed_manifests) == 0 and resubmit_manifest_name == None:
     # Delete the lock file
     try:
         client.files.delete(

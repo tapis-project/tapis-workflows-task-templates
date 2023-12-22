@@ -4,6 +4,10 @@ from owe_python_sdk.runtime import execution_context as ctx
 
 import json
 
+import time
+
+time.sleep(1000)
+
 
 try:
     comparator = ctx.get_input("COMPARATOR")

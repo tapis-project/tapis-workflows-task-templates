@@ -13,11 +13,12 @@ try:
     input_ids = ctx.find_inputs(contains=ctx.get_input("CONTAINS"))
     items = []
     for input_id in input_ids:
-        items.append(ctx.get_input(input_id, default=ctx.get_input("DEFAULT", default=None)))
+        items.append(ctx.get_input(input_id))
 
     print("COMPARATOR", comparator)
     print("CONTAINS", ctx.get_input("CONTAINS"))
     print("INPUT IDS", input_ids)
+    print("ITEMS", items)
     values = [item == comparator for item in items]
     print("VALUES", values)
     result = all(values)

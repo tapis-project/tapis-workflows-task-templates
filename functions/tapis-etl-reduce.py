@@ -27,7 +27,6 @@ try:
         result = False
         
     ctx.set_output("ACCUMULATOR", json.dumps(result))
-    time.sleep(1000)
 
 except Exception as e:
     ctx.stderr(1, f"Error: {str(e)}")

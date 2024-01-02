@@ -4,12 +4,6 @@ from owe_python_sdk.runtime import execution_context as ctx
 
 import json
 
-import time
-
-import os
-from pprint import pprint
-print("\n\n")
-pprint(os.environ)
 
 try:
     comparator = ctx.get_input("COMPARATOR")
@@ -18,14 +12,8 @@ try:
     for input_id in input_ids:
         items.append(ctx.get_input(input_id))
 
-    print("COMPARATOR", comparator)
-    print("CONTAINS", ctx.get_input("CONTAINS"))
-    print("INPUT IDS", input_ids)
-    print("ITEMS", items)
     values = [item == comparator for item in items]
-    print("VALUES", values)
     result = all(values)
-    print("RESULT", result)
     if len(values) == 0:
         result = False
         

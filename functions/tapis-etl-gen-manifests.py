@@ -202,7 +202,17 @@ unprocessed_manifests.sort(key=lambda m: m.created_at, reverse=True)
 if resubmit_manifest_name != None: # Is resubmission
     next_manifest = next(filter(lambda m: m.filename == resubmit_manifest_name + ".json", all_manifests), None)
     if next_manifest == None:
-        ctx.stderr(1, f"Resubmit failed: Manifest {resubmit_manifest_name + '.json'} does not exist")
+        cleanup_error = ""
+        # Delete the lock file
+        try:
+            client.files.delete(
+                systemId=system_id,
+                path=os.path.join(manifest_path, lockfile_filename),
+                file=b""
+            )
+        except Exception as e:
+            cleanup_error = f"An additional error occurred when attempting to clean up the pipeline -> Failed to delete lockfile: {e} | NOTE: When this occurs, the lockfile must be deleted manually in order for this task to run"
+        ctx.stderr(1, f"Resubmit failed: Manifest {resubmit_manifest_name + '.json'} does not exist. {cleanup_error}")
 else: # Not resubmission
     # Default to oldest manifest
     next_manifest = unprocessed_manifests[0]

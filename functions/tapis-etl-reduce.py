@@ -6,7 +6,10 @@ import json
 
 import time
 
-
+import os
+from pprint import pprint
+print("\n\n")
+pprint(os.envrion)
 
 try:
     comparator = ctx.get_input("COMPARATOR")

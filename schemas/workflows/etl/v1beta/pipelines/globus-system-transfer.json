@@ -211,6 +211,14 @@
                             "output_id": "ACTIVE_MANIFEST"
                         }
                     }
+                },
+                "PHASE_COMPLETED": {
+                    "value_from": {
+                        "task_output": {
+                            "task_id": "status-reduce",
+                            "output_id": "ACCUMULATOR"
+                        }
+                    }
                 }
             },
             "conditions": [

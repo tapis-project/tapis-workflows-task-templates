@@ -98,6 +98,7 @@
                     "value": "inbound"
                 },
                 "RESUBMIT_INBOUND": {
+                    "required": false,
                     "value_from": {
                         "args": "RESUBMIT_INBOUND"
                     }

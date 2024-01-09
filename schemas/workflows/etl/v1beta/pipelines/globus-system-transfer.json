@@ -404,7 +404,12 @@
                     "branch": "master"
                 }
             },
-            "depends_on": [],
+            "depends_on": [
+                {
+                    "id": "globus-transfer-results",
+                    "can_fail": false
+                }
+            ],
             "input": {
                 "COMPARATOR": {
                     "value": "FINISHED"

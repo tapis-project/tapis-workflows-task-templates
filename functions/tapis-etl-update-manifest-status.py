@@ -8,6 +8,17 @@ from tapipy.tapis import Tapis
 
 from utils import ETLManifestModel, EnumManifestStatus
 
+def cleanup():
+    # Delete the lock file
+    try:
+        client.files.delete(
+            systemId=system_id,
+            path=os.path.join(manifest_path, lockfile_filename),
+            file=b""
+        )
+    except Exception as e:
+        ctx.stderr(1, f"Failed to delete lockfile: {e}")
+
 #TODO add rollbacks on execptions; i.e. delete the LOCKFILE
 tapis_base_url = ctx.get_input("TAPIS_BASE_URL")
 tapis_username = ctx.get_input("TAPIS_USERNAME")
@@ -67,14 +78,7 @@ try:
     manifest.status = new_manifest_status
     manifest.update(system_id, client)
 except Exception as e:
+    cleanup()
     ctx.stderr(1, f"Failed to update last active manifest: {e}")
 
-# Delete the lock file
-try:
-    client.files.delete(
-        systemId=system_id,
-        path=os.path.join(manifest_path, lockfile_filename),
-        file=b""
-    )
-except Exception as e:
-    ctx.stderr(1, f"Failed to delete lockfile: {e}")
+cleanup()

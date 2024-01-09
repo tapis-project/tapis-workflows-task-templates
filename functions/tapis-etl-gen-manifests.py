@@ -20,13 +20,11 @@ phase = ctx.get_input("PHASE")
 resubmit_manifest_name = None
 resubmit_inbound_manfiest_name = ctx.get_input("RESUBMIT_INBOUND")
 resubmit_outbound_manfiest_name = ctx.get_input("RESUBMIT_OUTBOUND")
-print("RESUBMIT_INBOUND_MANIFEST_NAME", resubmit_inbound_manfiest_name)
 if phase == EnumETLPhase.Inbound and resubmit_inbound_manfiest_name != None:
     resubmit_manifest_name = resubmit_inbound_manfiest_name
 
 if phase == EnumETLPhase.Outbound and resubmit_outbound_manfiest_name != None:
     resubmit_manifest_name = resubmit_outbound_manfiest_name
-print("RESUBMIT_MANIFEST_NAME", resubmit_manifest_name)
 
 #TODO add rollbacks on execptions; i.e. delete the LOCKFILE
 tapis_base_url = ctx.get_input("TAPIS_BASE_URL")

@@ -445,7 +445,7 @@
                         "env": "LOCKFILE_FILENAME"
                     }
                 },
-                "LAST_TASK_STATUS": {
+                "PHASE_COMPLETED": {
                     "value_from": {
                         "task_output": {
                             "task_id": "globus-transfer-results",

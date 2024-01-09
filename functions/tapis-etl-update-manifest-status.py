@@ -72,7 +72,7 @@ try:
     new_manifest_status = EnumManifestStatus.Failed
     if json.loads(ctx.get_input("PHASE_COMPLETED")):
         new_manifest_status = EnumManifestStatus.Completed
-
+    
     # Load the manifest and update it with the current status
     manifest = ETLManifestModel(**json.loads(ctx.get_input("MANIFEST")))
     manifest.status = new_manifest_status

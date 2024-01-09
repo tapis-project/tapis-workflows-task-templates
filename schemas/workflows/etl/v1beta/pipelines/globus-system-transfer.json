@@ -120,7 +120,7 @@
         },
         
         {
-            "id": "status-reduce",
+            "id": "inbound-status-reduce",
             "description": "Returns true if all jobs finished, returns false if any jobs fail. NOTE: Depedencies for this task are determined by the Tapis Workflows API when creating this pipeline. This task will not work outside of the context of an ETL pipeline with Tapis Workflows API",
             "type": "template",
             "uses": {
@@ -162,7 +162,7 @@
                     "can_skip": false
                 },
                 {
-                    "id": "status-reduce",
+                    "id": "inbound-status-reduce",
                     "can_fail": false,
                     "can_skip": false
                 }
@@ -216,7 +216,7 @@
                 "PHASE_COMPLETED": {
                     "value_from": {
                         "task_output": {
-                            "task_id": "status-reduce",
+                            "task_id": "inbound-status-reduce",
                             "output_id": "ACCUMULATOR"
                         }
                     }
@@ -394,12 +394,44 @@
             ]
         },
         {
+            "id": "outbound-status-reduce",
+            "description": "Returns true if tranfer task succeeds, returns false if transfer fails.",
+            "type": "template",
+            "uses": {
+                "name": "tapis/etl/reduce@v1beta",
+                "source": {
+                    "url": "https://github.com/tapis-project/tapis-workflows-task-templates.git",
+                    "branch": "master"
+                }
+            },
+            "depends_on": [],
+            "input": {
+                "COMPARATOR": {
+                    "value": "FINISHED"
+                },
+                "CONTAINS": {
+                    "value": "STATUS"
+                },
+                "DEFAULT": {
+                    "value": "FAILED"
+                }
+            },
+            "conditions": [
+                {
+                    "eq": [
+                        {"args": "RESUBMIT_INBOUND"},
+                        null
+                    ]
+                }
+            ]
+        },
+        {
             "id": "update-outbound-manifest-status",
             "description": "Sets the status of the outbound manifest to completed/failed",
             "type": "template",
             "depends_on": [
                 {
-                    "id": "globus-transfer-results",
+                    "id": "outbound-status-reduce",
                     "can_fail": false
                 },
                 {
@@ -448,8 +480,8 @@
                 "PHASE_COMPLETED": {
                     "value_from": {
                         "task_output": {
-                            "task_id": "globus-transfer-results",
-                            "output_id": "STATUS"
+                            "task_id": "outbound-status-reduce",
+                            "output_id": "ACCUMULATOR"
                         }
                     }
                 },

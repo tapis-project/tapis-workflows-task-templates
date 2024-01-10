@@ -257,7 +257,12 @@
                     "branch": "master"
                 }
             },
-            "depends_on": [{"id": "update-inbound-manifest-status"}],
+            "depends_on": [
+                {
+                    "id": "update-inbound-manifest-status",
+                    "can_skip": true
+                }
+            ],
             "input": {
                 "TAPIS_BASE_URL": {
                     "value_from": {

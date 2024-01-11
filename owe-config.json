@@ -1,6 +1,6 @@
 {
     "tapis/etl-pipeline@v1beta": {
-        "path": "schemas/workflows/etl/v1beta/pipelines/globus-system-transfer.json"
+        "path": "schemas/workflows/etl/v1beta/pipelines/etl-pipeline-with-system-transfer.json"
     },
     "tapis/login@vlatest": {
         "path": "schemas/sdk/latest/login.json"
@@ -20,8 +20,8 @@
     "tapis/etl/gen-manifests@v1beta": {
         "path": "schemas/workflows/etl/v1beta/gen-manifests.json"
     },
-    "tapis/etl/globus-system-transfer@v1beta": {
-        "path": "schemas/workflows/etl/v1beta/globus-system-transfer.json"
+    "tapis/etl/tapis-system-transfer@v1beta": {
+        "path": "schemas/workflows/etl/v1beta/tapis-system-transfer.json"
     },
     "tapis/etl/update-manifest-status@v1beta": {
         "path": "schemas/workflows/etl/v1beta/update-manifest-status.json"

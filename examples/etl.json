@@ -1,0 +1,82 @@
+{
+    "id": "test-etl",
+    "remote_outbox": {},
+    "local_inbox": {
+        "system_id": "etl-workflows-test-local-inbox",
+        "data_path": "/LOCAL-INBOX",
+        "manifests_path": "/MANIFESTS-IN"
+    },
+    "local_outbox": {
+        "system_id": "etl-workflows-test-globus-local-outbox",
+        "data_path": "/LOCAL-OUTBOX",
+        "manifests_path": "/MANIFESTS-OUT",
+        "globus_endpoint_id": "142d715e-8939-11e9-b807-0a37f382de32"
+    },
+    "remote_inbox": {
+        "path": "/REMOTE-INBOX",
+        "system_id": "etl-workflows-test-globus-remote-inbox"
+    },
+    "jobs": [
+        {
+            "name": "string-transform",
+            "appId": "etl-string-replace-test",
+            "appVersion": "dev",
+            "execSystemInputDir": "${JobWorkingDir}/jobs/${JobUUID}/input",
+            "nodeCount": 1,
+            "coresPerNode": 1,
+            "maxMinutes": 10,
+            "parameterSet": {
+                "schedulerOptions": [
+                    {
+                        "name": "allocation",
+                        "arg": "-A TACC-ACI"
+                    },
+                    {
+                        "name": "profile",
+                        "arg": "--tapis-profile tacc-apptainer"
+                    }
+                ],
+                "containerArgs": [
+                    {
+                        "name": "input-mount",
+                        "arg": "--bind $(pwd)/input:/src/input:ro,$(pwd)/output:/src/output:rw"
+                    }
+                ]
+            }
+        },
+        {
+            "name": "sentiment-analysis",
+            "appId": "etl-sentiment-analysis-test", 
+            "appVersion": "dev",
+            "nodeCount": 1,
+            "coresPerNode": 1,
+            "maxMinutes": 10,
+            "execSystemInputDir": "${JobWorkingDir}/jobs/${JobUUID}/input",
+            "archiveSystemId": "etl-workflows-test-local-inbox",
+            "archiveSystemDir": "LOCAL-OUTBOX",
+            "parameterSet": {
+                "schedulerOptions": [
+                    {
+                        "name": "allocation",
+                        "arg": "-A TACC-ACI"
+                    },
+                    {
+                        "name": "profile",
+                        "arg": "--tapis-profile tacc-apptainer"
+                    }
+                ],
+                "containerArgs": [
+                    {
+                        "name": "input-mount",
+                        "arg": "--bind $(pwd)/input:/src/input:ro,$(pwd)/output:/src/output:rw"
+                    }
+                ],
+                "archiveFilter": {
+                    "includes": [],
+                    "excludes": ["tapisjob.out"],
+                    "includeLaunchFiles": false
+                }
+            }
+        }
+    ]
+}

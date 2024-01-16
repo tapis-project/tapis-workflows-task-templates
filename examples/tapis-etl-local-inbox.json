@@ -1,0 +1,73 @@
+{
+  "id": "etl-workflows-test-local-inbox",
+  "isPublic": false,
+  "description": "Test system for the etl pipelines",
+  "systemType": "LINUX",
+  "owner": "testuser2",
+  "host": "frontera.tacc.utexas.edu",
+  "enabled": true,
+  "effectiveUserId": "nathandf",
+  "defaultAuthnMethod": "PKI_KEYS",
+  "rootDir": "/scratch1/08325/nathandf/etl-test",
+  "canExec": true,
+  "canRunBatch": true,
+  "enableCmdPrefix": false,
+  "jobRuntimes": [
+    {
+      "runtimeType": "DOCKER",
+      "version": null
+    },
+    {
+      "runtimeType": "SINGULARITY",
+      "version": null
+    }
+  ],
+  "jobWorkingDir": "workdir",
+  "batchLogicalQueues": [
+    {
+      "name": "frontera-small",
+      "hpcQueueName": "small",
+      "maxJobs": 1,
+      "maxJobsPerUser": 1,
+      "minNodeCount": 1,
+      "maxNodeCount": 2,
+      "minCoresPerNode": 1,
+      "maxCoresPerNode": 2,
+      "minMemoryMB": 0,
+      "maxMemoryMB": 4096,
+      "minMinutes": 10,
+      "maxMinutes": 100
+    },
+    {
+      "name": "frontera-dev",
+      "hpcQueueName": "development",
+      "maxJobs": 1,
+      "maxJobsPerUser": 1,
+      "minNodeCount": 1,
+      "maxNodeCount": 2,
+      "minCoresPerNode": 1,
+      "maxCoresPerNode": 2,
+      "minMemoryMB": 0,
+      "maxMemoryMB": 4096,
+      "minMinutes": 10,
+      "maxMinutes": 100
+    },
+    {
+      "name": "frontera-normal",
+      "hpcQueueName": "normal",
+      "maxJobs": 50,
+      "maxJobsPerUser": 10,
+      "minNodeCount": 1,
+      "maxNodeCount": 16,
+      "minCoresPerNode": 1,
+      "maxCoresPerNode": 68,
+      "minMemoryMB": 1,
+      "maxMemoryMB": 16384,
+      "minMinutes": 1,
+      "maxMinutes": 60
+    }
+  ],
+  "batchDefaultLogicalQueue": "frontera-dev",
+  "batchScheduler": "SLURM",
+  "batchSchedulerProfile": "tacc-apptainer"
+}

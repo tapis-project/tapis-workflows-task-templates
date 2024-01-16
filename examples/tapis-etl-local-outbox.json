@@ -1,0 +1,11 @@
+{
+  "id": "etl-workflows-test-globus-local-outbox",
+  "description": "Test Globus system on Frontera",
+  "canExec": false,
+  "systemType": "GLOBUS",
+  "host": "142d715e-8939-11e9-b807-0a37f382de32",
+  "effectiveUserId": "nathandf",
+  "defaultAuthnMethod": "TOKEN",
+  "rootDir": "/scratch1/08325/nathandf/etl-test"
+}
+  

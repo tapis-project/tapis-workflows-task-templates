@@ -1,0 +1,1251 @@
+{
+    "id": "test-etl",
+    "description": "ETL Pipeline",
+    "env": {
+        "LOCKFILE_FILENAME": {
+            "type": "string",
+            "value": "TAPIS_ETL_MANIFEST.lock"
+        },
+        "REMOTE_INBOX_PATH": {
+            "type": "string",
+            "value": "/REMOTE-INBOX"
+        },
+        "LOCAL_INBOX_DATA_PATH": {
+            "type": "string",
+            "value": "/LOCAL-INBOX"
+        },
+        "LOCAL_INBOX_SYSTEM_ID": {
+            "type": "string",
+            "value": "etl-workflows-test-local-inbox"
+        },
+        "LOCAL_OUTBOX_DATA_PATH": {
+            "type": "string",
+            "value": "/LOCAL-OUTBOX"
+        },
+        "LOCAL_OUTBOX_SYSTEM_ID": {
+            "type": "string",
+            "value": "etl-workflows-test-globus-local-outbox"
+        },
+        "REMOTE_INBOX_SYSTEM_ID": {
+            "type": "string",
+            "value": "etl-workflows-test-globus-remote-inbox"
+        },
+        "LOCAL_INBOX_MANIFEST_PATH": {
+            "type": "string",
+            "value": "/MANIFESTS-IN"
+        },
+        "LOCAL_OUTBOX_MANIFEST_PATH": {
+            "type": "string",
+            "value": "/MANIFESTS-OUT"
+        },
+        "LOCAL_INBOX_MANIFEST_PRIORITY": {
+            "type": "string",
+            "value": "oldest"
+        },
+        "LOCAL_OUTBOX_MANIFEST_PRIORITY": {
+            "type": "string",
+            "value": "oldest"
+        },
+        "TAPIS_SYSTEM_FILE_REF_EXTENSION": {
+            "type": "string",
+            "value": "TapisSystemFile.json"
+        },
+        "LOCAL_INBOX_MANIFEST_GENERATION_POLICY": {
+            "type": "string",
+            "value": "one_per_file"
+        },
+        "LOCAL_OUTBOX_MANIFEST_GENERATION_POLICY": {
+            "type": "string",
+            "value": "one_for_all"
+        }
+    },
+    "params": {
+        "TAPIS_BASE_URL": {
+            "type": "string",
+            "required": true
+        },
+        "TAPIS_PASSWORD": {
+            "type": "string",
+            "required": true
+        },
+        "TAPIS_USERNAME": {
+            "type": "string",
+            "required": true
+        },
+        "RESUBMIT_INBOUND": {
+            "type": "string",
+            "required": false
+        },
+        "RESUBMIT_OUTBOUND": {
+            "type": "string",
+            "required": false
+        }
+    },
+    "uses": null,
+    "group": "12d17fcd-4755-450d-ab5b-f0e6b890de0e",
+    "invocation_mode": "async",
+    "max_exec_time": 10800,
+    "max_retries": 0,
+    "duplicate_submission_policy": "deny",
+    "owner": "testuser2",
+    "retry_policy": "exponential_backoff",
+    "uuid": "26e9c2f8-bd9b-44c2-8141-179f9e4068db",
+    "current_run": "d8447902-8e49-468c-96b0-88227b8042d6",
+    "last_run": "89615c9f-234f-47f7-ba4c-45f2f0d5208f",
+    "tasks": [
+        {
+            "id": "inbound-status-reduce",
+            "cache": null,
+            "depends_on": [
+                {
+                    "id": "etl_job_1",
+                    "can_fail": true,
+                    "can_skip": false
+                },
+                {
+                    "id": "etl_job_2",
+                    "can_fail": true,
+                    "can_skip": false
+                }
+            ],
+            "description": "Returns true if all jobs finished, returns false if any jobs fail. NOTE: Depedencies for this task are determined by the Tapis Workflows API when creating this pipeline. This task will not work outside of the context of an ETL pipeline with Tapis Workflows API",
+            "flavor": "c1med",
+            "conditions": [
+                {
+                    "eq": [
+                        {
+                            "args": "RESUBMIT_OUTBOUND"
+                        },
+                        null
+                    ]
+                }
+            ],
+            "input": {
+                "DEFAULT": {
+                    "type": "string",
+                    "value": "FAILED",
+                    "required": true,
+                    "value_from": null,
+                    "description": null
+                },
+                "CONTAINS": {
+                    "type": "string",
+                    "value": "_JOB_STATUS",
+                    "required": true,
+                    "value_from": null,
+                    "description": null
+                },
+                "COMPARATOR": {
+                    "type": "string",
+                    "value": "FINISHED",
+                    "required": true,
+                    "value_from": null,
+                    "description": null
+                },
+                "etl_job_1_JOB_STATUS": {
+                    "type": "string",
+                    "value": null,
+                    "required": true,
+                    "value_from": {
+                        "task_output": {
+                            "task_id": "etl_job_1",
+                            "output_id": "STATUS"
+                        }
+                    },
+                    "description": null
+                },
+                "etl_job_2_JOB_STATUS": {
+                    "type": "string",
+                    "value": null,
+                    "required": true,
+                    "value_from": {
+                        "task_output": {
+                            "task_id": "etl_job_2",
+                            "output_id": "STATUS"
+                        }
+                    },
+                    "description": null
+                }
+            },
+            "invocation_mode": "async",
+            "max_exec_time": 3600,
+            "max_retries": 0,
+            "output": {},
+            "pipeline": "26e9c2f8-bd9b-44c2-8141-179f9e4068db",
+            "poll": null,
+            "retry_policy": "exponential_backoff",
+            "type": "template",
+            "uses": {
+                "name": "tapis/etl/reduce@v1beta",
+                "path": null,
+                "source": {
+                    "url": "https://github.com/tapis-project/tapis-workflows-task-templates.git",
+                    "auth": null,
+                    "branch": "master"
+                }
+            },
+            "uuid": "03eabc03-b5aa-4ed4-abf9-fa675b215442",
+            "builder": null,
+            "context": null,
+            "destination": null,
+            "auth": null,
+            "data": null,
+            "headers": null,
+            "http_method": null,
+            "protocol": null,
+            "query_params": null,
+            "url": null,
+            "git_repositories": [],
+            "runtime": null,
+            "code": null,
+            "command": null,
+            "installer": null,
+            "packages": null,
+            "entrypoint": null,
+            "image": null,
+            "tapis_job_def": null,
+            "tapis_actor_id": null,
+            "tapis_actor_message": "null"
+        },
+        {
+            "id": "gen-outbound-manifests",
+            "cache": null,
+            "depends_on": [
+                {
+                    "id": "update-inbound-manifest-status",
+                    "can_fail": false,
+                    "can_skip": true
+                }
+            ],
+            "description": "Generates a manifests for data files in data directory of the local outbox system. Deletes lockfile once finished.",
+            "flavor": "c1med",
+            "conditions": [
+                {
+                    "eq": [
+                        {
+                            "args": "RESUBMIT_INBOUND"
+                        },
+                        null
+                    ]
+                }
+            ],
+            "input": {
+                "PHASE": {
+                    "type": "string",
+                    "value": "outbound",
+                    "required": true,
+                    "value_from": null,
+                    "description": null
+                },
+                "SYSTEM_ID": {
+                    "type": "string",
+                    "value": null,
+                    "required": true,
+                    "value_from": {
+                        "env": "LOCAL_INBOX_SYSTEM_ID"
+                    },
+                    "description": "NOTE: change this input from LOCAL_INBOX_SYSTEM_ID to LOCAL_OUTBOX_SYSTEM_ID as soon as insert operation is available for Globus-type systems"
+                },
+                "MANIFEST_PATH": {
+                    "type": "string",
+                    "value": null,
+                    "required": true,
+                    "value_from": {
+                        "env": "LOCAL_OUTBOX_MANIFEST_PATH"
+                    },
+                    "description": null
+                },
+                "TAPIS_BASE_URL": {
+                    "type": "string",
+                    "value": null,
+                    "required": true,
+                    "value_from": {
+                        "args": "TAPIS_BASE_URL"
+                    },
+                    "description": null
+                },
+                "TAPIS_PASSWORD": {
+                    "type": "string",
+                    "value": null,
+                    "required": true,
+                    "value_from": {
+                        "args": "TAPIS_PASSWORD"
+                    },
+                    "description": null
+                },
+                "TAPIS_USERNAME": {
+                    "type": "string",
+                    "value": null,
+                    "required": true,
+                    "value_from": {
+                        "args": "TAPIS_USERNAME"
+                    },
+                    "description": null
+                },
+                "LOCAL_DATA_PATH": {
+                    "type": "string",
+                    "value": null,
+                    "required": true,
+                    "value_from": {
+                        "env": "LOCAL_OUTBOX_DATA_PATH"
+                    },
+                    "description": null
+                },
+                "LOCKFILE_FILENAME": {
+                    "type": "string",
+                    "value": null,
+                    "required": true,
+                    "value_from": {
+                        "env": "LOCKFILE_FILENAME"
+                    },
+                    "description": null
+                },
+                "MANIFEST_PRIORITY": {
+                    "type": "string",
+                    "value": null,
+                    "required": true,
+                    "value_from": {
+                        "env": "LOCAL_OUTBOX_MANIFEST_PRIORITY"
+                    },
+                    "description": null
+                },
+                "RESUBMIT_OUTBOUND": {
+                    "type": "string",
+                    "value": null,
+                    "required": true,
+                    "value_from": {
+                        "args": "RESUBMIT_OUTBOUND"
+                    },
+                    "description": null
+                },
+                "MANIFEST_GENERATION_POLICY": {
+                    "type": "string",
+                    "value": null,
+                    "required": true,
+                    "value_from": {
+                        "env": "LOCAL_OUTBOX_MANIFEST_GENERATION_POLICY"
+                    },
+                    "description": null
+                }
+            },
+            "invocation_mode": "async",
+            "max_exec_time": 3600,
+            "max_retries": 0,
+            "output": {},
+            "pipeline": "26e9c2f8-bd9b-44c2-8141-179f9e4068db",
+            "poll": null,
+            "retry_policy": "exponential_backoff",
+            "type": "template",
+            "uses": {
+                "name": "tapis/etl/gen-manifests@v1beta",
+                "path": null,
+                "source": {
+                    "url": "https://github.com/tapis-project/tapis-workflows-task-templates.git",
+                    "auth": null,
+                    "branch": "master"
+                }
+            },
+            "uuid": "1b27072e-0bc4-4d6a-bf2a-b9139b4ef9a1",
+            "builder": null,
+            "context": null,
+            "destination": null,
+            "auth": null,
+            "data": null,
+            "headers": null,
+            "http_method": null,
+            "protocol": null,
+            "query_params": null,
+            "url": null,
+            "git_repositories": [],
+            "runtime": null,
+            "code": null,
+            "command": null,
+            "installer": null,
+            "packages": null,
+            "entrypoint": null,
+            "image": null,
+            "tapis_job_def": null,
+            "tapis_actor_id": null,
+            "tapis_actor_message": "null"
+        },
+        {
+            "id": "tapis-transfer-results",
+            "cache": null,
+            "depends_on": [
+                {
+                    "id": "gen-outbound-manifests",
+                    "can_fail": false,
+                    "can_skip": false
+                }
+            ],
+            "description": null,
+            "flavor": "c1med",
+            "conditions": [
+                {
+                    "eq": [
+                        {
+                            "args": "RESUBMIT_INBOUND"
+                        },
+                        null
+                    ]
+                }
+            ],
+            "input": {
+                "MANIFEST": {
+                    "type": "string",
+                    "value": null,
+                    "required": true,
+                    "value_from": {
+                        "task_output": {
+                            "task_id": "gen-outbound-manifests",
+                            "output_id": "ACTIVE_MANIFEST"
+                        }
+                    },
+                    "description": null
+                },
+                "TAPIS_BASE_URL": {
+                    "type": "string",
+                    "value": null,
+                    "required": true,
+                    "value_from": {
+                        "args": "TAPIS_BASE_URL"
+                    },
+                    "description": null
+                },
+                "TAPIS_PASSWORD": {
+                    "type": "string",
+                    "value": null,
+                    "required": true,
+                    "value_from": {
+                        "args": "TAPIS_PASSWORD"
+                    },
+                    "description": null
+                },
+                "TAPIS_USERNAME": {
+                    "type": "string",
+                    "value": null,
+                    "required": true,
+                    "value_from": {
+                        "args": "TAPIS_USERNAME"
+                    },
+                    "description": null
+                },
+                "DESTINATION_PATH": {
+                    "type": "string",
+                    "value": null,
+                    "required": true,
+                    "value_from": {
+                        "env": "REMOTE_INBOX_PATH"
+                    },
+                    "description": null
+                },
+                "LOCAL_INBOX_SYSTEM_ID": {
+                    "type": "string",
+                    "value": null,
+                    "required": true,
+                    "value_from": {
+                        "env": "LOCAL_INBOX_SYSTEM_ID"
+                    },
+                    "description": "NOTE: remove this input as soon as insert operation is available for Globus-type systems"
+                },
+                "LOCAL_OUTBOX_SYSTEM_ID": {
+                    "type": "string",
+                    "value": null,
+                    "required": true,
+                    "value_from": {
+                        "env": "LOCAL_OUTBOX_SYSTEM_ID"
+                    },
+                    "description": "NOTE: remove this input as soon as insert operation is available for Globus-type systems"
+                },
+                "REMOTE_INBOX_SYSTEM_ID": {
+                    "type": "string",
+                    "value": null,
+                    "required": true,
+                    "value_from": {
+                        "env": "REMOTE_INBOX_SYSTEM_ID"
+                    },
+                    "description": "NOTE: change this input from REMOTE_INBOX_SYSTEM_ID to SYSTEM_ID as soon as insert operation is available for Globus-type systems"
+                }
+            },
+            "invocation_mode": "async",
+            "max_exec_time": 3600,
+            "max_retries": 0,
+            "output": {},
+            "pipeline": "26e9c2f8-bd9b-44c2-8141-179f9e4068db",
+            "poll": null,
+            "retry_policy": "exponential_backoff",
+            "type": "template",
+            "uses": {
+                "name": "tapis/etl/tapis-system-transfer@v1beta",
+                "path": null,
+                "source": {
+                    "url": "https://github.com/tapis-project/tapis-workflows-task-templates.git",
+                    "auth": null,
+                    "branch": "master"
+                }
+            },
+            "uuid": "26e1276d-719b-4c91-a8a9-05aeadf6dd71",
+            "builder": null,
+            "context": null,
+            "destination": null,
+            "auth": null,
+            "data": null,
+            "headers": null,
+            "http_method": null,
+            "protocol": null,
+            "query_params": null,
+            "url": null,
+            "git_repositories": [],
+            "runtime": null,
+            "code": null,
+            "command": null,
+            "installer": null,
+            "packages": null,
+            "entrypoint": null,
+            "image": null,
+            "tapis_job_def": null,
+            "tapis_actor_id": null,
+            "tapis_actor_message": "null"
+        },
+        {
+            "id": "etl_job_2",
+            "cache": null,
+            "depends_on": [
+                {
+                    "id": "etl_job_1",
+                    "can_fail": false,
+                    "can_skip": false
+                }
+            ],
+            "description": null,
+            "flavor": "c1med",
+            "conditions": [
+                {
+                    "eq": [
+                        {
+                            "args": "RESUBMIT_OUTBOUND"
+                        },
+                        null
+                    ]
+                }
+            ],
+            "input": {},
+            "invocation_mode": "async",
+            "max_exec_time": 3600,
+            "max_retries": 0,
+            "output": {},
+            "pipeline": "26e9c2f8-bd9b-44c2-8141-179f9e4068db",
+            "poll": true,
+            "retry_policy": "exponential_backoff",
+            "type": "tapis_job",
+            "uses": null,
+            "uuid": "651cc495-53e0-4daf-9c8d-1bfdf276c8ee",
+            "builder": null,
+            "context": null,
+            "destination": null,
+            "auth": null,
+            "data": null,
+            "headers": null,
+            "http_method": null,
+            "protocol": null,
+            "query_params": null,
+            "url": null,
+            "git_repositories": [],
+            "runtime": null,
+            "code": null,
+            "command": null,
+            "installer": null,
+            "packages": null,
+            "entrypoint": null,
+            "image": null,
+            "tapis_job_def": {
+                "name": "sentiment-analysis",
+                "appId": "etl-sentiment-analysis-test",
+                "nodeCount": 1,
+                "appVersion": "dev",
+                "maxMinutes": 10,
+                "coresPerNode": 1,
+                "parameterSet": {
+                    "archiveFilter": {
+                        "excludes": [
+                            "tapisjob.out"
+                        ],
+                        "includes": [],
+                        "includeLaunchFiles": false
+                    },
+                    "containerArgs": [
+                        {
+                            "arg": "--bind $(pwd)/input:/src/input:ro,$(pwd)/output:/src/output:rw",
+                            "name": "input-mount"
+                        }
+                    ],
+                    "schedulerOptions": [
+                        {
+                            "arg": "-A TACC-ACI",
+                            "name": "allocation"
+                        },
+                        {
+                            "arg": "--tapis-profile tacc-apptainer",
+                            "name": "profile"
+                        }
+                    ]
+                },
+                "archiveSystemId": "etl-workflows-test-local-inbox",
+                "archiveSystemDir": "LOCAL-OUTBOX",
+                "execSystemInputDir": "${JobWorkingDir}/jobs/${JobUUID}/input"
+            },
+            "tapis_actor_id": null,
+            "tapis_actor_message": "null"
+        },
+        {
+            "id": "update-outbound-manifest-status",
+            "cache": null,
+            "depends_on": [
+                {
+                    "id": "outbound-status-reduce",
+                    "can_fail": false,
+                    "can_skip": false
+                },
+                {
+                    "id": "gen-outbound-manifests",
+                    "can_fail": false,
+                    "can_skip": false
+                }
+            ],
+            "description": "Sets the status of the outbound manifest to completed/failed",
+            "flavor": "c1med",
+            "conditions": [
+                {
+                    "eq": [
+                        {
+                            "args": "RESUBMIT_INBOUND"
+                        },
+                        null
+                    ]
+                }
+            ],
+            "input": {
+                "MANIFEST": {
+                    "type": "string",
+                    "value": null,
+                    "required": true,
+                    "value_from": {
+                        "task_output": {
+                            "task_id": "gen-outbound-manifests",
+                            "output_id": "ACTIVE_MANIFEST"
+                        }
+                    },
+                    "description": null
+                },
+                "SYSTEM_ID": {
+                    "type": "string",
+                    "value": null,
+                    "required": true,
+                    "value_from": {
+                        "env": "LOCAL_INBOX_SYSTEM_ID"
+                    },
+                    "description": null
+                },
+                "MANIFEST_PATH": {
+                    "type": "string",
+                    "value": null,
+                    "required": true,
+                    "value_from": {
+                        "env": "LOCAL_OUTBOX_MANIFEST_PATH"
+                    },
+                    "description": null
+                },
+                "TAPIS_BASE_URL": {
+                    "type": "string",
+                    "value": null,
+                    "required": true,
+                    "value_from": {
+                        "args": "TAPIS_BASE_URL"
+                    },
+                    "description": null
+                },
+                "TAPIS_PASSWORD": {
+                    "type": "string",
+                    "value": null,
+                    "required": true,
+                    "value_from": {
+                        "args": "TAPIS_PASSWORD"
+                    },
+                    "description": null
+                },
+                "TAPIS_USERNAME": {
+                    "type": "string",
+                    "value": null,
+                    "required": true,
+                    "value_from": {
+                        "args": "TAPIS_USERNAME"
+                    },
+                    "description": null
+                },
+                "PHASE_COMPLETED": {
+                    "type": "string",
+                    "value": null,
+                    "required": true,
+                    "value_from": {
+                        "task_output": {
+                            "task_id": "outbound-status-reduce",
+                            "output_id": "ACCUMULATOR"
+                        }
+                    },
+                    "description": null
+                },
+                "LOCKFILE_FILENAME": {
+                    "type": "string",
+                    "value": null,
+                    "required": true,
+                    "value_from": {
+                        "env": "LOCKFILE_FILENAME"
+                    },
+                    "description": null
+                }
+            },
+            "invocation_mode": "async",
+            "max_exec_time": 3600,
+            "max_retries": 0,
+            "output": {},
+            "pipeline": "26e9c2f8-bd9b-44c2-8141-179f9e4068db",
+            "poll": null,
+            "retry_policy": "exponential_backoff",
+            "type": "template",
+            "uses": {
+                "name": "tapis/etl/update-manifest-status@v1beta",
+                "path": null,
+                "source": {
+                    "url": "https://github.com/tapis-project/tapis-workflows-task-templates.git",
+                    "auth": null,
+                    "branch": "master"
+                }
+            },
+            "uuid": "6d4cb82b-3b02-485b-9753-cc5b3146d121",
+            "builder": null,
+            "context": null,
+            "destination": null,
+            "auth": null,
+            "data": null,
+            "headers": null,
+            "http_method": null,
+            "protocol": null,
+            "query_params": null,
+            "url": null,
+            "git_repositories": [],
+            "runtime": null,
+            "code": null,
+            "command": null,
+            "installer": null,
+            "packages": null,
+            "entrypoint": null,
+            "image": null,
+            "tapis_job_def": null,
+            "tapis_actor_id": null,
+            "tapis_actor_message": "null"
+        },
+        {
+            "id": "outbound-status-reduce",
+            "cache": null,
+            "depends_on": [
+                {
+                    "id": "tapis-transfer-results",
+                    "can_fail": false,
+                    "can_skip": false
+                }
+            ],
+            "description": "Returns true if tranfer task succeeds, returns false if transfer fails.",
+            "flavor": "c1med",
+            "conditions": [
+                {
+                    "eq": [
+                        {
+                            "args": "RESUBMIT_INBOUND"
+                        },
+                        null
+                    ]
+                }
+            ],
+            "input": {
+                "DEFAULT": {
+                    "type": "string",
+                    "value": "FAILED",
+                    "required": true,
+                    "value_from": null,
+                    "description": null
+                },
+                "CONTAINS": {
+                    "type": "string",
+                    "value": "STATUS",
+                    "required": true,
+                    "value_from": null,
+                    "description": null
+                },
+                "COMPARATOR": {
+                    "type": "string",
+                    "value": "FINISHED",
+                    "required": true,
+                    "value_from": null,
+                    "description": null
+                }
+            },
+            "invocation_mode": "async",
+            "max_exec_time": 3600,
+            "max_retries": 0,
+            "output": {},
+            "pipeline": "26e9c2f8-bd9b-44c2-8141-179f9e4068db",
+            "poll": null,
+            "retry_policy": "exponential_backoff",
+            "type": "template",
+            "uses": {
+                "name": "tapis/etl/reduce@v1beta",
+                "path": null,
+                "source": {
+                    "url": "https://github.com/tapis-project/tapis-workflows-task-templates.git",
+                    "auth": null,
+                    "branch": "master"
+                }
+            },
+            "uuid": "8a97fbcc-7d3a-421a-8042-036333f0779e",
+            "builder": null,
+            "context": null,
+            "destination": null,
+            "auth": null,
+            "data": null,
+            "headers": null,
+            "http_method": null,
+            "protocol": null,
+            "query_params": null,
+            "url": null,
+            "git_repositories": [],
+            "runtime": null,
+            "code": null,
+            "command": null,
+            "installer": null,
+            "packages": null,
+            "entrypoint": null,
+            "image": null,
+            "tapis_job_def": null,
+            "tapis_actor_id": null,
+            "tapis_actor_message": "null"
+        },
+        {
+            "id": "update-inbound-manifest-status",
+            "cache": null,
+            "depends_on": [
+                {
+                    "id": "gen-inbound-manifests",
+                    "can_fail": false,
+                    "can_skip": false
+                },
+                {
+                    "id": "inbound-status-reduce",
+                    "can_fail": false,
+                    "can_skip": false
+                }
+            ],
+            "description": "Sets the status of the inbound manifest currently being processed to completed/failed",
+            "flavor": "c1med",
+            "conditions": [
+                {
+                    "and": [
+                        {
+                            "eq": [
+                                {
+                                    "args": "RESUBMIT_OUTBOUND"
+                                },
+                                null
+                            ]
+                        },
+                        {
+                            "ne": [
+                                {
+                                    "task_output": {
+                                        "task_id": "gen-inbound-manifests",
+                                        "output_id": "ACTIVE_MANIFEST"
+                                    }
+                                },
+                                null
+                            ]
+                        }
+                    ]
+                }
+            ],
+            "input": {
+                "MANIFEST": {
+                    "type": "string",
+                    "value": null,
+                    "required": true,
+                    "value_from": {
+                        "task_output": {
+                            "task_id": "gen-inbound-manifests",
+                            "output_id": "ACTIVE_MANIFEST"
+                        }
+                    },
+                    "description": null
+                },
+                "SYSTEM_ID": {
+                    "type": "string",
+                    "value": null,
+                    "required": true,
+                    "value_from": {
+                        "env": "LOCAL_INBOX_SYSTEM_ID"
+                    },
+                    "description": null
+                },
+                "MANIFEST_PATH": {
+                    "type": "string",
+                    "value": null,
+                    "required": true,
+                    "value_from": {
+                        "env": "LOCAL_INBOX_MANIFEST_PATH"
+                    },
+                    "description": null
+                },
+                "TAPIS_BASE_URL": {
+                    "type": "string",
+                    "value": null,
+                    "required": true,
+                    "value_from": {
+                        "args": "TAPIS_BASE_URL"
+                    },
+                    "description": null
+                },
+                "TAPIS_PASSWORD": {
+                    "type": "string",
+                    "value": null,
+                    "required": true,
+                    "value_from": {
+                        "args": "TAPIS_PASSWORD"
+                    },
+                    "description": null
+                },
+                "TAPIS_USERNAME": {
+                    "type": "string",
+                    "value": null,
+                    "required": true,
+                    "value_from": {
+                        "args": "TAPIS_USERNAME"
+                    },
+                    "description": null
+                },
+                "PHASE_COMPLETED": {
+                    "type": "string",
+                    "value": null,
+                    "required": true,
+                    "value_from": {
+                        "task_output": {
+                            "task_id": "inbound-status-reduce",
+                            "output_id": "ACCUMULATOR"
+                        }
+                    },
+                    "description": null
+                },
+                "LOCKFILE_FILENAME": {
+                    "type": "string",
+                    "value": null,
+                    "required": true,
+                    "value_from": {
+                        "env": "LOCKFILE_FILENAME"
+                    },
+                    "description": null
+                }
+            },
+            "invocation_mode": "async",
+            "max_exec_time": 3600,
+            "max_retries": 0,
+            "output": {},
+            "pipeline": "26e9c2f8-bd9b-44c2-8141-179f9e4068db",
+            "poll": null,
+            "retry_policy": "exponential_backoff",
+            "type": "template",
+            "uses": {
+                "name": "tapis/etl/update-manifest-status@v1beta",
+                "path": null,
+                "source": {
+                    "url": "https://github.com/tapis-project/tapis-workflows-task-templates.git",
+                    "auth": null,
+                    "branch": "master"
+                }
+            },
+            "uuid": "934846a4-cdb6-4882-a1d0-54d6b6b74064",
+            "builder": null,
+            "context": null,
+            "destination": null,
+            "auth": null,
+            "data": null,
+            "headers": null,
+            "http_method": null,
+            "protocol": null,
+            "query_params": null,
+            "url": null,
+            "git_repositories": [],
+            "runtime": null,
+            "code": null,
+            "command": null,
+            "installer": null,
+            "packages": null,
+            "entrypoint": null,
+            "image": null,
+            "tapis_job_def": null,
+            "tapis_actor_id": null,
+            "tapis_actor_message": "null"
+        },
+        {
+            "id": "gen-inbound-manifests",
+            "cache": null,
+            "depends_on": [],
+            "description": "Generates a manifests for data files in the data directory of the local inbox system",
+            "flavor": "c1med",
+            "conditions": [
+                {
+                    "eq": [
+                        {
+                            "args": "RESUBMIT_OUTBOUND"
+                        },
+                        null
+                    ]
+                }
+            ],
+            "input": {
+                "PHASE": {
+                    "type": "string",
+                    "value": "inbound",
+                    "required": true,
+                    "value_from": null,
+                    "description": null
+                },
+                "SYSTEM_ID": {
+                    "type": "string",
+                    "value": null,
+                    "required": true,
+                    "value_from": {
+                        "env": "LOCAL_INBOX_SYSTEM_ID"
+                    },
+                    "description": null
+                },
+                "MANIFEST_PATH": {
+                    "type": "string",
+                    "value": null,
+                    "required": true,
+                    "value_from": {
+                        "env": "LOCAL_INBOX_MANIFEST_PATH"
+                    },
+                    "description": null
+                },
+                "TAPIS_BASE_URL": {
+                    "type": "string",
+                    "value": null,
+                    "required": true,
+                    "value_from": {
+                        "args": "TAPIS_BASE_URL"
+                    },
+                    "description": null
+                },
+                "TAPIS_PASSWORD": {
+                    "type": "string",
+                    "value": null,
+                    "required": true,
+                    "value_from": {
+                        "args": "TAPIS_PASSWORD"
+                    },
+                    "description": null
+                },
+                "TAPIS_USERNAME": {
+                    "type": "string",
+                    "value": null,
+                    "required": true,
+                    "value_from": {
+                        "args": "TAPIS_USERNAME"
+                    },
+                    "description": null
+                },
+                "LOCAL_DATA_PATH": {
+                    "type": "string",
+                    "value": null,
+                    "required": true,
+                    "value_from": {
+                        "env": "LOCAL_INBOX_DATA_PATH"
+                    },
+                    "description": null
+                },
+                "RESUBMIT_INBOUND": {
+                    "type": "string",
+                    "value": null,
+                    "required": false,
+                    "value_from": {
+                        "args": "RESUBMIT_INBOUND"
+                    },
+                    "description": null
+                },
+                "LOCKFILE_FILENAME": {
+                    "type": "string",
+                    "value": null,
+                    "required": true,
+                    "value_from": {
+                        "env": "LOCKFILE_FILENAME"
+                    },
+                    "description": null
+                },
+                "MANIFEST_PRIORITY": {
+                    "type": "string",
+                    "value": null,
+                    "required": true,
+                    "value_from": {
+                        "env": "LOCAL_INBOX_MANIFEST_PRIORITY"
+                    },
+                    "description": null
+                },
+                "MANIFEST_GENERATION_POLICY": {
+                    "type": "string",
+                    "value": null,
+                    "required": true,
+                    "value_from": {
+                        "env": "LOCAL_INBOX_MANIFEST_GENERATION_POLICY"
+                    },
+                    "description": null
+                },
+                "TAPIS_SYSTEM_FILE_REF_EXTENSION": {
+                    "type": "string",
+                    "value": null,
+                    "required": true,
+                    "value_from": {
+                        "env": "TAPIS_SYSTEM_FILE_REF_EXTENSION"
+                    },
+                    "description": null
+                }
+            },
+            "invocation_mode": "async",
+            "max_exec_time": 3600,
+            "max_retries": 0,
+            "output": {},
+            "pipeline": "26e9c2f8-bd9b-44c2-8141-179f9e4068db",
+            "poll": null,
+            "retry_policy": "exponential_backoff",
+            "type": "template",
+            "uses": {
+                "name": "tapis/etl/gen-manifests@v1beta",
+                "path": null,
+                "source": {
+                    "url": "https://github.com/tapis-project/tapis-workflows-task-templates.git",
+                    "auth": null,
+                    "branch": "master"
+                }
+            },
+            "uuid": "ac926454-2edb-40de-8811-f84f2e5442a0",
+            "builder": null,
+            "context": null,
+            "destination": null,
+            "auth": null,
+            "data": null,
+            "headers": null,
+            "http_method": null,
+            "protocol": null,
+            "query_params": null,
+            "url": null,
+            "git_repositories": [],
+            "runtime": null,
+            "code": null,
+            "command": null,
+            "installer": null,
+            "packages": null,
+            "entrypoint": null,
+            "image": null,
+            "tapis_job_def": null,
+            "tapis_actor_id": null,
+            "tapis_actor_message": "null"
+        },
+        {
+            "id": "etl_job_1",
+            "cache": null,
+            "depends_on": [
+                {
+                    "id": "gen-inbound-manifests",
+                    "can_fail": false,
+                    "can_skip": false
+                }
+            ],
+            "description": null,
+            "flavor": "c1med",
+            "conditions": [
+                {
+                    "eq": [
+                        {
+                            "args": "RESUBMIT_OUTBOUND"
+                        },
+                        null
+                    ]
+                },
+                {
+                    "ne": [
+                        {
+                            "task_output": {
+                                "task_id": "gen-inbound-manifests",
+                                "output_id": "ACTIVE_MANIFEST"
+                            }
+                        },
+                        "null"
+                    ]
+                }
+            ],
+            "input": {},
+            "invocation_mode": "async",
+            "max_exec_time": 3600,
+            "max_retries": 0,
+            "output": {},
+            "pipeline": "26e9c2f8-bd9b-44c2-8141-179f9e4068db",
+            "poll": true,
+            "retry_policy": "exponential_backoff",
+            "type": "tapis_job",
+            "uses": null,
+            "uuid": "c55e5967-383e-4a5b-9d7c-0eb5a47d8725",
+            "builder": null,
+            "context": null,
+            "destination": null,
+            "auth": null,
+            "data": null,
+            "headers": null,
+            "http_method": null,
+            "protocol": null,
+            "query_params": null,
+            "url": null,
+            "git_repositories": [],
+            "runtime": null,
+            "code": null,
+            "command": null,
+            "installer": null,
+            "packages": null,
+            "entrypoint": null,
+            "image": null,
+            "tapis_job_def": {
+                "name": "string-transform",
+                "appId": "etl-string-replace-test",
+                "nodeCount": 1,
+                "appVersion": "dev",
+                "maxMinutes": 10,
+                "coresPerNode": 1,
+                "parameterSet": {
+                    "containerArgs": [
+                        {
+                            "arg": "--bind $(pwd)/input:/src/input:ro,$(pwd)/output:/src/output:rw",
+                            "name": "input-mount"
+                        }
+                    ],
+                    "schedulerOptions": [
+                        {
+                            "arg": "-A TACC-ACI",
+                            "name": "allocation"
+                        },
+                        {
+                            "arg": "--tapis-profile tacc-apptainer",
+                            "name": "profile"
+                        }
+                    ]
+                },
+                "execSystemInputDir": "${JobWorkingDir}/jobs/${JobUUID}/input"
+            },
+            "tapis_actor_id": null,
+            "tapis_actor_message": "null"
+        }
+    ]
+}

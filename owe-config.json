@@ -2,6 +2,9 @@
     "tapis/etl-pipeline@v1beta": {
         "path": "schemas/workflows/etl/v1beta/pipelines/etl-pipeline-with-system-transfer.json"
     },
+    "tapis/ml/we@v1beta": {
+        "path": "schemas/workflows/ml/v1/pipelines/inference.json"
+    },
     "tapis/login@vlatest": {
         "path": "schemas/sdk/latest/login.json"
     },

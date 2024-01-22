@@ -2,8 +2,8 @@
     "tapis/etl-pipeline@v1beta": {
         "path": "schemas/workflows/etl/v1beta/pipelines/etl-pipeline-with-system-transfer.json"
     },
-    "tapis/ml/we@v1beta": {
-        "path": "schemas/workflows/ml/v1/pipelines/inference.json"
+    "tapis/web-page-summarize@v1beta": {
+        "path": "schemas/workflows/ml/v1/pipelines/web-page-summarize.json"
     },
     "tapis/login@vlatest": {
         "path": "schemas/sdk/latest/login.json"
@@ -34,5 +34,11 @@
     },
     "tapis/workflows/tapis/job@latest": {
         "path": "schemas/workflows/tapis/latest/job.json"
+    },
+    "tapis/ml/v1/text-summarize@v1": {
+        "path": "schemas/ml/v1/text-summarize.json"
+    },
+    "web/scrape@latest": {
+        "path": "schemas/web/v1/scrape.json"
     }
 }

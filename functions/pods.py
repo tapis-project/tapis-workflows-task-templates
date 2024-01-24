@@ -48,8 +48,9 @@ try:
     while pod.status != op_complete_status:
         time.sleep(poll_interval)
         pod = t.pods.get_pod(pod_id=pod_id)
-        
+    
     ctx.set_output("POD", pod.__dict__)
+    ctx.set_output("URL", f"{pod.networking.protocol}://{pod.networking.url}")
     ctx.stdout()
     
 except Exception as e:

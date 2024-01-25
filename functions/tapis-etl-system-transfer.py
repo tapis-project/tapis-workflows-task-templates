@@ -34,6 +34,8 @@ try:
     # Create the destination dir on the remote inbox if it doesn't exist
     remote_inbox_system_id = ctx.get_input("REMOTE_INBOX_SYSTEM_ID")
     destination_path = ctx.get_input("DESTINATION_PATH")
+    print("REMOTE_INBOX_SYSTEM_ID", remote_inbox_system_id)
+    print("DESTINATION_PATH", destination_path)
     client.files.mkdir(
         systemId=remote_inbox_system_id,
         path=destination_path

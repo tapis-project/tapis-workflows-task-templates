@@ -57,6 +57,7 @@
         }
     },
     "output": {
-        "POD": {"type": "string"}
+        "POD": {"type": "string"},
+        "POD_URL": {"type": "string"}
     }
 }

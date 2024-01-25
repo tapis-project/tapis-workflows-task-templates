@@ -56,6 +56,9 @@ try:
             )
         })
 
+        from pprint import pprint
+        pprint(elements)
+
     task = client.files.createTransferTask(elements=elements)
 except Exception as e:
     ctx.stdout(f"Failed to create transfer task: {e}")

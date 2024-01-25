@@ -96,36 +96,17 @@
         },
         {
             "id": "scrape-web-page",
-            "description": "Scrapes the webpage at the provided URL and returns the text",
             "type": "template",
-            "depends_on": [
-                {
-                    "id": "start-pod"
-                }
-            ],
             "uses": {
                 "name": "tapis/srape-web-page@v1",
                 "source": {
                     "url": "https://github.com/tapis-project/tapis-workflows-task-templates.git",
                     "branch": "master"
                 }
-            },
-            "input": {
-                "URL": {
-                    "value_from": {
-                        "args": "URL"
-                    }
-                }
-            },
-            "conditions": [],
-            "output": {
-                "TEXT": {
-                    "type": "string"
-                }
             }
         },
         {
-            "id": "summarize-text",
+            "id": "inference",
             "description": "Perform text summarization on the provided body of text",
             "type": "template",
             "depends_on": [
@@ -141,6 +122,15 @@
                 }
             },
             "input": {
+                "URL": {
+                    "type": "string",
+                    "value_from": {
+                        "task_output": {
+                            "task_id": "start-pod",
+                            "output_id": "POD_URL"
+                        }
+                    }
+                },
                 "TAPIS_JWT": {
                     "value_from": {
                         "task_output": {

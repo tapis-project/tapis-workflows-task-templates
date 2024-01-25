@@ -56,8 +56,7 @@ try:
             )
         })
 
-        from pprint import pprint
-        pprint(elements)
+    print(elements)
 
     task = client.files.createTransferTask(elements=elements)
 except Exception as e:

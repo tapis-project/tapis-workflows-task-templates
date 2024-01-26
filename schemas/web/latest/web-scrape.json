@@ -1,0 +1,25 @@
+{
+    "type": "function",
+    "execution_profile": {
+        "flavor": "c1tiny"
+    },
+    "installer": "pip",
+    "packages": ["bs4", "requests"],
+    "runtime": "python:3.9",
+    "entrypoint": "tapis-owe-functions/functions/web-scrape.py",
+    "git_repositories": [
+        {
+            "url": "https://github.com/tapis-project/tapis-workflows-task-templates.git",
+            "branch": "master",
+            "directory": "tapis-owe-functions"
+        }
+    ],
+    "input": {
+        "URL": {
+            "value": null,
+            "value_from": {
+                "args": "URL"
+            }
+        }
+    }
+}

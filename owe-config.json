@@ -37,8 +37,8 @@
     },
     "tapis/ml/v1/text-summarize@v1": {
         "path": "schemas/ml/v1/text-summarize.json"
-    },
+    },    
     "web/scrape@latest": {
-        "path": "schemas/web/v1/scrape.json"
+        "path": "schemas/web/latest/web-scrape.json"
     }
 }

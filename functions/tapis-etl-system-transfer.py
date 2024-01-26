@@ -63,7 +63,7 @@ try:
 
     task = client.files.createTransferTask(elements=elements)
 except Exception as e:
-    ctx.stdout(f"Failed to create transfer task: {e}")
+    ctx.stdout(f"Elements: {elements} \nFailed to create transfer task: {e}")
 
 # Poll the transfer task until it reaches a terminal state
 try:

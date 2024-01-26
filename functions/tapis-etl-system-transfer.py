@@ -40,7 +40,7 @@ try:
         systemId=remote_inbox_system_id,
         path=destination_path
     )
-
+    print("AFTER MKDIR")
     # Create transfer task
     elements = []
     for f in manifest.files:

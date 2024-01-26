@@ -1,0 +1,187 @@
+{
+    "description": "Pulls text from a web page and runs sentiment analysis",
+    "execution_profile": {
+        "duplicate_submission_policy": "allow"
+    },
+    "params": {
+        "TAPIS_BASE_URL": {
+            "type": "string",
+            "required": true
+        },
+        "TAPIS_USERNAME": {
+            "type": "string",
+            "required": true
+        },
+        "TAPIS_PASSWORD": {
+            "type": "string",
+            "required": true
+        },
+        "URL": {
+            "type": "string",
+            "required": true
+        },
+        "POD_ID": {
+            "type": "string",
+            "required": true
+        }
+    },
+    "env": {
+        "STOP_POD_ON_COMPLETE": {
+            "type": "boolean",
+            "value": true
+        }
+    },
+    "tasks": [
+        {
+            "id": "tapis-authenticate",
+            "description": "Authenticates with Tapis",
+            "type": "template",
+            "uses": {
+                "name": "tapis/login@latest",
+                "source": {
+                    "url": "https://github.com/tapis-project/tapis-workflows-task-templates.git",
+                    "branch": "master"
+                }
+            },
+            "depends_on": [],
+            "input": {
+                "TAPIS_BASE_URL": {
+                    "value_from": {
+                        "args": "TAPIS_BASE_URL"
+                    }
+                },
+                "TAPIS_USERNAME": {
+                    "value_from": {
+                        "args": "TAPIS_USERNAME"
+                    }
+                },
+                "TAPIS_PASSWORD": {
+                    "value_from": {
+                        "args": "TAPIS_PASSWORD"
+                    }
+                }
+            },
+            "conditions": []
+        },
+        {
+            "id": "start-pod",
+            "description": "Starts the pod inference server for the provided model model",
+            "type": "template",
+            "uses": {
+                "name": "tapis/pods/start@latest",
+                "source": {
+                    "url": "https://github.com/tapis-project/tapis-workflows-task-templates.git",
+                    "branch": "master"
+                }
+            },
+            "depends_on": [
+                {
+                    "id": "tapis-authenticate"
+                }
+            ],
+            "input": {
+                "TAPIS_JWT": {
+                    "task_output": {
+                        "task_id": "tapis-authenticate",
+                        "output_id": "TAPIS_JWT"
+                    }
+                },
+                "POD_ID": {
+                    "value_from": {
+                        "args": "POD_ID"
+                    }
+                }
+            },
+            "conditions": []
+        },
+        {
+            "id": "scrape-web-page",
+            "type": "template",
+            "uses": {
+                "name": "tapis/srape-web-page@v1",
+                "source": {
+                    "url": "https://github.com/tapis-project/tapis-workflows-task-templates.git",
+                    "branch": "master"
+                }
+            }
+        },
+        {
+            "id": "inference",
+            "description": "Perform text summarization on the provided body of text",
+            "type": "template",
+            "depends_on": [
+                {"id": "tapis-authenticate"},
+                {"id": "start-pod"},
+                {"id": "scrape-web-page"}
+            ],
+            "uses": {
+                "name": "tapis/ml/text-summarize@v1",
+                "source": {
+                    "url": "https://github.com/tapis-project/tapis-workflows-task-templates.git",
+                    "branch": "master"
+                }
+            },
+            "input": {
+                "URL": {
+                    "type": "string",
+                    "value_from": {
+                        "task_output": {
+                            "task_id": "start-pod",
+                            "output_id": "POD_URL"
+                        }
+                    }
+                },
+                "TAPIS_JWT": {
+                    "value_from": {
+                        "task_output": {
+                            "task_id": "tapis-authenticate",
+                            "output_id": "TAPIS_JWT"
+                        }
+                    }
+                },
+                "TEXT": {
+                    "value_from": {
+                        "task_output": {
+                            "task_id": "scrape-web-page",
+                            "output_id": "TEXT"
+                        }
+                    }
+                }
+            },
+            "conditions": []
+        },
+        {
+            "id": "stop-pod",
+            "description": "Stops the running pod",
+            "type": "template",
+            "depends_on": [
+                {"id": "summarize-text"}
+            ],
+            "uses": {
+                "name": "tapis/ml/text-summarize@v1",
+                "source": {
+                    "url": "https://github.com/tapis-project/tapis-workflows-task-templates.git",
+                    "branch": "master"
+                }
+            },
+            "input": {
+                "TEXT": {
+                    "value_from": {
+                        "task_output": {
+                            "task_id": "summarize-text",
+                            "output_id": ""
+                        }
+                    }
+                }
+            },
+            "conditions": [
+                {
+                    "eq": [
+                        {"env": "STOP_POD_ON_COMPLETE"},
+                        true
+                    ]
+                }
+            ]
+        }
+    ]
+}

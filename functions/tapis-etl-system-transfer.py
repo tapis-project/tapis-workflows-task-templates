@@ -42,6 +42,7 @@ try:
     # Create transfer task
     elements = []
     for f in manifest.files:
+        print("")
         # NOTE: remove this input as soon as insert operation is available for Globus-type systems
         local_inbox_system_id = ctx.get_input("LOCAL_INBOX_SYSTEM_ID")
         local_outbox_system_id = ctx.get_input("LOCAL_OUTBOX_SYSTEM_ID")
@@ -56,9 +57,11 @@ try:
             )
         })
 
+    print(elements)
+
     task = client.files.createTransferTask(elements=elements)
 except Exception as e:
-    ctx.stdout(f"Failed to create transfer task: {e}")
+    ctx.stdout(f"Elements: {elements} \nFailed to create transfer task: {e}")
 
 # Poll the transfer task until it reaches a terminal state
 try:

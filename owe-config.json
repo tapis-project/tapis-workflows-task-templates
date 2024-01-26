@@ -34,5 +34,8 @@
     },
     "tapis/workflows/tapis/job@latest": {
         "path": "schemas/workflows/tapis/latest/job.json"
+    },
+    "web/scrape@latest": {
+        "path": "schemas/web/latest/web-scrape.json"
     }
 }

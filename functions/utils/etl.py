@@ -94,6 +94,17 @@ def get_client(ctx):
     except Exception as e:
         ctx.stderr(1, f"Failed to authenticate: {e}")
 
+def match_patterns(target, include_pattern, exclude_pattern):
+    matches_include = True
+    if include_pattern != None:
+        matches_include = re.match(include_pattern, target) != None
+
+    matches_exclude = True
+    if exclude_pattern != None:
+        matches_exclude = re.match(exclude_pattern, target) != None
+
+    return matches_include and not matches_exclude
+
 class DataIntegrityProfile:
     def __init__(
         self,
@@ -203,18 +214,6 @@ class DataIntegrityValidator:
             validated,
             err if error_count > 0 else None
         )
-    
-def match_patterns(target, include_pattern, exclude_pattern):
-    matches_include = True
-    if include_pattern != None:
-        matches_include = re.match(include_pattern, target) != None
-
-    matches_exclude = True
-    if exclude_pattern != None:
-        matches_exclude = re.match(exclude_pattern, target) != None
-
-    return matches_include and matches_exclude
-
 
 def delete_lockfile(client, system_id, manifests_path, lockfile_filename):
     # Delete the lock file
@@ -229,6 +228,8 @@ def delete_lockfile(client, system_id, manifests_path, lockfile_filename):
 def generate_new_manfifests(
     system_id,
     data_path,
+    include_pattern,
+    exclude_pattern,
     manifests_path,
     manifest_generation_policy,
     manifests,
@@ -236,23 +237,28 @@ def generate_new_manfifests(
 ):
     try:
         # Fetch the all data files
-        data_files = client.files.listFiles(
+        unfiltered_data_files = client.files.listFiles(
             systemId=system_id,
             path=data_path
         )
     except Exception as e:
         raise Exception(f"Failed to fetch data files: {str(e)}")
+    
+    try:
+        data_files = unfiltered_data_files
+        if include_pattern != None and exclude_pattern != None:
+            data_files = [
+                data_file for data_file in unfiltered_data_files
+                if match_patterns(data_file.name, include_pattern, exclude_pattern)
+            ]
+    except Exception as e:
+        raise Exception(f"Error while filtering data files using provided include and exclude patterns: {str(e)}")
 
     # Create a list of all registered files
     registered_data_file_paths = []
     for manifest in manifests:
         for manifest_data_file in manifest.files:
             registered_data_file_paths.append(manifest_data_file["path"])
-
-    registered_data_files = [
-        data_file for data_file in data_files
-        if data_file.path in registered_data_file_paths
-    ]
 
     # Find all data files that have not yet been registered with a manifest
     unregistered_data_files = [

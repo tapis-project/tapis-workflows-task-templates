@@ -6,7 +6,7 @@ import json, os, time
 
 from tapipy.tapis import Tapis
 
-from utils import ETLManifestModel, EnumManifestStatus
+from utils.etl import ETLManifestModel, EnumManifestStatus
 
 def cleanup():
     # Delete the lock file

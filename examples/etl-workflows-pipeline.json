@@ -52,11 +52,11 @@
         },
         "LOCAL_INBOX_MANIFEST_GENERATION_POLICY": {
             "type": "string",
-            "value": "one_per_file"
+            "value": "auto_one_per_file"
         },
         "LOCAL_OUTBOX_MANIFEST_GENERATION_POLICY": {
             "type": "string",
-            "value": "one_for_all"
+            "value": "auto_one_for_all"
         }
     },
     "params": {

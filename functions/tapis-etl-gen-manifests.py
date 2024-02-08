@@ -47,10 +47,10 @@ try:
     # Create the manifests directory if it doesn't exist. Equivalent
     # to `mkdir -p`
     system_id = ctx.get_input("SYSTEM_ID")
-    manifest_path = ctx.get_input("MANIFEST_PATH")
+    manifests_path = ctx.get_input("MANIFESTS_PATH")
     client.files.mkdir(
         systemId=system_id,
-        path=manifest_path
+        path=manifests_path
     )
 
     # Create the data directory if it doesn't exist. Equivalent
@@ -78,7 +78,7 @@ try:
         # Fetch the all manifest files
         manifest_files = client.files.listFiles(
             systemId=system_id,
-            path=manifest_path
+            path=manifests_path
         )
 
         manifests_locked = lockfile_filename in [file.name for file in manifest_files]
@@ -88,7 +88,7 @@ try:
     # Create the lockfile
     client.files.insert(
         systemId=system_id,
-        path=os.path.join(manifest_path, lockfile_filename),
+        path=os.path.join(manifests_path, lockfile_filename),
         file=b""
     )
 except Exception as e:
@@ -99,7 +99,7 @@ add_hook_props = (
     delete_lockfile,
     client,
     system_id,
-    manifest_path,
+    manifests_path,
     lockfile_filename
 )
 ctx.add_hook(1, *add_hook_props)
@@ -125,12 +125,14 @@ manifest_generation_policy = ctx.get_input("MANIFEST_GENERATION_POLICY")
 if manifest_generation_policy != "manual":
     try:
         new_manifests = generate_new_manfifests(
-            system_id,
-            data_path,
-            manifest_path,
-            manifest_generation_policy,
-            manifests,
-            client
+            system_id=system_id,
+            data_path=data_path,
+            include_pattern=ctx.get_input("INCLUDE_PATTERN"),
+            exclude_pattern=ctx.get_input("EXCLUDE_PATTERN"),
+            manifests_path=manifests_path,
+            manifest_generation_policy=manifest_generation_policy,
+            manifests=manifests,
+            client=client
         )
     except Exception as e:
         ctx.stderr(f"Error generating manifests: {e}")
@@ -182,7 +184,8 @@ try:
         data_integrity_profile = DataIntegrityProfile(
             data_integrity_type,
             done_files_path=ctx.get_input("DATA_INTEGRITY_DONE_FILES_PATH"),
-            pattern=ctx.get_input("DATA_INTEGRITY_DONE_FILE_PATTERN"),
+            include_pattern=ctx.get_input("DATA_INTEGRITY_DONE_FILE_INCLUDE_PATTERN"),
+            exclude_pattern=ctx.get_input("DATA_INTEGRITY_DONE_FILE_EXCLUDE_PATTERN"),
         )
 except TypeError as e:
     ctx.stderr(1, str(e))

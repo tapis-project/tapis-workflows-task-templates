@@ -216,12 +216,12 @@ def match_patterns(target, include_pattern, exclude_pattern):
     return matches_include and matches_exclude
 
 
-def delete_lockfile(client, system_id, manifest_path, lockfile_filename):
+def delete_lockfile(client, system_id, manifests_path, lockfile_filename):
     # Delete the lock file
     try:
         client.files.delete(
             systemId=system_id,
-            path=os.path.join(manifest_path, lockfile_filename),
+            path=os.path.join(manifests_path, lockfile_filename),
         )
     except Exception as e:
         raise Exception(f"Failed to delete lockfile: {e}")
@@ -229,7 +229,7 @@ def delete_lockfile(client, system_id, manifest_path, lockfile_filename):
 def generate_new_manfifests(
     system_id,
     data_path,
-    manifest_path,
+    manifests_path,
     manifest_generation_policy,
     manifests,
     client
@@ -272,7 +272,7 @@ def generate_new_manfifests(
             new_manifests.append(
                 ManifestModel(
                     filename=manifest_filename,
-                    path=os.path.join(manifest_path, manifest_filename),
+                    path=os.path.join(manifests_path, manifest_filename),
                     files=[unregistered_data_file]
                 )
             )
@@ -281,7 +281,7 @@ def generate_new_manfifests(
         new_manifests.append(
             ManifestModel(
                 filename=manifest_filename,
-                path=os.path.join(manifest_path, manifest_filename),
+                path=os.path.join(manifests_path, manifest_filename),
                 files=unregistered_data_files
             )
         )

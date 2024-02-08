@@ -69,9 +69,9 @@
                         "env": "LOCAL_INBOX_SYSTEM_ID"
                     }
                 },
-                "MANIFEST_PATH": {
+                "MANIFESTS_PATH": {
                     "value_from": {
-                        "env": "LOCAL_INBOX_MANIFEST_PATH"
+                        "env": "LOCAL_INBOX_MANIFESTS_PATH"
                     }
                 },
                 "MANIFEST_GENERATION_POLICY": {
@@ -87,6 +87,36 @@
                 "LOCAL_DATA_PATH": {
                     "value_from": {
                         "env": "LOCAL_INBOX_DATA_PATH"
+                    }
+                },
+                "INCLUDE_PATTERN": {
+                    "valude_from": {
+                        "env": "LOCAL_INBOX_INCLUDE_PATTERN"
+                    }
+                },
+                "EXCLUDE_PATTERN": {
+                    "valude_from": {
+                        "env": "LOCAL_INBOX_EXCLUDE_PATTERN"
+                    }
+                },
+                "DATA_INTEGRITY_TYPE": {
+                    "value_from": {
+                        "env": "LOCAL_INBOX_DATA_INTEGRITY_TYPE"
+                    }
+                },
+                "DATA_INTEGRITY_DONE_FILES_PATH": {
+                    "value_from": {
+                        "env": "LOCAL_INBOX_DATA_INTEGRITY_DONE_FILES_PATH"
+                    }
+                },
+                "DATA_INTEGRITY_DONE_FILE_INCLUDE_PATTERN": {
+                    "value_from": {
+                        "env": "LOCAL_INBOX_DATA_INTEGRITY_DONE_FILE_INCLUDE_PATTERN"
+                    }
+                },
+                "DATA_INTEGRITY_DONE_FILE_EXCLUDE_PATTERN": {
+                    "value_from": {
+                        "env": "LOCAL_INBOX_DATA_INTEGRITY_DONE_FILE_EXCLUDE_PATTERN"
                     }
                 },
                 "LOCKFILE_FILENAME": {
@@ -195,9 +225,9 @@
                         "env": "LOCAL_INBOX_SYSTEM_ID"
                     }
                 },
-                "MANIFEST_PATH": {
+                "MANIFESTS_PATH": {
                     "value_from": {
-                        "env": "LOCAL_INBOX_MANIFEST_PATH"
+                        "env": "LOCAL_INBOX_MANIFESTS_PATH"
                     }
                 },
                 "LOCKFILE_FILENAME": {
@@ -285,9 +315,9 @@
                         "env": "LOCAL_INBOX_SYSTEM_ID"
                     }
                 },
-                "MANIFEST_PATH": {
+                "MANIFESTS_PATH": {
                     "value_from": {
-                        "env": "LOCAL_OUTBOX_MANIFEST_PATH"
+                        "env": "LOCAL_OUTBOX_MANIFESTS_PATH"
                     }
                 },
                 "MANIFEST_GENERATION_POLICY": {
@@ -303,6 +333,36 @@
                 "LOCAL_DATA_PATH": {
                     "value_from": {
                         "env": "LOCAL_OUTBOX_DATA_PATH"
+                    }
+                },
+                "INCLUDE_PATTERN": {
+                    "valude_from": {
+                        "env": "LOCAL_OUTBOX_INCLUDE_PATTERN"
+                    }
+                },
+                "EXCLUDE_PATTERN": {
+                    "valude_from": {
+                        "env": "LOCAL_OUTBOX_EXCLUDE_PATTERN"
+                    }
+                },
+                "DATA_INTEGRITY_TYPE": {
+                    "value_from": {
+                        "env": "LOCAL_OUTBOX_DATA_INTEGRITY_TYPE"
+                    }
+                },
+                "DATA_INTEGRITY_DONE_FILES_PATH": {
+                    "value_from": {
+                        "env": "LOCAL_OUTBOX_DATA_INTEGRITY_DONE_FILES_PATH"
+                    }
+                },
+                "DATA_INTEGRITY_DONE_FILE_INCLUDE_PATTERN": {
+                    "value_from": {
+                        "env": "LOCAL_OUTBOX_DATA_INTEGRITY_DONE_FILE_INCLUDE_PATTERN"
+                    }
+                },
+                "DATA_INTEGRITY_DONE_FILE_EXCLUDE_PATTERN": {
+                    "value_from": {
+                        "env": "LOCAL_OUTBOX_DATA_INTEGRITY_DONE_FILE_EXCLUDE_PATTERN"
                     }
                 },
                 "LOCKFILE_FILENAME": {
@@ -477,9 +537,9 @@
                         "env": "LOCAL_INBOX_SYSTEM_ID"
                     }
                 },
-                "MANIFEST_PATH": {
+                "MANIFESTS_PATH": {
                     "value_from": {
-                        "env": "LOCAL_OUTBOX_MANIFEST_PATH"
+                        "env": "LOCAL_OUTBOX_MANIFESTS_PATH"
                     }
                 },
                 "LOCKFILE_FILENAME": {

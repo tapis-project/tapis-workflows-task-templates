@@ -6,7 +6,7 @@ import json, time
 
 from tapipy.tapis import Tapis
 
-from utils_tapis_jobs import ReqSubmitJob, TapisSystemFileOutput
+from utils_tapis_job import ReqSubmitJob, TapisSystemFileOutput
 
 
 tapis_base_url = ctx.get_input("TAPIS_BASE_URL")

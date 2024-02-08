@@ -5,7 +5,7 @@ from owe_python_sdk.runtime import execution_context as ctx
 import os, json, time
 from tapipy.tapis import Tapis
 
-from utils import ETLManifestModel
+from utils.etl import ETLManifestModel
 
 
 tapis_base_url = ctx.get_input("TAPIS_BASE_URL")

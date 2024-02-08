@@ -4,15 +4,17 @@ from owe_python_sdk.runtime import execution_context as ctx
 
 import json, os, time
 
-from uuid import uuid4
-
 from tapipy.tapis import Tapis
 
-from utils import (
-    ETLManifestModel,
+from utils.etl import (
+    ManifestModel,
     EnumManifestStatus,
     EnumETLPhase,
-    get_tapis_file_contents_json
+    get_tapis_file_contents_json,
+    delete_lockfile,
+    generate_new_manfifests,
+    DataIntegrityValidator,
+    DataIntegrityProfile
 )
 
 # Set the variables related to resubmission.
@@ -53,10 +55,10 @@ try:
 
     # Create the data directory if it doesn't exist. Equivalent
     # to `mkdir -p`
-    local_data_path = ctx.get_input("LOCAL_DATA_PATH")
+    data_path = ctx.get_input("LOCAL_DATA_PATH")
     client.files.mkdir(
         systemId=system_id,
-        path=local_data_path
+        path=data_path
     )
 except Exception as e:
     ctx.stderr(1, f"Failed to create directories: {e}")
@@ -92,13 +94,24 @@ try:
 except Exception as e:
     ctx.stderr(1, f"Failed to generate lockfile: {str(e)}")
 
+# Register the lockfile cleanup hook to be called on called to stderr and stdout
+add_hook_props = (
+    delete_lockfile,
+    client,
+    system_id,
+    manifest_path,
+    lockfile_filename
+)
+ctx.add_hook(1, *add_hook_props)
+ctx.add_hook(0, *add_hook_props)
+
 # Fetch existing manifests and create new manifests
 try:
     # Get all of the contents of each manifest file
     manifests = []
     for manifest_file in manifest_files:
         manifests.append(
-            ETLManifestModel(
+            ManifestModel(
                 filename=manifest_file.name,
                 path=manifest_file.path,
                 **json.loads(get_tapis_file_contents_json(client, system_id, manifest_file.path))
@@ -107,66 +120,20 @@ try:
 except Exception as e:
     ctx.stderr(1, f"Failed to fetch manifest files: {e}")
 
-try:
-    # Fetch the all data files
-    local_data_path = ctx.get_input("LOCAL_DATA_PATH")
-    data_files = client.files.listFiles(
-        systemId=system_id,
-        path=local_data_path
-    )
-except Exception as e:
-    ctx.stderr(1, f"Failed to fetch data files: {str(e)}")
-
-# Create a list of all registered files
-registered_data_file_paths = []
-for manifest in manifests:
-    for manifest_data_file in manifest.files:
-        registered_data_file_paths.append(manifest_data_file["path"])
-
-registered_data_files = [
-    data_file for data_file in data_files
-    if data_file.path in registered_data_file_paths
-]
-
-# Find all data files that have not yet been registered with a manifest
-unregistered_data_files = [
-    data_file for data_file in data_files
-    if data_file.path not in registered_data_file_paths
-]
-
-# Check the manifest generation policy to determine whether all new
-# data files should be added to a single manifest, or a manifest
-# should be generated for each new data file
-# TODO consider querying for the file(s) sizes 2 times in a row at some interval and if
-# the size is different, keep polling until the last 2 sizes(for the same file(s)) are the same
 new_manifests = []
 manifest_generation_policy = ctx.get_input("MANIFEST_GENERATION_POLICY")
-if manifest_generation_policy == "one_per_file":
-    for unregistered_data_file in unregistered_data_files:
-        manifest_filename = f"{str(uuid4())}.json"
-        new_manifests.append(
-            ETLManifestModel(
-                filename=manifest_filename,
-                path=os.path.join(manifest_path, manifest_filename),
-                files=[unregistered_data_file]
-            )
+if manifest_generation_policy != "manual":
+    try:
+        new_manifests = generate_new_manfifests(
+            system_id,
+            data_path,
+            manifest_path,
+            manifest_generation_policy,
+            manifests,
+            client
         )
-elif manifest_generation_policy == "one_for_all":
-    manifest_filename = f"{str(uuid4())}.json" 
-    new_manifests.append(
-        ETLManifestModel(
-            filename=manifest_filename,
-            path=os.path.join(manifest_path, manifest_filename),
-            files=unregistered_data_files
-        )
-    )
-
-try:
-    # Persist all of the new manifests
-    for new_manifest in new_manifests:
-        new_manifest.create(system_id, client)
-except Exception as e:
-    ctx.stderr(1, f"Failed to create manifests: {e}")
+    except Exception as e:
+        ctx.stderr(f"Error generating manifests: {e}")
 
 # Make a list of all manifests
 all_manifests = manifests + new_manifests
@@ -178,20 +145,10 @@ unprocessed_manifests = [
     if manifest.status == EnumManifestStatus.Pending or manifest.filename == resubmit_manifest_name
 ]
 
+# No manifests to process. Exit successfully
 if len(unprocessed_manifests) == 0 and resubmit_manifest_name == None:
-    # Delete the lock file
-    try:
-        client.files.delete(
-            systemId=system_id,
-            path=os.path.join(manifest_path, lockfile_filename),
-            file=b""
-        )
-    except Exception as e:
-        ctx.stderr(1, f"Failed to delete lockfile: {e}")
-    
     ctx.set_output("ACTIVE_MANIFEST", json.dumps(None))
-
-    ctx.stdout("Exiting: No new data to process")
+    ctx.stdout("")
 
 # Reorder the unprocessed manifests from oldest to newest
 unprocessed_manifests.sort(key=lambda m: m.created_at, reverse=True)
@@ -200,17 +157,7 @@ unprocessed_manifests.sort(key=lambda m: m.created_at, reverse=True)
 if resubmit_manifest_name != None: # Is resubmission
     next_manifest = next(filter(lambda m: m.filename == resubmit_manifest_name + ".json", all_manifests), None)
     if next_manifest == None:
-        cleanup_error = ""
-        # Delete the lock file
-        try:
-            client.files.delete(
-                systemId=system_id,
-                path=os.path.join(manifest_path, lockfile_filename),
-                file=b""
-            )
-        except Exception as e:
-            cleanup_error = f"An additional error occurred when attempting to clean up the pipeline -> Failed to delete lockfile: {e} | NOTE: When this occurs, the lockfile must be deleted manually in order for this task to run"
-        ctx.stderr(1, f"Resubmit failed: Manifest {resubmit_manifest_name + '.json'} does not exist. {cleanup_error}")
+        ctx.stderr(1, f"Resubmit failed: Manifest {resubmit_manifest_name + '.json'} does not exist")
 else: # Not resubmission
     # Default to oldest manifest
     next_manifest = unprocessed_manifests[0]
@@ -225,6 +172,36 @@ try:
 except Exception as e:
     ctx.stderr(1, f"Failed to update manifest to 'active': {e}")
 
+# This step ensures that the file(s) in the manifest are ready for the current
+# operation (data processing or transfer) to be performed against them.
+data_integrity_type = ctx.get_input("DATA_INTEGRITY_TYPE")
+data_integrity_profile_props = {"type": data_integrity_type}
+data_integrity_profile = None
+try: 
+    if data_integrity_type == None:
+        data_integrity_profile = DataIntegrityProfile(
+            data_integrity_type,
+            done_files_path=ctx.get_input("DATA_INTEGRITY_DONE_FILES_PATH"),
+            pattern=ctx.get_input("DATA_INTEGRITY_DONE_FILE_PATTERN"),
+        )
+except TypeError as e:
+    ctx.stderr(1, str(e))
+
+# Check the integrity of each data file in the manifests based on the data
+# integrity profile
+validated = False
+if data_integrity_profile != None:
+    data_integrity_validator = DataIntegrityValidator(client)
+    (validated, err) = data_integrity_validator.validate(
+        next_manifest,
+        system_id,
+        data_integrity_profile
+    )
+
+# Fail the pipeline if the data integrity check failed
+if data_integrity_profile != None and not validated:
+    ctx.stderr(1, f"Data integrity checks failed | {err}")
+
 # Create an output to be used by the first job in the etl pipeline
 if len(next_manifest.files) > 0 and phase == EnumETLPhase.Inbound:
     tapis_system_file_ref_extension = ctx.get_input("TAPIS_SYSTEM_FILE_REF_EXTENSION")
@@ -232,16 +209,10 @@ if len(next_manifest.files) > 0 and phase == EnumETLPhase.Inbound:
         # Set the file_input_arrays to output
         ctx.set_output(f"{i}-etl-data-file-ref.{tapis_system_file_ref_extension}", json.dumps({"file": file}))
 
-# Delete the lock file
-try:
-    client.files.delete(
-        systemId=system_id,
-        path=os.path.join(manifest_path, lockfile_filename),
-        file=b""
-    )
-except Exception as e:
-    ctx.stderr(1, f"Failed to delete lockfile: {e}")
-
 # Output the json of the current manifest
 ctx.set_output("ACTIVE_MANIFEST", json.dumps(vars(next_manifest)))
+# NOTE IMPORTANT DO NOT REMOVE BELOW.
+# Calling stdout calls clean up hooks that were regsitered in the
+# beginning of the script
+ctx.stdout("")
 

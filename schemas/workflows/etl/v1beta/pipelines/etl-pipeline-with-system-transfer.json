@@ -90,31 +90,37 @@
                     }
                 },
                 "INCLUDE_PATTERN": {
+                    "required": false,
                     "valude_from": {
                         "env": "LOCAL_INBOX_INCLUDE_PATTERN"
                     }
                 },
                 "EXCLUDE_PATTERN": {
+                    "required": false,
                     "valude_from": {
                         "env": "LOCAL_INBOX_EXCLUDE_PATTERN"
                     }
                 },
                 "DATA_INTEGRITY_TYPE": {
+                    "required": false,
                     "value_from": {
                         "env": "LOCAL_INBOX_DATA_INTEGRITY_TYPE"
                     }
                 },
                 "DATA_INTEGRITY_DONE_FILES_PATH": {
+                    "required": false,
                     "value_from": {
                         "env": "LOCAL_INBOX_DATA_INTEGRITY_DONE_FILES_PATH"
                     }
                 },
                 "DATA_INTEGRITY_DONE_FILE_INCLUDE_PATTERN": {
+                    "required": false,
                     "value_from": {
                         "env": "LOCAL_INBOX_DATA_INTEGRITY_DONE_FILE_INCLUDE_PATTERN"
                     }
                 },
                 "DATA_INTEGRITY_DONE_FILE_EXCLUDE_PATTERN": {
+                    "required": false,
                     "value_from": {
                         "env": "LOCAL_INBOX_DATA_INTEGRITY_DONE_FILE_EXCLUDE_PATTERN"
                     }
@@ -346,21 +352,25 @@
                     }
                 },
                 "DATA_INTEGRITY_TYPE": {
+                    "required": false,
                     "value_from": {
                         "env": "LOCAL_OUTBOX_DATA_INTEGRITY_TYPE"
                     }
                 },
                 "DATA_INTEGRITY_DONE_FILES_PATH": {
+                    "required": false,
                     "value_from": {
                         "env": "LOCAL_OUTBOX_DATA_INTEGRITY_DONE_FILES_PATH"
                     }
                 },
                 "DATA_INTEGRITY_DONE_FILE_INCLUDE_PATTERN": {
+                    "required": false,
                     "value_from": {
                         "env": "LOCAL_OUTBOX_DATA_INTEGRITY_DONE_FILE_INCLUDE_PATTERN"
                     }
                 },
                 "DATA_INTEGRITY_DONE_FILE_EXCLUDE_PATTERN": {
+                    "required": false,
                     "value_from": {
                         "env": "LOCAL_OUTBOX_DATA_INTEGRITY_DONE_FILE_EXCLUDE_PATTERN"
                     }

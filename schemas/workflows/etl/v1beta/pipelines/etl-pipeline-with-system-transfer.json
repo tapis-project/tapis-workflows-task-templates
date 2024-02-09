@@ -91,13 +91,13 @@
                 },
                 "INCLUDE_PATTERN": {
                     "required": false,
-                    "valude_from": {
+                    "value_from": {
                         "env": "LOCAL_INBOX_INCLUDE_PATTERN"
                     }
                 },
                 "EXCLUDE_PATTERN": {
                     "required": false,
-                    "valude_from": {
+                    "value_from": {
                         "env": "LOCAL_INBOX_EXCLUDE_PATTERN"
                     }
                 },
@@ -342,12 +342,14 @@
                     }
                 },
                 "INCLUDE_PATTERN": {
-                    "valude_from": {
+                    "required": false,
+                    "value_from": {
                         "env": "LOCAL_OUTBOX_INCLUDE_PATTERN"
                     }
                 },
                 "EXCLUDE_PATTERN": {
-                    "valude_from": {
+                    "required": false,
+                    "value_from": {
                         "env": "LOCAL_OUTBOX_EXCLUDE_PATTERN"
                     }
                 },

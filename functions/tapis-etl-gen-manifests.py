@@ -9,7 +9,7 @@ from tapipy.tapis import Tapis
 from utils.etl import (
     ManifestModel,
     EnumManifestStatus,
-    EnumETLPhase,
+    EnumPhase,
     get_tapis_file_contents_json,
     delete_lockfile,
     generate_new_manfifests,
@@ -22,10 +22,10 @@ phase = ctx.get_input("PHASE")
 resubmit_manifest_name = None
 resubmit_inbound_manfiest_name = ctx.get_input("RESUBMIT_INBOUND")
 resubmit_outbound_manfiest_name = ctx.get_input("RESUBMIT_OUTBOUND")
-if phase == EnumETLPhase.Inbound and resubmit_inbound_manfiest_name != None:
+if phase == EnumPhase.Inbound and resubmit_inbound_manfiest_name != None:
     resubmit_manifest_name = resubmit_inbound_manfiest_name
 
-if phase == EnumETLPhase.Outbound and resubmit_outbound_manfiest_name != None:
+if phase == EnumPhase.Outbound and resubmit_outbound_manfiest_name != None:
     resubmit_manifest_name = resubmit_outbound_manfiest_name
 
 #TODO add rollbacks on execptions; i.e. delete the LOCKFILE
@@ -206,7 +206,7 @@ if data_integrity_profile != None and not validated:
     ctx.stderr(1, f"Data integrity checks failed | {err}")
 
 # Create an output to be used by the first job in the etl pipeline
-if len(next_manifest.files) > 0 and phase == EnumETLPhase.Inbound:
+if len(next_manifest.files) > 0 and phase == EnumPhase.Inbound:
     tapis_system_file_ref_extension = ctx.get_input("TAPIS_SYSTEM_FILE_REF_EXTENSION")
     for i, file in enumerate(next_manifest.files):
         # Set the file_input_arrays to output

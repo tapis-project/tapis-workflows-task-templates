@@ -124,11 +124,15 @@ new_manifests = []
 manifest_generation_policy = ctx.get_input("MANIFEST_GENERATION_POLICY")
 if manifest_generation_policy != "manual":
     try:
+        include_pattern = ctx.get_input("INCLUDE_PATTERN"),
+        exclude_pattern = ctx.get_input("EXCLUDE_PATTERN"),
+        print("include_pattern", include_pattern)
+        print("exclude_pattern", exclude_pattern)
         new_manifests = generate_new_manfifests(
             system_id=system_id,
             data_path=data_path,
-            include_pattern=ctx.get_input("INCLUDE_PATTERN"),
-            exclude_pattern=ctx.get_input("EXCLUDE_PATTERN"),
+            include_pattern=include_pattern,
+            exclude_pattern=exclude_pattern,
             manifests_path=manifests_path,
             manifest_generation_policy=manifest_generation_policy,
             manifests=manifests,

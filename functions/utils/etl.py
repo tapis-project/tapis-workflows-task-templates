@@ -97,10 +97,12 @@ def get_client(ctx):
 def match_patterns(target, include_pattern, exclude_pattern):
     matches_include = True
     if include_pattern != None:
+        print("MATCH PATTERNS INCLUDE", include_pattern, type(include_pattern))
         matches_include = re.match(include_pattern, target) != None
 
     matches_exclude = True
     if exclude_pattern != None:
+        print("MATCH PATTERNS EXCLUDE", exclude_pattern, type(exclude_pattern))
         matches_exclude = re.match(exclude_pattern, target) != None
 
     return matches_include and not matches_exclude
@@ -246,7 +248,7 @@ def generate_new_manfifests(
     
     try:
         data_files = unfiltered_data_files
-        if include_pattern != None and exclude_pattern != None:
+        if include_pattern != None or exclude_pattern != None:
             data_files = [
                 data_file for data_file in unfiltered_data_files
                 if match_patterns(data_file.name, include_pattern, exclude_pattern)

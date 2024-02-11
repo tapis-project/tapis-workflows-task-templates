@@ -124,10 +124,8 @@ new_manifests = []
 manifest_generation_policy = ctx.get_input("MANIFEST_GENERATION_POLICY")
 if manifest_generation_policy != "manual":
     try:
-        include_pattern = ctx.get_input("INCLUDE_PATTERN"),
-        exclude_pattern = ctx.get_input("EXCLUDE_PATTERN"),
-        print("include_pattern", include_pattern)
-        print("exclude_pattern", exclude_pattern)
+        include_pattern = fr'{ctx.get_input("INCLUDE_PATTERN")}',
+        exclude_pattern = fr'{ctx.get_input("EXCLUDE_PATTERN")}',
         new_manifests = generate_new_manfifests(
             system_id=system_id,
             data_path=data_path,
@@ -139,7 +137,7 @@ if manifest_generation_policy != "manual":
             client=client
         )
     except Exception as e:
-        ctx.stderr(f"Error generating manifests: {e}")
+        ctx.stderr(1, f"Error generating manifests: {e}")
 
 # Make a list of all manifests
 all_manifests = manifests + new_manifests

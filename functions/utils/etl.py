@@ -95,6 +95,7 @@ def get_client(ctx):
         ctx.stderr(1, f"Failed to authenticate: {e}")
 
 def match_patterns(target, include_pattern, exclude_pattern):
+    print(target, include_pattern, exclude_pattern)
     matches_include = True
     if include_pattern != None:
         print("MATCH PATTERNS INCLUDE", include_pattern, type(include_pattern))
@@ -123,8 +124,7 @@ class DataIntegrityProfile:
         if self.type == "checksum" or self.type == "byte_check":
             pass
         elif self.type == "done_file" and (
-            self.done_files_path == None
-            or self.pattern == None
+            self.done_files_path == None or self.pattern == None
         ):
             raise TypeError(f"Missing required properties for data integrity profile with type {self.type} | Values required: [done_files_path, pattern]")
 
@@ -141,6 +141,7 @@ class DataIntegrityValidator:
         )
         filtered_done_files = []
         for done_file in done_files:
+            print("CHECKING DONE_FILE", done_file)
             # Add files to the done files list if it complies with the include
             # and exclude patterns
             if match_patterns(

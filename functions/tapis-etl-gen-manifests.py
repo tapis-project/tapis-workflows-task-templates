@@ -2,7 +2,7 @@
 from owe_python_sdk.runtime import execution_context as ctx
 #-------- Workflow Context import: DO NOT REMOVE ----------------
 
-import json, os, time
+import json, os, time, re
 
 from tapipy.tapis import Tapis
 
@@ -124,8 +124,8 @@ new_manifests = []
 manifest_generation_policy = ctx.get_input("MANIFEST_GENERATION_POLICY")
 if manifest_generation_policy != "manual":
     try:
-        include_pattern = fr'{ctx.get_input("INCLUDE_PATTERN")}',
-        exclude_pattern = fr'{ctx.get_input("EXCLUDE_PATTERN")}',
+        include_pattern = re.compile(ctx.get_input("INCLUDE_PATTERN")),
+        exclude_pattern = re.compile(ctx.get_input("EXCLUDE_PATTERN")),
         new_manifests = generate_new_manfifests(
             system_id=system_id,
             data_path=data_path,

@@ -96,13 +96,17 @@ def get_client(ctx):
         ctx.stderr(1, f"Failed to authenticate: {e}")
 
 def match_patterns(target, include_pattern, exclude_pattern):
+    # If no patterns were provided, return True
+    if include_pattern == None and exclude_pattern == None:
+        return True
+    
     matches_include = True
     if include_pattern != None:
-        matches_include = fnmatch(include_pattern, target) != None
+        matches_include = fnmatch(include_pattern, target)
 
     matches_exclude = False
     if exclude_pattern != None:
-        matches_exclude = fnmatch(exclude_pattern, target) != None
+        matches_exclude = fnmatch(exclude_pattern, target)
 
     print("TARGET", target, f"matches include: {include_pattern} - {matches_include}", f"matches exclude: {exclude_pattern} - {matches_exclude}", "returns", matches_include and not matches_exclude)
 

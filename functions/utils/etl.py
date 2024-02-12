@@ -141,12 +141,11 @@ class DataIntegrityValidator:
             if match_patterns(file.name, profile.include_pattern, profile.exclude_pattern):
                 done_files.append(file)
 
-        print("done files", done_files)
-
         validated_files = []
         for file_in_manifest in manifest.files:
             validated = False
             for done_file in done_files:
+                print(file_in_manifest, "TYPE", type(file_in_manifest))
                 if file_in_manifest.name in done_file.name:
                     validated = True
                     validated_files.append(file_in_manifest)

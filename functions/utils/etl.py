@@ -97,11 +97,11 @@ def get_client(ctx):
 def match_patterns(target, include_pattern, exclude_pattern):
     matches_include = True
     if include_pattern != None:
-        matches_include = fnmatch(include_pattern, target) != None
+        matches_include = fnmatch.filter(include_pattern, target) != None
 
     matches_exclude = True
     if exclude_pattern != None:
-        matches_exclude = fnmatch(exclude_pattern, target) != None
+        matches_exclude = fnmatch.filter(exclude_pattern, target) != None
 
     return matches_include and not matches_exclude
 

@@ -131,7 +131,6 @@ class DataIntegrityValidator:
         self.errors = []
 
     def _done_file_validation(self, manifest, system_id, profile):
-        print("DONE FILE VALIDATION START")
         # Fetch the done files
         all_files = self.client.files.listFiles(
             system_id=system_id,
@@ -142,8 +141,6 @@ class DataIntegrityValidator:
         for file in all_files:
             if match_patterns(file.name, profile.include, profile.exclude):
                 done_files.append(file)
-
-        print("DONE FILES", done_files)
 
         validated_files = []
         for file_in_manifest in manifest.files:
@@ -193,7 +190,7 @@ class DataIntegrityValidator:
         validated = False
         try:
             if profile.type == "done_file":
-                validated = self._done_file_validation(manifest, system_id)
+                validated = self._done_file_validation(manifest, system_id, profile)
             elif profile.type == "checksum":
                 validated = self._checksum_validation(manifest, system_id)
             elif profile.type == "byte_check":
@@ -251,7 +248,6 @@ def generate_new_manfifests(
                 data_file for data_file in unfiltered_data_files
                 if match_patterns(data_file.name, include_pattern, exclude_pattern)
             ]
-        print("DATA FILES", data_files)
     except Exception as e:
         raise Exception(f"Error while filtering data files using provided include and exclude patterns: {str(e)}")
 

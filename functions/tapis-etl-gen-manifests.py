@@ -196,7 +196,6 @@ except Exception as e:
 # Check the integrity of each data file in the manifests based on the data
 # integrity profile
 validated = False
-print("DATA INTEGRITY PROFILE", data_integrity_profile)
 if data_integrity_profile != None:
     data_integrity_validator = DataIntegrityValidator(client)
     (validated, err) = data_integrity_validator.validate(

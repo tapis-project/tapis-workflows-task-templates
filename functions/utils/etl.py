@@ -138,7 +138,7 @@ class DataIntegrityValidator:
 
         done_files = []
         for file in all_files:
-            if match_patterns(file.name, profile.include, profile.exclude):
+            if match_patterns(file.name, profile.include_pattern, profile.exclude_pattern):
                 done_files.append(file)
 
         validated_files = []

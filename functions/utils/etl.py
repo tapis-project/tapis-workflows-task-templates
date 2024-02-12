@@ -103,6 +103,8 @@ def match_patterns(target, include_pattern, exclude_pattern):
     if exclude_pattern != None:
         matches_exclude = fnmatch.filter(exclude_pattern, target) != None
 
+    print("TARGET", target, f"matches include: {include_pattern}", f"matches include: {include_pattern}", "returns", matches_include and not matches_exclude)
+
     return matches_include and not matches_exclude
 
 class DataIntegrityProfile:
@@ -120,10 +122,8 @@ class DataIntegrityProfile:
 
         if self.type == "checksum" or self.type == "byte_check":
             pass
-        elif self.type == "done_file" and (
-            self.done_files_path == None or self.pattern == None
-        ):
-            raise TypeError(f"Missing required properties for data integrity profile with type {self.type} | Values required: [done_files_path, pattern]")
+        elif self.type == "done_file" and self.done_files_path == None:
+            raise TypeError(f"Missing required properties for data integrity profile with type {self.type} | Values required: [done_files_path]")
 
 class DataIntegrityValidator:
     def __init__(self, client):
@@ -247,11 +247,11 @@ def generate_new_manfifests(
     try:
         data_files = unfiltered_data_files
         if include_pattern != None or exclude_pattern != None:
-            print("FILTERING")
             data_files = [
                 data_file for data_file in unfiltered_data_files
                 if match_patterns(data_file.name, include_pattern, exclude_pattern)
             ]
+        print("DATA FILES", data_files)
     except Exception as e:
         raise Exception(f"Error while filtering data files using provided include and exclude patterns: {str(e)}")
 

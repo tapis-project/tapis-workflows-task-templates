@@ -132,7 +132,7 @@ class DataIntegrityValidator:
     def _done_file_validation(self, manifest, system_id, profile):
         # Fetch the done files
         all_files = self.client.files.listFiles(
-            system_id=system_id,
+            systemId=system_id,
             path=profile.done_files_path
         )
 
@@ -161,7 +161,7 @@ class DataIntegrityValidator:
         validations = []
         for file_in_manifest in manifest.files:
             file_on_system = self.client.flies.listFiles(
-                system_id=system_id,
+                systemId=system_id,
                 path=file_in_manifest.path
             )[0]
 

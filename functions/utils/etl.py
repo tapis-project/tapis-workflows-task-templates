@@ -141,19 +141,15 @@ class DataIntegrityValidator:
             if match_patterns(file.name, profile.include_pattern, profile.exclude_pattern):
                 done_files.append(file)
 
-        validated_files = []
         for file_in_manifest in manifest.files:
             validated = False
             for done_file in done_files:
-                print(file_in_manifest, "TYPE", type(file_in_manifest))
-                if file_in_manifest.name in done_file.name:
+                if file_in_manifest.get("name") in done_file.name:
                     validated = True
-                    validated_files.append(file_in_manifest)
                     break
 
             if not validated:
                 self.errors.append(f"Failed to find done file for file '{file_in_manifest.name}'")
-                break
         
         # Not really sure if this check is necessary. Perhaps just return false
         return len(self.errors) < 1

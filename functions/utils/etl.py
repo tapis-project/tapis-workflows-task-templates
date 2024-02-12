@@ -103,7 +103,7 @@ def match_patterns(target, include_pattern, exclude_pattern):
     if exclude_pattern != None:
         matches_exclude = fnmatch.filter(exclude_pattern, target) != None
 
-    print("TARGET", target, f"matches include: {include_pattern}", f"matches include: {include_pattern}", "returns", matches_include and not matches_exclude)
+    print("TARGET", target, f"matches include: {include_pattern}", f"matches exclude: {exclude_pattern}", "returns", matches_include and not matches_exclude)
 
     return matches_include and not matches_exclude
 

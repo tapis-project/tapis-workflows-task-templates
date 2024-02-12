@@ -1,4 +1,4 @@
-import enum, json, time, os, re
+import enum, json, time, os, fnmatch
 
 from uuid import uuid4
 
@@ -95,16 +95,13 @@ def get_client(ctx):
         ctx.stderr(1, f"Failed to authenticate: {e}")
 
 def match_patterns(target, include_pattern, exclude_pattern):
-    print(target, include_pattern, exclude_pattern)
     matches_include = True
     if include_pattern != None:
-        print("MATCH PATTERNS INCLUDE", include_pattern, type(include_pattern))
-        matches_include = re.match(include_pattern, target) != None
+        matches_include = fnmatch(include_pattern, target) != None
 
     matches_exclude = True
     if exclude_pattern != None:
-        print("MATCH PATTERNS EXCLUDE", exclude_pattern, type(exclude_pattern))
-        matches_exclude = re.match(exclude_pattern, target) != None
+        matches_exclude = fnmatch(exclude_pattern, target) != None
 
     return matches_include and not matches_exclude
 
@@ -135,20 +132,18 @@ class DataIntegrityValidator:
 
     def _done_file_validation(self, manifest, system_id, profile):
         # Fetch the done files
-        done_files = self.client.files.listFiles(
+        all_files = self.client.files.listFiles(
             system_id=system_id,
             path=profile.done_files_path
         )
-        filtered_done_files = []
-        for done_file in done_files:
-            print("CHECKING DONE_FILE", done_file)
-            # Add files to the done files list if it complies with the include
-            # and exclude patterns
-            if match_patterns(
-                done_file.name, 
-                profile.include_pattern, profile.exclude_pattern
-            ):
-                filtered_done_files.append(done_file)
+
+        done_files = []
+        for file in all_files:
+            if match_patterns(file.name, profile.include, profile.exclude):
+                done_files.append(file)
+
+        print("DONE FILES", done_files)
+
         validated_files = []
         for file_in_manifest in manifest.files:
             validated = False
@@ -161,8 +156,9 @@ class DataIntegrityValidator:
             if not validated:
                 self.errors.append(f"Failed to find done file for file '{file_in_manifest.name}'")
                 break
-
-        return len(validated_files) == len(done_files)
+        
+        # Not really sure if this check is necessary. Perhaps just return false
+        return len(self.errors) < 1
 
     def _byte_check_validation(self, manifest, system_id):
         validations = []

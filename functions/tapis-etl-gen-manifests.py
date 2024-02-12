@@ -2,7 +2,7 @@
 from owe_python_sdk.runtime import execution_context as ctx
 #-------- Workflow Context import: DO NOT REMOVE ----------------
 
-import json, os, time, re
+import json, os, time
 
 from tapipy.tapis import Tapis
 
@@ -124,18 +124,11 @@ new_manifests = []
 manifest_generation_policy = ctx.get_input("MANIFEST_GENERATION_POLICY")
 if manifest_generation_policy != "manual":
     try:
-        include_pattern = ctx.get_input("INCLUDE_PATTERN")
-        if include_pattern != None:
-            include_pattern = re.compile(include_pattern)
-
-        exclude_pattern = ctx.get_input("EXCLUDE_PATTERN")
-        if exclude_pattern != None:
-            exclude_pattern = re.compile(exclude_pattern)
         new_manifests = generate_new_manfifests(
             system_id=system_id,
             data_path=data_path,
-            include_pattern=include_pattern,
-            exclude_pattern=exclude_pattern,
+            include_pattern=ctx.get_input("INCLUDE_PATTERN"),
+            exclude_pattern=ctx.get_input("EXCLUDE_PATTERN"),
             manifests_path=manifests_path,
             manifest_generation_policy=manifest_generation_policy,
             manifests=manifests,
@@ -184,29 +177,20 @@ except Exception as e:
 # This step ensures that the file(s) in the manifest are ready for the current
 # operation (data processing or transfer) to be performed against them.
 data_integrity_type = ctx.get_input("DATA_INTEGRITY_TYPE")
-data_integrity_profile_props = {"type": data_integrity_type}
 data_integrity_profile = None
 try: 
-    done_file_include_pattern = ctx.get_input(
-        "DATA_INTEGRITY_DONE_FILE_INCLUDE_PATTERN"
-    )
-    if done_file_include_pattern != None:
-        done_file_include_pattern = re.compile(done_file_include_pattern)
-
-    done_file_exclude_pattern=ctx.get_input(
-        "DATA_INTEGRITY_DONE_FILE_EXCLUDE_PATTERN"
-    )
-    if done_file_exclude_pattern != None:
-        done_file_exclude_pattern = re.compile(done_file_exclude_pattern)
-
-    if data_integrity_type == None:
+    if data_integrity_type != None:
         data_integrity_profile = DataIntegrityProfile(
             data_integrity_type,
             done_files_path=ctx.get_input("DATA_INTEGRITY_DONE_FILES_PATH"),
-            include_pattern=done_file_include_pattern,
-            exclude_pattern=done_file_exclude_pattern
+            include_pattern=ctx.get_input(
+                "DATA_INTEGRITY_DONE_FILE_INCLUDE_PATTERN"
+            ),
+            exclude_pattern=ctx.get_input(
+                "DATA_INTEGRITY_DONE_FILE_EXCLUDE_PATTERN"
+            )
         )
-except TypeError as e:
+except Exception as e:
     ctx.stderr(1, str(e))
 
 # Check the integrity of each data file in the manifests based on the data

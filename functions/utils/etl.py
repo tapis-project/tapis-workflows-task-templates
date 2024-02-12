@@ -1,5 +1,6 @@
-import enum, json, time, os, fnmatch
+import enum, json, time, os
 
+from fnmatch import fnmatch
 from uuid import uuid4
 
 from tapipy.tapis import Tapis
@@ -97,11 +98,11 @@ def get_client(ctx):
 def match_patterns(target, include_pattern, exclude_pattern):
     matches_include = True
     if include_pattern != None:
-        matches_include = fnmatch.filter(include_pattern, target) != None
+        matches_include = fnmatch(include_pattern, target) != None
 
     matches_exclude = False
     if exclude_pattern != None:
-        matches_exclude = fnmatch.filter(exclude_pattern, target) != None
+        matches_exclude = fnmatch(exclude_pattern, target) != None
 
     print("TARGET", target, f"matches include: {include_pattern} - {matches_include}", f"matches exclude: {exclude_pattern} - {matches_exclude}", "returns", matches_include and not matches_exclude)
 

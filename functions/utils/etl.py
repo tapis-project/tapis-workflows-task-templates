@@ -131,6 +131,7 @@ class DataIntegrityValidator:
         self.errors = []
 
     def _done_file_validation(self, manifest, system_id, profile):
+        print("DONE FILE VALIDATION START")
         # Fetch the done files
         all_files = self.client.files.listFiles(
             system_id=system_id,

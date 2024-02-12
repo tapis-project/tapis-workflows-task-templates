@@ -99,7 +99,7 @@ def match_patterns(target, include_pattern, exclude_pattern):
     if include_pattern != None:
         matches_include = fnmatch.filter(include_pattern, target) != None
 
-    matches_exclude = True
+    matches_exclude = False
     if exclude_pattern != None:
         matches_exclude = fnmatch.filter(exclude_pattern, target) != None
 
@@ -247,6 +247,7 @@ def generate_new_manfifests(
     try:
         data_files = unfiltered_data_files
         if include_pattern != None or exclude_pattern != None:
+            print("FILTERING")
             data_files = [
                 data_file for data_file in unfiltered_data_files
                 if match_patterns(data_file.name, include_pattern, exclude_pattern)

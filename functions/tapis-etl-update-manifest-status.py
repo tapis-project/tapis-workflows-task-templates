@@ -6,7 +6,7 @@ import json, os, time
 
 from tapipy.tapis import Tapis
 
-from utils.etl import ETLManifestModel, EnumManifestStatus
+from utils.etl import ManifestModel, EnumManifestStatus
 
 def cleanup():
     # Delete the lock file
@@ -74,7 +74,7 @@ try:
         new_manifest_status = EnumManifestStatus.Completed
     
     # Load the manifest and update it with the current status
-    manifest = ETLManifestModel(**json.loads(ctx.get_input("MANIFEST")))
+    manifest = ManifestModel(**json.loads(ctx.get_input("MANIFEST")))
     manifest.status = new_manifest_status
     manifest.update(system_id, client)
 except Exception as e:

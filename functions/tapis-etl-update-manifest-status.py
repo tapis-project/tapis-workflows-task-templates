@@ -42,7 +42,7 @@ try:
     max_wait_time = 300
     lockfile_filename = ctx.get_input("LOCKFILE_FILENAME")
     system_id = ctx.get_input("SYSTEM_ID")
-    manifest_path = ctx.get_input("MANIFEST_PATH")
+    manifest_path = ctx.get_input("MANIFESTS_PATH")
     while manifests_locked:
         # Check if the total wait time was exceeded. If so, throw exception
         if time.time() - start_time >= max_wait_time:
@@ -62,7 +62,6 @@ try:
     client.files.insert(
         systemId=system_id,
         path=os.path.join(manifest_path, lockfile_filename),
-        file=b""
     )
 except Exception as e:
     ctx.stderr(1, f"Failed to generate lockfile: {str(e)}")

@@ -55,7 +55,7 @@ try:
 
     # Create the data directory if it doesn't exist. Equivalent
     # to `mkdir -p`
-    data_path = ctx.get_input("LOCAL_DATA_PATH")
+    data_path = ctx.get_input("DATA_PATH")
     client.files.mkdir(
         systemId=system_id,
         path=data_path

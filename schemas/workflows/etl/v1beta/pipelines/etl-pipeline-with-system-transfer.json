@@ -84,7 +84,7 @@
                         "env": "LOCAL_INBOX_MANIFEST_PRIORITY"
                     }
                 },
-                "LOCAL_DATA_PATH": {
+                "DATA_PATH": {
                     "value_from": {
                         "env": "LOCAL_INBOX_DATA_PATH"
                     }
@@ -191,6 +191,36 @@
             "id": "update-inbound-manifest-status",
             "description": "Sets the status of the inbound manifest currently being processed to completed/failed",
             "type": "template",
+            "uses": {
+                "name": "tapis/etl/update-manifest-status@v1beta",
+                "source": {
+                    "url": "https://github.com/tapis-project/tapis-workflows-task-templates.git",
+                    "branch": "master"
+                }
+            },
+            "conditions": [
+                {
+                    "and": [
+                        {
+                            "eq": [
+                                {"args": "RESUBMIT_OUTBOUND"},
+                                null
+                            ]
+                        },
+                        {
+                            "ne": [
+                                {
+                                    "task_output": {
+                                        "task_id": "gen-inbound-manifests",
+                                        "output_id": "ACTIVE_MANIFEST"
+                                    }
+                                },
+                                null
+                            ]
+                        }
+                    ]
+                }
+            ],
             "depends_on": [
                 {
                     "id": "gen-inbound-manifests",
@@ -203,13 +233,6 @@
                     "can_skip": false
                 }
             ],
-            "uses": {
-                "name": "tapis/etl/update-manifest-status@v1beta",
-                "source": {
-                    "url": "https://github.com/tapis-project/tapis-workflows-task-templates.git",
-                    "branch": "master"
-                }
-            },
             "input": {
                 "TAPIS_BASE_URL": {
                     "value_from": {
@@ -257,30 +280,7 @@
                         }
                     }
                 }
-            },
-            "conditions": [
-                {
-                    "and": [
-                        {
-                            "eq": [
-                                {"args": "RESUBMIT_OUTBOUND"},
-                                null
-                            ]
-                        },
-                        {
-                            "ne": [
-                                {
-                                    "task_output": {
-                                        "task_id": "gen-inbound-manifests",
-                                        "output_id": "ACTIVE_MANIFEST"
-                                    }
-                                },
-                                null
-                            ]
-                        }
-                    ]
-                }
-            ]
+            }
         },
         {
             "id": "gen-outbound-manifests",
@@ -336,7 +336,7 @@
                         "env": "LOCAL_OUTBOX_MANIFEST_PRIORITY"
                     }
                 },
-                "LOCAL_DATA_PATH": {
+                "DATA_PATH": {
                     "value_from": {
                         "env": "LOCAL_OUTBOX_DATA_PATH"
                     }

@@ -148,7 +148,6 @@ unprocessed_manifests = [
 ]
 
 # No manifests to process. Exit successfully
-print("UNPROCESSED MANIFESTS", unprocessed_manifests, "RESUBMIT_MANIFEST_NAME", resubmit_manifest_name)
 if len(unprocessed_manifests) == 0 and resubmit_manifest_name == None:
     ctx.set_output("ACTIVE_MANIFEST", json.dumps(None))
     ctx.stdout("")

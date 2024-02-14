@@ -215,7 +215,7 @@
                                         "output_id": "ACTIVE_MANIFEST"
                                     }
                                 },
-                                null
+                                "null"
                             ]
                         }
                     ]
@@ -427,7 +427,7 @@
                                         "output_id": "ACTIVE_MANIFEST"
                                     }
                                 },
-                                null
+                                "null"
                             ]
                         }
                     ]

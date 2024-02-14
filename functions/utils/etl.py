@@ -275,7 +275,10 @@ def generate_new_manfifests(
                     files=[unregistered_data_file]
                 )
             )
-    elif manifest_generation_policy == "auto_one_for_all":
+    elif (
+        manifest_generation_policy == "auto_one_for_all"
+        and len(unregistered_data_files) > 0
+    ):
         manifest_filename = f"{str(uuid4())}.json" 
         new_manifests.append(
             ManifestModel(

@@ -412,7 +412,7 @@
             },
             "conditions": [
                 {
-                    "or": [
+                    "and": [
                         {
                             "eq": [
                                 {"args": "RESUBMIT_INBOUND"},

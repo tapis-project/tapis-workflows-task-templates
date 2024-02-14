@@ -410,6 +410,29 @@
                     "branch": "master"
                 }
             },
+            "conditions": [
+                {
+                    "or": [
+                        {
+                            "eq": [
+                                {"args": "RESUBMIT_INBOUND"},
+                                null
+                            ]
+                        },
+                        {
+                            "ne": [
+                                {
+                                    "task_output": {
+                                        "task_id": "gen-outbound-manifests",
+                                        "output_id": "ACTIVE_MANIFEST"
+                                    }
+                                },
+                                null
+                            ]
+                        }
+                    ]
+                }
+            ],
             "depends_on": [
                 {"id": "gen-outbound-manifests"}
             ],
@@ -460,15 +483,7 @@
                         "env": "LOCAL_OUTBOX_SYSTEM_ID"
                     }
                 }
-            },
-            "conditions": [
-                {
-                    "eq": [
-                        {"args": "RESUBMIT_INBOUND"},
-                        null
-                    ]
-                }
-            ]
+            }
         },
         {
             "id": "outbound-status-reduce",

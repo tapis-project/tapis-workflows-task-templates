@@ -54,6 +54,11 @@ class ManifestModel:
             },
             indent=4
         )
+    
+    def update_status(self, status):
+        self.status = status
+        self.log(f"Status change: {status}")
+
     def log(self, message, prefix_datetime=True):
         if prefix_datetime:
             message = f"{str(datetime.now())} {message}"
@@ -69,7 +74,7 @@ class ManifestModel:
             file=self._to_json()
         )
 
-    def update(self, system_id, client):
+    def save(self, system_id, client):
         self.last_modified = time.time()
         client.files.insert(
             systemId=system_id,

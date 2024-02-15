@@ -25,7 +25,7 @@ class ManifestModel:
         files=[],
         status: EnumManifestStatus=EnumManifestStatus.Pending,
         logs=[],
-        created_at = None,
+        created_at=None,
         last_modified = None
     ):
         self.filename = filename
@@ -55,7 +55,7 @@ class ManifestModel:
         )
     def log(self, message, prefix_datetime=True):
         if prefix_datetime:
-            message = f"{str(datetime.now())} message"
+            message = f"{str(datetime.now())} {message}"
         self.logs.append(message)
 
     def create(self, system_id, client):
@@ -73,7 +73,7 @@ class ManifestModel:
         client.files.insert(
             systemId=system_id,
             path=self.path,
-            file=self._to_json
+            file=self._to_json()
         )
 
 def get_tapis_file_contents_json(client, system_id, path):

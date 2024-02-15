@@ -2,6 +2,7 @@ import enum, json, time, os
 
 from fnmatch import fnmatch
 from uuid import uuid4
+from datetime import datetime
 
 from tapipy.tapis import Tapis
 
@@ -23,6 +24,7 @@ class ManifestModel:
         path,
         files=[],
         status: EnumManifestStatus=EnumManifestStatus.Pending,
+        logs=[],
         created_at = None,
         last_modified = None
     ):
@@ -36,8 +38,25 @@ class ManifestModel:
 
             self.files.append(file.__dict__)
         self.status = status
+        self.logs = logs
         self.created_at = created_at
         self.last_modified = last_modified
+
+    def _to_json(self):
+        return json.dumps(
+            {
+                "status": self.status,
+                "files": self.files,
+                "logs": self.logs,
+                "created_at": self.created_at,
+                "last_modified": self.last_modified
+            },
+            indent=4
+        )
+    def log(self, message, prefix_datetime=True):
+        if prefix_datetime:
+            message = f"{str(datetime.now())} message"
+        self.logs.append(message)
 
     def create(self, system_id, client):
         self.created_at = time.time()
@@ -46,12 +65,7 @@ class ManifestModel:
         client.files.insert(
             systemId=system_id,
             path=self.path,
-            file=json.dumps({
-                "status": self.status,
-                "files": self.files,
-                "created_at": self.created_at,
-                "last_modified": self.last_modified
-            })
+            file=self._to_json()
         )
 
     def update(self, system_id, client):
@@ -59,12 +73,7 @@ class ManifestModel:
         client.files.insert(
             systemId=system_id,
             path=self.path,
-            file=json.dumps({
-                "status": self.status,
-                "files": self.files,
-                "created_at": self.created_at,
-                "last_modified": self.last_modified
-            })
+            file=self._to_json
         )
 
 def get_tapis_file_contents_json(client, system_id, path):
@@ -291,6 +300,7 @@ def generate_new_manfifests(
     try:
         # Persist all of the new manifests
         for new_manifest in new_manifests:
+            new_manifest.log("Created")
             new_manifest.create(system_id, client)
     except Exception as e:
         raise Exception(f"Failed to create manifests: {e}")

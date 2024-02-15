@@ -170,6 +170,7 @@ else: # Not resubmission
 # Update the status of the next manifest to 'active'
 try:
     next_manifest.status = EnumManifestStatus.Active
+    next_manifest.log(f"Status change: {next_manifest.status}")
     next_manifest.update(system_id, client)
 except Exception as e:
     ctx.stderr(1, f"Failed to update manifest to 'active': {e}")
@@ -206,7 +207,10 @@ if data_integrity_profile != None:
 
 # Fail the pipeline if the data integrity check failed
 if data_integrity_profile != None and not validated:
-    ctx.stderr(1, f"Data integrity checks failed | {err}")
+    next_manifest.log(f"Data integrity checks failed | {err}""")
+    next_manifest.update(system_id, client)
+    ctx.set_output("ACTIVE_MANIFEST", json.dumps(None))
+    ctx.stdout("")
 
 # Create an output to be used by the first job in the etl pipeline
 if len(next_manifest.files) > 0 and phase == EnumPhase.Inbound:

@@ -63,12 +63,14 @@ class ManifestModel:
     def log(self, message, prefix_datetime=True):
         if prefix_datetime:
             message = f"{str(datetime.now())} {message}"
+        print()
         self.logs.append(message)
 
     def create(self, system_id, client):
         self.created_at = time.time()
         self.last_modified = self.created_at
         self.log("Created")
+        print(f"LOGS ID: {id(self.logs)}")
         # Upload the contents of the manifest file to the tapis system
         client.files.insert(
             systemId=system_id,
@@ -307,6 +309,7 @@ def generate_new_manifests(
 
     try:
         # Persist all of the new manifests
+        print(f"MANIFEST IDs {[id(new_manifest) for new_manifest in new_manifests]}")
         for new_manifest in new_manifests:
             new_manifest.create(system_id, client)
     except Exception as e:

@@ -8,6 +8,7 @@ from tapipy.tapis import Tapis
 
 
 class EnumManifestStatus(str, enum.Enum):
+    Created = "created"
     Pending = "pending"
     IntegrityCheckFailed = "integrity_check_failed"
     Active = "active"
@@ -67,6 +68,7 @@ class ManifestModel:
     def create(self, system_id, client):
         self.created_at = time.time()
         self.last_modified = self.created_at
+        self.log("Created")
         # Upload the contents of the manifest file to the tapis system
         client.files.insert(
             systemId=system_id,
@@ -306,7 +308,6 @@ def generate_new_manifests(
     try:
         # Persist all of the new manifests
         for new_manifest in new_manifests:
-            new_manifest.log("Created")
             new_manifest.create(system_id, client)
     except Exception as e:
         raise Exception(f"Failed to create manifests: {e}")

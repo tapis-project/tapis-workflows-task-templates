@@ -165,7 +165,6 @@ unprocessed_manifests.sort(key=lambda m: m.created_at, reverse=True)
 if resubmit_manifest_name != None: # Is resubmission
     next_manifest = next(filter(lambda m: m.filename == resubmit_manifest_name + ".json", all_manifests), None)
     next_manifest.log("Resubmitting")
-    next_manifest.save()
     if next_manifest == None:
         ctx.stderr(1, f"Resubmit failed: Manifest {resubmit_manifest_name + '.json'} does not exist")
 else: # Not resubmission

@@ -13,8 +13,7 @@ def cleanup():
     try:
         client.files.delete(
             systemId=system_id,
-            path=os.path.join(manifest_path, lockfile_filename),
-            file=b""
+            path=os.path.join(manifests_path, lockfile_filename),
         )
     except Exception as e:
         ctx.stderr(1, f"Failed to delete lockfile: {e}")
@@ -42,7 +41,7 @@ try:
     max_wait_time = 300
     lockfile_filename = ctx.get_input("LOCKFILE_FILENAME")
     system_id = ctx.get_input("SYSTEM_ID")
-    manifest_path = ctx.get_input("MANIFESTS_PATH")
+    manifests_path = ctx.get_input("MANIFESTS_PATH")
     while manifests_locked:
         # Check if the total wait time was exceeded. If so, throw exception
         if time.time() - start_time >= max_wait_time:
@@ -51,7 +50,7 @@ try:
         # Fetch the all manifest files
         manifest_files = client.files.listFiles(
             systemId=system_id,
-            path=manifest_path
+            path=manifests_path
         )
 
         manifests_locked = lockfile_filename in [file.name for file in manifest_files]
@@ -61,7 +60,8 @@ try:
     # Create the lockfile
     client.files.insert(
         systemId=system_id,
-        path=os.path.join(manifest_path, lockfile_filename),
+        path=os.path.join(manifests_path, lockfile_filename),
+        file=b""
     )
 except Exception as e:
     ctx.stderr(1, f"Failed to generate lockfile: {str(e)}")
@@ -74,8 +74,8 @@ try:
     
     # Load the manifest and update it with the current status
     manifest = ManifestModel(**json.loads(ctx.get_input("MANIFEST")))
-    manifest.status = new_manifest_status
-    manifest.update(system_id, client)
+    manifest.set_status(new_manifest_status)
+    manifest.save(system_id, client)
 except Exception as e:
     cleanup()
     ctx.stderr(1, f"Failed to update last active manifest: {e}")

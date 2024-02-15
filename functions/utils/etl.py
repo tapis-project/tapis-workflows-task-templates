@@ -63,6 +63,7 @@ class ManifestModel:
     def log(self, message, prefix_datetime=True):
         if prefix_datetime:
             message = f"{str(datetime.now())} {message}"
+        print(f"CALLING LOGS: {self.filename} '{message}'" )
         self.logs.append(message)
 
     def create(self, system_id, client):

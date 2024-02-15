@@ -233,7 +233,7 @@ def delete_lockfile(client, system_id, manifests_path, lockfile_filename):
     except Exception as e:
         raise Exception(f"Failed to delete lockfile: {e}")
     
-def generate_new_manfifests(
+def generate_new_manifests(
     system_id,
     data_path,
     include_pattern,

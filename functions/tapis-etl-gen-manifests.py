@@ -12,7 +12,7 @@ from utils.etl import (
     EnumPhase,
     get_tapis_file_contents_json,
     delete_lockfile,
-    generate_new_manfifests,
+    generate_new_manifests,
     DataIntegrityValidator,
     DataIntegrityProfile
 )
@@ -20,13 +20,13 @@ from utils.etl import (
 # Set the variables related to resubmission.
 phase = ctx.get_input("PHASE")
 resubmit_manifest_name = None
-resubmit_inbound_manfiest_name = ctx.get_input("RESUBMIT_INBOUND")
-resubmit_outbound_manfiest_name = ctx.get_input("RESUBMIT_OUTBOUND")
-if phase == EnumPhase.Inbound and resubmit_inbound_manfiest_name != None:
-    resubmit_manifest_name = resubmit_inbound_manfiest_name
+resubmit_inbound_manifest_name = ctx.get_input("RESUBMIT_INBOUND")
+resubmit_outbound_manifest_name = ctx.get_input("RESUBMIT_OUTBOUND")
+if phase == EnumPhase.Inbound and resubmit_inbound_manifest_name != None:
+    resubmit_manifest_name = resubmit_inbound_manifest_name
 
-if phase == EnumPhase.Outbound and resubmit_outbound_manfiest_name != None:
-    resubmit_manifest_name = resubmit_outbound_manfiest_name
+if phase == EnumPhase.Outbound and resubmit_outbound_manifest_name != None:
+    resubmit_manifest_name = resubmit_outbound_manifest_name
 
 #TODO add rollbacks on execptions; i.e. delete the LOCKFILE
 tapis_base_url = ctx.get_input("TAPIS_BASE_URL")
@@ -124,7 +124,7 @@ new_manifests = []
 manifest_generation_policy = ctx.get_input("MANIFEST_GENERATION_POLICY")
 if manifest_generation_policy != "manual":
     try:
-        new_manifests = generate_new_manfifests(
+        new_manifests = generate_new_manifests(
             system_id=system_id,
             data_path=data_path,
             include_pattern=ctx.get_input("INCLUDE_PATTERN"),

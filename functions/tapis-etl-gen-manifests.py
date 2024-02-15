@@ -145,7 +145,7 @@ all_manifests = manifests + new_manifests
 unprocessed_manifests = [
     manifest for manifest in all_manifests
     if (
-        manifest.status == EnumManifestStatus.Pending
+        manifest.status in [EnumManifestStatus.Pending, EnumManifestStatus.IntegrityCheckFailed]
         or manifest.filename == resubmit_manifest_name
     )
 ]
@@ -211,6 +211,7 @@ if data_integrity_profile != None:
 # Fail the pipeline if the data integrity check failed
 if data_integrity_profile != None and not validated:
     next_manifest.log(f"Data integrity checks failed | {err}""")
+    next_manifest.status = EnumManifestStatus.IntegrityCheckFailed
     next_manifest.update(system_id, client)
     ctx.set_output("ACTIVE_MANIFEST", json.dumps(None))
     ctx.stdout("")

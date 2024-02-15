@@ -54,6 +54,7 @@ class ManifestModel:
             indent=4
         )
     def log(self, message, prefix_datetime=True):
+        print(f"LOG CALLED: {self.filename}")
         if prefix_datetime:
             message = f"{str(datetime.now())} {message}"
         self.logs.append(message)

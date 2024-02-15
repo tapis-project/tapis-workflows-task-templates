@@ -144,7 +144,10 @@ all_manifests = manifests + new_manifests
 # of 'pending' into a single list
 unprocessed_manifests = [
     manifest for manifest in all_manifests
-    if manifest.status == EnumManifestStatus.Pending or manifest.filename == resubmit_manifest_name
+    if (
+        manifest.status == EnumManifestStatus.Pending
+        or manifest.filename == resubmit_manifest_name
+    )
 ]
 
 # No manifests to process. Exit successfully

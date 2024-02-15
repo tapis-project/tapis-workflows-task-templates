@@ -149,7 +149,7 @@ class DataIntegrityValidator:
                     break
 
             if not validated:
-                self.errors.append(f"Failed to find done file for file '{file_in_manifest.name}'")
+                self.errors.append(f"Failed to find done file for file '{file_in_manifest.get('name')}'")
         
         # Not really sure if this check is necessary. Perhaps just return false
         return len(self.errors) < 1

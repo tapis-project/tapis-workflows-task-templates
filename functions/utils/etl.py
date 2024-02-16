@@ -25,24 +25,26 @@ class ManifestModel:
         path,
         files=None,
         status: EnumManifestStatus=EnumManifestStatus.Pending,
-        logs=[],
+        logs=None,
         created_at=None,
         last_modified = None
     ):
         self.filename = filename
         self.path = path
+        self.status = status
         self.files = []
-        print("filename", files)
+        self.logs = logs if logs != None else []
+        self.created_at = created_at
+        self.last_modified = last_modified
+
+        files = files if files != None else []
         for file in files:
             if type(file) == dict:
                 self.files.append(file)
                 continue
 
             self.files.append(file.__dict__)
-        self.status = status
-        self.logs = logs
-        self.created_at = created_at
-        self.last_modified = last_modified
+
 
     def _to_json(self):
         return json.dumps(

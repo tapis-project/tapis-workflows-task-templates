@@ -8,7 +8,6 @@ from tapipy.tapis import Tapis
 
 
 class EnumManifestStatus(str, enum.Enum):
-    Created = "created"
     Pending = "pending"
     IntegrityCheckFailed = "integrity_check_failed"
     Active = "active"
@@ -24,7 +23,7 @@ class ManifestModel:
         self,
         filename,
         path,
-        files=[],
+        files=None,
         status: EnumManifestStatus=EnumManifestStatus.Pending,
         logs=[],
         created_at=None,
@@ -33,6 +32,7 @@ class ManifestModel:
         self.filename = filename
         self.path = path
         self.files = []
+        print("filename", files)
         for file in files:
             if type(file) == dict:
                 self.files.append(file)
@@ -63,7 +63,6 @@ class ManifestModel:
     def log(self, message, prefix_datetime=True):
         if prefix_datetime:
             message = f"{str(datetime.now())} {message}"
-        print()
         self.logs.append(message)
 
     def create(self, system_id, client):

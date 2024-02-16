@@ -1,3 +1,5 @@
+print("IMPORTS")
+
 #-------- Workflow Context import: DO NOT REMOVE ----------------
 from owe_python_sdk.runtime import execution_context as ctx
 #-------- Workflow Context import: DO NOT REMOVE ----------------
@@ -16,6 +18,8 @@ from utils.etl import (
     DataIntegrityValidator,
     DataIntegrityProfile
 )
+
+print("IMPORTS DONES")
 
 # Set the variables related to resubmission.
 phase = ctx.get_input("PHASE")
@@ -64,6 +68,7 @@ except Exception as e:
     ctx.stderr(1, f"Failed to create directories: {e}")
 
 try:
+    print("WAIT FOR LOCKFILE")
     # Wait for the Lockfile to disappear.
     total_wait_time = 0
     manifests_locked = True
@@ -74,7 +79,7 @@ try:
         # Check if the total wait time was exceeded. If so, throw exception
         if time.time() - start_time >= max_wait_time:
             raise Exception(f"Max Wait Time Reached: {max_wait_time}")
-    
+
         # Fetch the all manifest files
         manifest_files = client.files.listFiles(
             systemId=system_id,
@@ -82,9 +87,12 @@ try:
         )
 
         manifests_locked = lockfile_filename in [file.name for file in manifest_files]
-            
+        if not manifests_locked:
+            break
+
         time.sleep(5)
 
+    print("CREATING LOCKFILE")
     # Create the lockfile
     client.files.insert(
         systemId=system_id,
@@ -95,6 +103,7 @@ except Exception as e:
     ctx.stderr(1, f"Failed to generate lockfile: {str(e)}")
 
 # Register the lockfile cleanup hook to be called on called to stderr and stdout
+print("REGISTERING HOOKS")
 add_hook_props = (
     delete_lockfile,
     client,
@@ -108,6 +117,7 @@ ctx.add_hook(0, *add_hook_props)
 # Fetch existing manifests and create new manifests
 try:
     # Get all of the contents of each manifest file
+    print("")
     manifests = []
     for manifest_file in manifest_files:
         manifests.append(

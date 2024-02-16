@@ -253,7 +253,6 @@ def generate_new_manifests(
     manifests,
     client
 ):
-    print("Generate NEW MANIFEST")
     try:
         # Fetch the all data files
         unfiltered_data_files = client.files.listFiles(

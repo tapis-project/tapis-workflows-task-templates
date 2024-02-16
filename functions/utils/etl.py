@@ -32,25 +32,24 @@ class ManifestModel:
     ):
         self.filename = filename
         self.path = path
+        self.status = status
+        self.created_at = created_at
+        self.last_modified = last_modified
 
         self.files = []
         if files != None:
             self.files = files
 
-        for file in files:
+        for file in self.files:
             if type(file) == dict:
                 self.files.append(file)
                 continue
 
             self.files.append(file.__dict__)
-        self.status = status
+            
         self.logs = []
         if logs != None:
             self.logs = logs
-            
-        self.logs = logs
-        self.created_at = created_at
-        self.last_modified = last_modified
 
     def _to_json(self):
         return json.dumps(
@@ -78,7 +77,6 @@ class ManifestModel:
         self.created_at = time.time()
         self.last_modified = self.created_at
         self.log("Created")
-        print(f"LOGS ID: {id(self.logs)}")
         # Upload the contents of the manifest file to the tapis system
         client.files.insert(
             systemId=system_id,

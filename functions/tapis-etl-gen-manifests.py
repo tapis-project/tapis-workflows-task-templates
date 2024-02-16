@@ -145,7 +145,8 @@ all_manifests = manifests + new_manifests
 unprocessed_manifests = [
     manifest for manifest in all_manifests
     if (
-        manifest.status in [EnumManifestStatus.Pending, EnumManifestStatus.IntegrityCheckFailed]
+        manifest.status in [
+            EnumManifestStatus.Pending, EnumManifestStatus.IntegrityCheckFailed]
         or manifest.filename == resubmit_manifest_name
     )
 ]

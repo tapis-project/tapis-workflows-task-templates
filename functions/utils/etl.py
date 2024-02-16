@@ -55,7 +55,7 @@ class ManifestModel:
             indent=4
         )
     
-    def update_status(self, status):
+    def set_status(self, status):
         self.status = status
         self.log(f"Status change: {status}")
 

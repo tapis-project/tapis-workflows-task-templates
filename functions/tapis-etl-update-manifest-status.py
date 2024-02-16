@@ -56,7 +56,7 @@ try:
     manifest.set_status(new_manifest_status)
     manifest.save(system_id, client)
 except Exception as e:
-    delete_lockfile(system_id, manifests_path, lockfile_filename)
+    delete_lockfile(client, system_id, manifests_path, lockfile_filename)
     ctx.stderr(1, f"Failed to update last active manifest: {e}")
 
-delete_lockfile(system_id, manifests_path, lockfile_filename)
+delete_lockfile(client, system_id, manifests_path, lockfile_filename)

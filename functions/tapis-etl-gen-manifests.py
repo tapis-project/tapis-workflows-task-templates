@@ -162,7 +162,7 @@ else: # Not resubmission
 
 # Update the status of the next manifest to 'active'
 try:
-    next_manifest.update_status(EnumManifestStatus.Active)
+    next_manifest.set_status(EnumManifestStatus.Active)
     next_manifest.save(system_id, client)
 except Exception as e:
     ctx.stderr(1, f"Failed to update manifest to 'active': {e}")
@@ -200,7 +200,7 @@ if data_integrity_profile != None:
 # Fail the pipeline if the data integrity check failed
 if data_integrity_profile != None and not validated:
     next_manifest.log(f"Data integrity checks failed | {err}")
-    next_manifest.update_status(EnumManifestStatus.IntegrityCheckFailed)
+    next_manifest.set_status(EnumManifestStatus.IntegrityCheckFailed)
     next_manifest.save(system_id, client)
     ctx.set_output("ACTIVE_MANIFEST", json.dumps(None))
     ctx.stdout("")

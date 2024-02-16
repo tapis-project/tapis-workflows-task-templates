@@ -146,7 +146,9 @@ unprocessed_manifests = [
     manifest for manifest in all_manifests
     if (
         manifest.status in [
-            EnumManifestStatus.Pending, EnumManifestStatus.IntegrityCheckFailed]
+            EnumManifestStatus.Pending,
+            EnumManifestStatus.IntegrityCheckFailed
+        ]
         or manifest.filename == resubmit_manifest_name
     )
 ]
@@ -162,6 +164,7 @@ unprocessed_manifests.sort(key=lambda m: m.created_at, reverse=True)
 # Change the next manifest to the manifest associated with the resubmission
 if resubmit_manifest_name != None: # Is resubmission
     next_manifest = next(filter(lambda m: m.filename == resubmit_manifest_name + ".json", all_manifests), None)
+    next_manifest.log("Resubmitting")
     if next_manifest == None:
         ctx.stderr(1, f"Resubmit failed: Manifest {resubmit_manifest_name + '.json'} does not exist")
 else: # Not resubmission

@@ -45,7 +45,6 @@ class ManifestModel:
 
             self.files.append(file.__dict__)
 
-
     def _to_json(self):
         return json.dumps(
             {
@@ -70,7 +69,7 @@ class ManifestModel:
     def create(self, system_id, client):
         self.created_at = time.time()
         self.last_modified = self.created_at
-        self.log("Created")
+        self.log(f"Created. Tracking {len(self.files)} file(s)")
         # Upload the contents of the manifest file to the tapis system
         client.files.insert(
             systemId=system_id,

@@ -4,8 +4,6 @@ from fnmatch import fnmatch
 from uuid import uuid4
 from datetime import datetime
 
-from tapipy.tapis import Tapis
-
 
 class EnumManifestStatus(str, enum.Enum):
     Pending = "pending"
@@ -87,31 +85,6 @@ class ManifestModel:
 
 def get_tapis_file_contents_json(client, system_id, path):
     return client.files.getContents(systemId=system_id, path=path)
-
-def get_client(ctx):
-    username = ctx.get_input("TAPIS_USERNAME")
-    password = ctx.get_input("TAPIS_PASSWORD")
-    jwt = ctx.get_input("TAPIS_JWT")
-
-    if (username == None or password == None) and jwt == None:
-        ctx.stderr(1, "Unable to authenticate with tapis: Must provide either a username with a password or a JWT")
-
-    kwargs = {
-        "username": username,
-        "password": password,
-        "jwt": jwt
-    }
-
-    try:
-        t = Tapis(
-            base_url=ctx.get_input("TAPIS_BASE_URL"),
-            **kwargs
-        )
-        
-        if username and password and not jwt:
-            t.get_tokens()
-    except Exception as e:
-        ctx.stderr(1, f"Failed to authenticate: {e}")
 
 def match_patterns(target, include_pattern, exclude_pattern):
     matches_include = True

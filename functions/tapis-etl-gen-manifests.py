@@ -67,7 +67,12 @@ except Exception as e:
 try:
     # Wait for the Lockfile to disappear.
     lockfile_filename = ctx.get_input("LOCKFILE_FILENAME")
-    manifest_files = await_lockfile_fetch_manifest_files(lockfile_filename)
+    manifest_files = await_lockfile_fetch_manifest_files(
+        client,
+        system_id,
+        manifests_path,
+        lockfile_filename
+    )
 
     # Create the lockfile
     create_lockfile(system_id, manifests_path, lockfile_filename)

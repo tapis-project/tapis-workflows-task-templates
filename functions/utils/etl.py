@@ -225,7 +225,41 @@ class DataIntegrityValidator:
             validated,
             err if error_count > 0 else None
         )
+    
+def await_lockfile_fetch_manifest_files(client, system_id, manifests_path, lockfile_filename):
+    manifests_locked = True
+    start_time = time.time()
+    max_wait_time = 300
+    while manifests_locked:
+        # Check if the total wait time was exceeded. If so, throw exception
+        if time.time() - start_time >= max_wait_time:
+            raise Exception(f"Max Wait Time Reached: {max_wait_time}")
+    
+        # Fetch the all manifest files
+        manifest_files = client.files.listFiles(
+            systemId=system_id,
+            path=manifests_path
+        )
 
+        manifests_locked = lockfile_filename in [file.name for file in manifest_files]
+        if not manifests_locked:
+            break
+            
+        time.sleep(5)
+
+    return manifest_files
+
+def create_lockfile(client, system_id, manifests_path, lockfile_filename):
+    try:
+        # Create the lockfile
+        client.files.insert(
+            systemId=system_id,
+            path=os.path.join(manifests_path, lockfile_filename),
+            file=b""
+        )
+    except Exception as e:
+        raise Exception(f"Failed to create lockfile: {e}")
+    
 def delete_lockfile(client, system_id, manifests_path, lockfile_filename):
     # Delete the lock file
     try:
@@ -235,6 +269,7 @@ def delete_lockfile(client, system_id, manifests_path, lockfile_filename):
         )
     except Exception as e:
         raise Exception(f"Failed to delete lockfile: {e}")
+    
     
 def generate_new_manifests(
     system_id,

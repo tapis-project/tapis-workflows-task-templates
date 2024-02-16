@@ -11,11 +11,16 @@ from utils.etl import (
     EnumManifestStatus,
     EnumPhase,
     get_tapis_file_contents_json,
+    create_lockfile,
     delete_lockfile,
+    await_lockfile_fetch_manifest_files,
     generate_new_manifests,
     DataIntegrityValidator,
     DataIntegrityProfile
 )
+
+from utils.tapis import get_client
+
 
 # Set the variables related to resubmission.
 phase = ctx.get_input("PHASE")
@@ -28,20 +33,16 @@ if phase == EnumPhase.Inbound and resubmit_inbound_manifest_name != None:
 if phase == EnumPhase.Outbound and resubmit_outbound_manifest_name != None:
     resubmit_manifest_name = resubmit_outbound_manifest_name
 
-#TODO add rollbacks on execptions; i.e. delete the LOCKFILE
-tapis_base_url = ctx.get_input("TAPIS_BASE_URL")
-tapis_username = ctx.get_input("TAPIS_USERNAME")
-tapis_password = ctx.get_input("TAPIS_PASSWORD")
 try:
     # Instantiate a Tapis client
-    client = Tapis(
-        base_url=tapis_base_url,
-        username=tapis_username,
-        password=tapis_password,
+    client = get_client(
+        ctx.get_input("TAPIS_BASE_URL"),
+        username=ctx.get_input("TAPIS_USERNAME"),
+        password=ctx.get_input("TAPIS_PASSWORD"),
+        jwt=ctx.get_input("TAPIS_JWT")
     )
-    client.get_tokens()
 except Exception as e:
-    ctx.stderr(1, f"Failed to initialize Tapis client: {e}")
+    ctx.stderr(str(e))
 
 try:
     # Create the manifests directory if it doesn't exist. Equivalent
@@ -65,32 +66,11 @@ except Exception as e:
 
 try:
     # Wait for the Lockfile to disappear.
-    total_wait_time = 0
-    manifests_locked = True
-    start_time = time.time()
-    max_wait_time = 300
     lockfile_filename = ctx.get_input("LOCKFILE_FILENAME")
-    while manifests_locked:
-        # Check if the total wait time was exceeded. If so, throw exception
-        if time.time() - start_time >= max_wait_time:
-            raise Exception(f"Max Wait Time Reached: {max_wait_time}")
-    
-        # Fetch the all manifest files
-        manifest_files = client.files.listFiles(
-            systemId=system_id,
-            path=manifests_path
-        )
-
-        manifests_locked = lockfile_filename in [file.name for file in manifest_files]
-            
-        time.sleep(5)
+    manifest_files = await_lockfile_fetch_manifest_files(lockfile_filename)
 
     # Create the lockfile
-    client.files.insert(
-        systemId=system_id,
-        path=os.path.join(manifests_path, lockfile_filename),
-        file=b""
-    )
+    create_lockfile(system_id, manifests_path, lockfile_filename)
 except Exception as e:
     ctx.stderr(1, f"Failed to generate lockfile: {str(e)}")
 

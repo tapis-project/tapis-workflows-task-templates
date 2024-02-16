@@ -308,7 +308,6 @@ def generate_new_manifests(
 
     try:
         # Persist all of the new manifests
-        print(f"MANIFEST IDs {[id(new_manifest) for new_manifest in new_manifests]}")
         for new_manifest in new_manifests:
             new_manifest.create(system_id, client)
     except Exception as e:

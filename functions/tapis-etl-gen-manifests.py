@@ -110,7 +110,6 @@ try:
     # Get all of the contents of each manifest file
     manifests = []
     for manifest_file in manifest_files:
-        print(**json.loads(get_tapis_file_contents_json(client, system_id, manifest_file.path)))
         manifests.append(
             ManifestModel(
                 filename=manifest_file.name,
@@ -166,6 +165,7 @@ unprocessed_manifests.sort(key=lambda m: m.created_at, reverse=True)
 if resubmit_manifest_name != None: # Is resubmission
     next_manifest = next(filter(lambda m: m.filename == resubmit_manifest_name + ".json", all_manifests), None)
     next_manifest.log("Resubmitting")
+    next_manifest.save()
     if next_manifest == None:
         ctx.stderr(1, f"Resubmit failed: Manifest {resubmit_manifest_name + '.json'} does not exist")
 else: # Not resubmission

@@ -24,7 +24,7 @@ class ManifestModel:
         self,
         filename,
         path,
-        files=[],
+        files=None,
         status: EnumManifestStatus=EnumManifestStatus.Pending,
         logs=[],
         created_at=None,
@@ -32,8 +32,8 @@ class ManifestModel:
     ):
         self.filename = filename
         self.path = path
-        self.files = []
-        for file in files:
+        self.files = files if files != None else []
+        for file in self.files:
             if type(file) == dict:
                 self.files.append(file)
                 continue

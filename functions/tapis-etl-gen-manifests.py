@@ -110,6 +110,7 @@ try:
     # Get all of the contents of each manifest file
     manifests = []
     for manifest_file in manifest_files:
+        print(**json.loads(get_tapis_file_contents_json(client, system_id, manifest_file.path)))
         manifests.append(
             ManifestModel(
                 filename=manifest_file.name,

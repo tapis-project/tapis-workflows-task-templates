@@ -75,7 +75,7 @@ try:
     )
 
     # Create the lockfile
-    create_lockfile(system_id, manifests_path, lockfile_filename)
+    create_lockfile(client, system_id, manifests_path, lockfile_filename)
 except Exception as e:
     ctx.stderr(1, f"Failed to generate lockfile: {str(e)}")
 

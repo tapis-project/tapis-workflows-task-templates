@@ -45,11 +45,13 @@ try:
         url = f.get("url")
         destination_filename = url.rsplit("/", 1)[1]
         protocol = url.rsplit("://")[0]
+        destination_uri = f"{protocol}://{os.path.join(remote_inbox_system_id, destination_path, destination_filename)}"
+        print(destination_uri)
         elements.append({
             # FIXME .replace of system name in destinationURI should be deleted as soon as the insert
             # operation is available for Globus-type systems
             "sourceURI": f.get("url").replace(local_inbox_system_id, local_outbox_system_id), # NOTE See 'NOTE' above
-            "destinationURI": f"{protocol}://{os.path.join(remote_inbox_system_id, destination_path, destination_filename)}"
+            "destinationURI": destination_uri
         })
 
     ctx.set_output("ELEMETNS", elements)

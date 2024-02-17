@@ -28,6 +28,9 @@ except Exception as e:
 ctx.set_output("STATUS", "FAILED")
 
 try:
+    # Log the transfer start
+    manifest.log(f"Starting transfer of {len(manifest.files)} file(s)")
+
     # Create the destination dir on the remote inbox if it doesn't exist
     remote_inbox_system_id = ctx.get_input("REMOTE_INBOX_SYSTEM_ID")
     destination_path = ctx.get_input("DESTINATION_PATH")
@@ -59,15 +62,19 @@ try:
 except Exception as e:
     ctx.stdout(f"Elements: {elements} \nFailed to create transfer task: {e}")
 
+print(f"Status: {task.status}")
+
 # Poll the transfer task until it reaches a terminal state
 try:
     while task.status not in ["COMPLETED", "FAILED"]:
+        print(f"Status: {task.status}")
         time.sleep(5)
         task = client.files.getTransferTask(
             transferTaskId=task.uuid
         )
 
     ctx.set_output("TRANSFER_TASK", task.__dict__)
+    print(f"Status: {task.status}")
 
     if task.status == "FAILED":
         ctx.stdout(f"Error message for transfer task: {task.errorMessage}")

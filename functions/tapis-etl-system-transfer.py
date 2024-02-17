@@ -6,19 +6,16 @@ import os, json, time
 from tapipy.tapis import Tapis
 
 from utils.etl import ManifestModel
+from utils.tapis import get_client
 
 
-tapis_base_url = ctx.get_input("TAPIS_BASE_URL")
-tapis_username = ctx.get_input("TAPIS_USERNAME")
-tapis_password = ctx.get_input("TAPIS_PASSWORD")
 try:
     # Instantiate a Tapis client
-    client = Tapis(
-        base_url=tapis_base_url,
-        username=tapis_username,
-        password=tapis_password,
+    client = get_client(
+        ctx.get_input("TAPIS_BASE_URL"),
+        username = ctx.get_input("TAPIS_USERNAME"),
+        password = ctx.get_input("TAPIS_PASSWORD")
     )
-    client.get_tokens()
 except Exception as e:
     ctx.stderr(1, f"Failed to initialize Tapis client: {e}")
 
@@ -45,15 +42,14 @@ try:
         # NOTE: remove this input as soon as insert operation is available for Globus-type systems
         local_inbox_system_id = ctx.get_input("LOCAL_INBOX_SYSTEM_ID")
         local_outbox_system_id = ctx.get_input("LOCAL_OUTBOX_SYSTEM_ID")
+        url = f.get("url")
+        destination_filename = url.rsplit("/", 1)[1]
+        protocol = url.rsplit("://")[0]
         elements.append({
             # FIXME .replace of system name in destinationURI should be deleted as soon as the insert
             # operation is available for Globus-type systems
             "sourceURI": f.get("url").replace(local_inbox_system_id, local_outbox_system_id), # NOTE See 'NOTE' above
-            "destinationURI": os.path.join(
-                f.get("url").rsplit("/", 2)[0].replace(local_inbox_system_id, remote_inbox_system_id), # NOTE See 'NOTE' and 'FIXME' above
-                destination_path.lstrip("/"),
-                f.get("name")
-            )
+            "destinationURI": f"{protocol}://{os.path.join(remote_inbox_system_id, destination_path, destination_filename)}"
         })
 
     ctx.set_output("ELEMETNS", elements)

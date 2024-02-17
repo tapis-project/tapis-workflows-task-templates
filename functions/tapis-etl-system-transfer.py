@@ -30,7 +30,6 @@ ctx.set_output("STATUS", "FAILED")
 try:
     # Create the destination dir on the remote inbox if it doesn't exist
     remote_inbox_system_id = ctx.get_input("REMOTE_INBOX_SYSTEM_ID")
-    print("REMOTE INBOX SYSTEM ID", remote_inbox_system_id)
     destination_path = ctx.get_input("DESTINATION_PATH")
     client.files.mkdir(
         systemId=remote_inbox_system_id,
@@ -46,8 +45,7 @@ try:
         url = f.get("url")
         destination_filename = url.rsplit("/", 1)[1]
         protocol = url.rsplit("://")[0]
-        destination_uri = f"{protocol}://{os.path.join(remote_inbox_system_id, destination_path, destination_filename)}"
-        print(destination_uri)
+        destination_uri = f"{protocol}://{remote_inbox_system_id}{os.path.join(destination_path.strip('/'), destination_filename)}"
         elements.append({
             # FIXME .replace of system name in destinationURI should be deleted as soon as the insert
             # operation is available for Globus-type systems

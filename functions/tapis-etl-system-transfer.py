@@ -56,7 +56,7 @@ try:
             "destinationURI": destination_uri
         })
 
-    ctx.set_output("ELEMETNS", elements)
+    ctx.set_output("ELEMENTS", elements)
 
     task = client.files.createTransferTask(elements=elements)
 except Exception as e:
@@ -66,13 +66,26 @@ print(f"Status: {task.status}")
 
 # Poll the transfer task until it reaches a terminal state
 try:
-    while task.status not in ["COMPLETED", "FAILED"]:
+    while task.status not in ["COMPLETED", "FAILED", "FAILED_OPT", "CANCELLED"]:
         print(f"Status: {task.status}")
         time.sleep(5)
         task = client.files.getTransferTask(
             transferTaskId=task.uuid
         )
 
+    # Add transfer data to the manifest's metadata
+    transfers = []
+    for parent_task in task.parent_tasks:
+        transfers.append({
+            "id": parent_task.id,
+            "sourceURI": parent_task.sourceURI,
+            "destinationURI": parent_task.destinationURI,
+            "errorMessage": parent_task.errorMessage,
+            "uuid": parent_task.uuid
+        })
+
+        
+    manifest.add_metadata({"transfers": transfers})
     ctx.set_output("TRANSFER_TASK", task.__dict__)
     print(f"Status: {task.status}")
 

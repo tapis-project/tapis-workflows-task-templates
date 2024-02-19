@@ -25,7 +25,8 @@ class ManifestModel:
         status: EnumManifestStatus=EnumManifestStatus.Pending,
         logs=None,
         created_at=None,
-        last_modified = None
+        last_modified=None,
+        metadata=None
     ):
         self.filename = filename
         self.path = path
@@ -34,6 +35,7 @@ class ManifestModel:
         self.logs = logs if logs != None else []
         self.created_at = created_at
         self.last_modified = last_modified
+        self.metadata = metadata if metadata != None else {}
 
         files = files if files != None else []
         for file in files:
@@ -50,10 +52,17 @@ class ManifestModel:
                 "files": self.files,
                 "logs": self.logs,
                 "created_at": self.created_at,
-                "last_modified": self.last_modified
+                "last_modified": self.last_modified,
+                "metadata": self.metadata
             },
             indent=4
         )
+    
+    def add_metadata(self, metadata):
+        self.metadata = {
+            **self.metadata,
+            **metadata
+        }
     
     def set_status(self, status):
         self.status = status
@@ -68,15 +77,14 @@ class ManifestModel:
         self.created_at = time.time()
         self.last_modified = self.created_at
         self.log(f"Created. Tracking {len(self.files)} file(s)")
-        # Upload the contents of the manifest file to the tapis system
-        client.files.insert(
-            systemId=system_id,
-            path=self.path,
-            file=self._to_json()
-        )
+        self._persist(system_id, client)
 
     def save(self, system_id, client):
         self.last_modified = time.time()
+        self._persist(system_id, client)
+        
+
+    def _persist(self, system_id, client):
         client.files.insert(
             systemId=system_id,
             path=self.path,

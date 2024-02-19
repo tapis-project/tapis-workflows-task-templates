@@ -57,12 +57,9 @@ try:
 except Exception as e:
     ctx.stdout(f"Elements: {elements} \nFailed to create transfer task: {e}")
 
-print(f"Status: {task.status}")
-
 # Poll the transfer task until it reaches a terminal state
 try:
     while task.status not in ["COMPLETED", "FAILED", "FAILED_OPT", "CANCELLED"]:
-        print(f"Status: {task.status}")
         time.sleep(5)
         task = client.files.getTransferTask(
             transferTaskId=task.uuid
@@ -81,7 +78,6 @@ try:
 
         
     # manifest.add_metadata({"transfers": transfers})
-    print(f"Final Status: {task.status}")
 
     if task.status != "COMPLETED":
         # Default the transfer success flag to false.

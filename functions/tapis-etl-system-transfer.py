@@ -24,9 +24,6 @@ try:
 except Exception as e:
     ctx.stderr(1, f"Error initializing manifest: {e}")
 
-# Default the transfer success flag to false.
-ctx.set_output("STATUS", "FAILED")
-
 try:
     # Log the transfer start
     manifest.log(f"Starting transfer of {len(manifest.files)} file(s)")
@@ -87,10 +84,13 @@ try:
         
     manifest.add_metadata({"transfers": transfers})
     ctx.set_output("TRANSFER_TASK", task.__dict__)
+    ctx.set_output("STATUS", "COMPLETED")
     print(f"Status: {task.status}")
 
-    if task.status == "FAILED":
-        ctx.stdout(f"Error message for transfer task: {task.errorMessage}")
+    if task.status != "COMPLETED":
+        # Default the transfer success flag to false.
+        ctx.set_output("STATUS", "FAILED")
+        ctx.stdout(f"Transfer task failed to complete. Status '{task.status}' | Error message for transfer task: {task.errorMessage}")
 except Exception as e:
     ctx.stdout(str(e))
 

@@ -504,7 +504,7 @@
             ],
             "input": {
                 "COMPARATOR": {
-                    "value": "FINISHED"
+                    "value": "COMPLETED"
                 },
                 "CONTAINS": {
                     "value": "STATUS"

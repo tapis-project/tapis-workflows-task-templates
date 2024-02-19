@@ -53,8 +53,6 @@ try:
             "destinationURI": destination_uri
         })
 
-    ctx.set_output("ELEMENTS", elements)
-
     task = client.files.createTransferTask(elements=elements)
 except Exception as e:
     ctx.stdout(f"Elements: {elements} \nFailed to create transfer task: {e}")
@@ -70,21 +68,19 @@ try:
             transferTaskId=task.uuid
         )
 
-    # Add transfer data to the manifest's metadata
-    transfers = []
-    for parent_task in task.parent_tasks:
-        transfers.append({
-            "id": parent_task.id,
-            "sourceURI": parent_task.sourceURI,
-            "destinationURI": parent_task.destinationURI,
-            "errorMessage": parent_task.errorMessage,
-            "uuid": parent_task.uuid
-        })
+    # # Add transfer data to the manifest's metadata
+    # transfers = []
+    # for parent_task in task.parent_tasks:
+    #     transfers.append({
+    #         "id": parent_task.id,
+    #         "sourceURI": parent_task.sourceURI,
+    #         "destinationURI": parent_task.destinationURI,
+    #         "errorMessage": parent_task.errorMessage,
+    #         "uuid": parent_task.uuid
+    #     })
 
         
-    manifest.add_metadata({"transfers": transfers})
-    ctx.set_output("TRANSFER_TASK", task.__dict__)
-    ctx.set_output("STATUS", "COMPLETED")
+    # manifest.add_metadata({"transfers": transfers})
     print(f"Final Status: {task.status}")
 
     if task.status != "COMPLETED":

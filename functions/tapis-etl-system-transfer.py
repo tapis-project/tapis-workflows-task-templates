@@ -85,7 +85,7 @@ try:
     manifest.add_metadata({"transfers": transfers})
     ctx.set_output("TRANSFER_TASK", task.__dict__)
     ctx.set_output("STATUS", "COMPLETED")
-    print(f"Status: {task.status}")
+    print(f"Final Status: {task.status}")
 
     if task.status != "COMPLETED":
         # Default the transfer success flag to false.

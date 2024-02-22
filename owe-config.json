@@ -20,6 +20,12 @@
     "tapis/pods/restart@v1beta": {
         "path": "schemas/pods/latest/restart.json"
     },
+    "tapis/etl/prepare-systems@v1beta": {
+        "path": "schemas/workflows/etl/v1beta/prepare-systems.json"
+    },
+    "tapis/etl/ingest-data@v1beta": {
+        "path": "schemas/workflows/etl/v1beta/ingest-data.json"
+    },
     "tapis/etl/gen-manifests@v1beta": {
         "path": "schemas/workflows/etl/v1beta/gen-manifests.json"
     },

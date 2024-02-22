@@ -37,6 +37,112 @@
     },
     "tasks": [
         {
+            "id": "prepare-systems",
+            "description": "Create required directories on all systems",
+            "type": "template",
+            "uses": {
+                "name": "tapis/etl/prepare-systems@v1beta",
+                "source": {
+                    "url": "https://github.com/tapis-project/tapis-workflows-task-templates.git",
+                    "branch": "master"
+                }
+            },
+            "depends_on": [],
+            "input": {
+                "TAPIS_BASE_URL": {
+                    "value_from": {
+                        "args": "TAPIS_BASE_URL"
+                    }
+                },
+                "TAPIS_USERNAME": {
+                    "value_from": {
+                        "args": "TAPIS_USERNAME"
+                    }
+                },
+                "TAPIS_PASSWORD": {
+                    "value_from": {
+                        "args": "TAPIS_PASSWORD"
+                    }
+                },
+                "TAPIS_JWT": {
+                    "value_from": {
+                        "args": "TAPIS_PASSWORD"
+                    }
+                },
+                "LOCAL_INBOX": {
+                    "value_from": {
+                        "env": "LOCAL_INBOX"
+                    }
+                },
+                "LOCAL_OUTBOX": {
+                    "value_from": {
+                        "env": "LOCAL_OUTBOX"
+                    }
+                },
+                "REMOTE_INBOX": {
+                    "value_from": {
+                        "env": "REMOTE_INBOX"
+                    }
+                },
+                "REMOTE_OUTBOX": {
+                    "value_from": {
+                        "env": "REMOTE_OUTBOX"
+                    }
+                }
+            }
+        },
+        {
+            "id": "ingest-data",
+            "description": "Transfer data files and manifest from the remote outbox to the local inbox",
+            "type": "template",
+            "uses": {
+                "name": "tapis/etl/ingest-data@v1beta",
+                "source": {
+                    "url": "https://github.com/tapis-project/tapis-workflows-task-templates.git",
+                    "branch": "master"
+                }
+            },
+            "depends_on": [
+                {
+                    "id": "prepare-systems",
+                    "can_fail": false,
+                    "can_skip": true
+                }
+            ],
+            "input": {
+                "TAPIS_BASE_URL": {
+                    "value_from": {
+                        "args": "TAPIS_BASE_URL"
+                    }
+                },
+                "TAPIS_USERNAME": {
+                    "value_from": {
+                        "args": "TAPIS_USERNAME"
+                    }
+                },
+                "TAPIS_PASSWORD": {
+                    "value_from": {
+                        "args": "TAPIS_PASSWORD"
+                    }
+                },
+                "TAPIS_JWT": {
+                    "value_from": {
+                        "args": "TAPIS_PASSWORD"
+                    }
+                },
+                "LOCAL_INBOX": {
+                    "value_from": {
+                        "env": "LOCAL_INBOX"
+                    }
+                },
+                "REMOTE_OUTBOX": {
+                    "value_from": {
+                        "env": "REMOTE_OUTBOX"
+                    }
+                }
+            }
+        },
+        {
             "id": "gen-inbound-manifests",
             "description": "Generates a manifests for data files in the data directory of the local inbox system",
             "type": "template",
@@ -47,7 +153,13 @@
                     "branch": "master"
                 }
             },
-            "depends_on": [],
+            "depends_on": [
+                {
+                    "id": "ingest-data",
+                    "can_fail": false,
+                    "can_skip": false
+                }
+            ],
             "input": {
                 "TAPIS_BASE_URL": {
                     "value_from": {

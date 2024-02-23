@@ -46,9 +46,9 @@
             "depends_on": [],
             "conditions": [
                 {
-                    "ne": [
+                    "eq": [
                         {"args": "SKIP_PREPARE_SYSTEMS"},
-                        null
+                        true
                     ]
                 }
             ],

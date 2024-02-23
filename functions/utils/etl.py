@@ -219,6 +219,9 @@ class PipelineLock:
         self._await_lockfile(max_wait_sec=max_wait_sec)
         self._create_lockfile()
 
+    def release(self):
+        self._delete_lockfile()
+
     def _await_lockfile(self, max_wait_sec):
         start_time = time.time()
         while self._locked:

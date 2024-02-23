@@ -30,12 +30,10 @@ try:
     local_inbox = json.loads(ctx.get_input("LOCAL_INBOX"))
     local_outbox = json.loads(ctx.get_input("LOCAL_OUTBOX"))
     remote_inbox = json.loads(ctx.get_input("REMOTE_INBOX"))
-    control_system = json.loads(ctx.get_input("CONTROL_SYSTEM"))
 except json.JSONDecodeError as e:
     ctx.stderr(1, f"{e}")
 
 systems = [
-    control_system,
     remote_outbox,
     local_inbox,
     local_outbox,
@@ -48,14 +46,14 @@ try:
         # Create the data directory if it doesn't exist. Equivalent
         # to `mkdir -p`
         client.files.mkdir(
-            systemId=system.get("system_id"),
+            systemId=system.get("writable_system_id"),
             path=system.get("data_path")
         )
 
         # Create the manifests directory if it doesn't exist. Equivalent
         # to `mkdir -p`
         client.files.mkdir(
-            systemId=system.get("system_id"),
+            systemId=system.get("writable_system_id"),
             path=system.get("manifests_path")
         )
 except Exception as e:

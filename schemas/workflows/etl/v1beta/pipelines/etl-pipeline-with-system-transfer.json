@@ -34,7 +34,7 @@
     "tasks": [
         {
             "id": "prepare-systems",
-            "description": "Create directories required by an etl pipelineon all systems",
+            "description": "Create directories required by an etl pipeline on all systems",
             "type": "template",
             "uses": {
                 "name": "tapis/etl/prepare-systems@v1beta",
@@ -62,7 +62,7 @@
                 },
                 "TAPIS_JWT": {
                     "value_from": {
-                        "args": "TAPIS_PASSWORD"
+                        "args": "TAPIS_JWT"
                     }
                 },
                 "LOCAL_INBOX": {
@@ -123,7 +123,7 @@
                 },
                 "TAPIS_JWT": {
                     "value_from": {
-                        "args": "TAPIS_PASSWORD"
+                        "args": "TAPIS_JWT"
                     }
                 },
                 "INGRESS_SYSTEM": {
@@ -174,7 +174,7 @@
                 },
                 "TAPIS_JWT": {
                     "value_from": {
-                        "args": "TAPIS_PASSWORD"
+                        "args": "TAPIS_JWT"
                     }
                 },
                 "LOCAL_INBOX": {

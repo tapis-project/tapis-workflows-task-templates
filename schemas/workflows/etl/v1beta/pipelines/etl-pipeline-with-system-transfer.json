@@ -47,7 +47,7 @@
             "conditions": [
                 {
                     "ne": [
-                        {"arg": "SKIP_PREPARE_SYSTEMS"},
+                        {"args": "SKIP_PREPARE_SYSTEMS"},
                         null
                     ]
                 }

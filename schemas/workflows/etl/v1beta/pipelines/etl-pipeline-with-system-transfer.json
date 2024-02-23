@@ -44,6 +44,14 @@
                 }
             },
             "depends_on": [],
+            "conditions": [
+                {
+                    "ne": [
+                        {"arg": "SKIP_PREPARE_SYSTEMS"},
+                        null
+                    ]
+                }
+            ],
             "input": {
                 "TAPIS_BASE_URL": {
                     "value_from": {

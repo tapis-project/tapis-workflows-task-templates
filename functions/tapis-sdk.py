@@ -6,30 +6,18 @@ import json
 
 from tapipy.tapis import Tapis, TapisResult
 
+from utils.tapis import get_client
 
-username = ctx.get_input("TAPIS_USERNAME")
-password = ctx.get_input("TAPIS_PASSWORD")
-jwt = ctx.get_input("TAPIS_JWT")
-
-if (username == None or password == None) and jwt == None:
-    ctx.stderr(1, "Unable to authenticate with tapis: Must provide either a username with a password or a JWT")
-
-kwargs = {
-    "username": username,
-    "password": password,
-    "jwt": jwt
-}
-
+# Instantiate a Tapis client
 try:
-    t = Tapis(
-        base_url=ctx.get_input("TAPIS_BASE_URL"),
-        **kwargs
+    t = get_client(
+        ctx.get_input("TAPIS_BASE_URL"),
+        username=ctx.get_input("TAPIS_USERNAME"),
+        password=ctx.get_input("TAPIS_PASSWORD"),
+        jwt=ctx.get_input("TAPIS_JWT")
     )
-    
-    if username and password and not jwt:
-        t.get_tokens()
 except Exception as e:
-    ctx.stderr(1, f"Failed to authenticate: {e}")
+    ctx.stderr(str(e))
 
 resource_name = ctx.get_input("RESOURCE_NAME")
 operation_name = ctx.get_input("OPERTION_NAME")
@@ -47,7 +35,6 @@ try:
 
     request = json.loads(ctx.get_input("REQUEST", "{}"))
     result = operation(**request)
-
 
     if type(result) == list:
         result = [r.__dict__ if type(r) == TapisResult else r for r in result]

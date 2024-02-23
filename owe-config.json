@@ -23,6 +23,9 @@
     "tapis/etl/prepare-systems@v1beta": {
         "path": "schemas/workflows/etl/v1beta/prepare-systems.json"
     },
+    "tapis/etl/pull-manifests@v1beta": {
+        "path": "schemas/workflows/etl/v1beta/pull-manifests.json"
+    },
     "tapis/etl/ingest-data@v1beta": {
         "path": "schemas/workflows/etl/v1beta/ingest-data.json"
     },

@@ -7,8 +7,7 @@ import json, os
 from constants.etl import ROOT_MANIFEST_FILENAME
 from utils.etl import (
     ManifestModel,
-    lock_manifests,
-    unlock_manifests
+    PipelineLock
 )
 
 from utils.tapis import get_client
@@ -27,14 +26,25 @@ except Exception as e:
 
 # Deserialize system details
 try:
-    local_inbox = ctx.get_input("LOCAL_INBOX")
-    local_outbox = ctx.get_input("LOCAL_OUTBOX")
+    remote_outbox = json.loads(ctx.get_input("REMOTE_OUTBOX"))
+    local_inbox = json.loads(ctx.get_input("LOCAL_INBOX"))
+    local_outbox = json.loads(ctx.get_input("LOCAL_OUTBOX"))
+    remote_inbox = json.loads(ctx.get_input("REMOTE_INBOX"))
+    control_system = json.loads(ctx.get_input("CONTROL_SYSTEM"))
 except json.JSONDecodeError as e:
     ctx.stderr(1, f"{e}")
 
-# Create the directories on the local inbox and local outbox systems
+systems = [
+    control_system,
+    remote_outbox,
+    local_inbox,
+    local_outbox,
+    remote_inbox
+]
+
+# Create the directories on the writable systems
 try:
-    for system in [local_inbox, local_outbox]:
+    for system in [system for system in systems if system.get("writable")]:
         # Create the data directory if it doesn't exist. Equivalent
         # to `mkdir -p`
         client.files.mkdir(
@@ -54,21 +64,16 @@ except Exception as e:
 try:
     # Lock the manifests directory to prevent other concurrent pipeline runs
     # from mutating manifest files
-    lock_manifests(client, local_inbox)
+    lock = PipelineLock(client, local_inbox)
+    lock.acquire()
 except Exception as e:
-    ctx.stderr(1, f"Failed to generate lockfile: {str(e)}")
+    ctx.stderr(1, f"Failed to lock pipeline: {str(e)}")
 
 # Register the lockfile cleanup hook to be called on called to stderr and
 # stdout. This will unlock the manifests lock when the program exits with any
 # code
-add_hook_props = (
-    unlock_manifests,
-    client,
-    local_inbox.get("system_id"),
-    local_inbox.get("manifests_path")
-)
-ctx.add_hook(1, *add_hook_props)
-ctx.add_hook(0, *add_hook_props)
+ctx.add_hook(1, lock.release)
+ctx.add_hook(0, lock.release)
 
 # Create the root manifest if it does not exist. The root manifest is used
 # to track which 

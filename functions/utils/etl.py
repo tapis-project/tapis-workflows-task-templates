@@ -4,6 +4,8 @@ from fnmatch import fnmatch
 from uuid import uuid4
 from datetime import datetime
 
+from constants.etl import LOCKFILE_FILENAME
+
 
 class EnumManifestStatus(str, enum.Enum):
     Pending = "pending"
@@ -207,49 +209,63 @@ class DataIntegrityValidator:
             err if error_count > 0 else None
         )
     
-def await_lockfile_fetch_manifest_files(client, system_id, manifests_path, lockfile_filename):
-    manifests_locked = True
-    start_time = time.time()
-    max_wait_time = 300
-    while manifests_locked:
-        # Check if the total wait time was exceeded. If so, throw exception
-        if time.time() - start_time >= max_wait_time:
-            raise Exception(f"Max Wait Time Reached: {max_wait_time}")
-    
-        # Fetch the all manifest files
-        manifest_files = client.files.listFiles(
-            systemId=system_id,
-            path=manifests_path
-        )
+class PipelineLock:
+    def __init__(self, client, system):
+        self._client = client
+        self._system = system
+        self._locked = True
 
-        manifests_locked = lockfile_filename in [file.name for file in manifest_files]
-        if not manifests_locked:
-            break
-            
+    def acquire(self, max_wait_sec=300):
+        self._await_lockfile(max_wait_sec=max_wait_sec)
+        self._create_lockfile()
+
+    def _await_lockfile(self, max_wait_sec):
+        start_time = time.time()
+        while self._locked:
+            # Check if the total wait time was exceeded. If so, throw exception
+            if time.time() - start_time >= max_wait_sec:
+                raise Exception(f"Max Wait Time Reached: {max_wait_sec}")
+        
+            # Fetch all manifest files
+            files = self._client.files.listFiles(
+                systemId=self.system.get("writable_system_id"),
+                path=self.system.get("manifests_path")
+            )
+
+            self._locked = LOCKFILE_FILENAME in [file.name for file in files]
+            if not self._locked:
+                break
+                
+            time.sleep(5)
+
+    def _create_lockfile(self):
+        try:
+            # Create the lockfile
+            self._client.files.insert(
+                systemId=self._system.get("writable_system_id"),
+                path=os.path.join(self._system.get("manifests_path"), LOCKFILE_FILENAME),
+                file=b""
+            )
+        except Exception as e:
+            raise Exception(f"Failed to create lockfile: {e}")
+        
+    def _delete_lockfile(self):
+        # Delete the lock file
+        try:
+            self._client.files.delete(
+                systemId=self._system.get("writable_system_id"),
+                path=os.path.join(self._system.get("manifests_path"), LOCKFILE_FILENAME)
+            )
+        except Exception as e:
+            raise Exception(f"Failed to delete lockfile: {e}")
+        
+def poll_transfer_task(client, task):
+    while task.status not in ["COMPLETED", "FAILED", "FAILED_OPT", "CANCELLED"]:
         time.sleep(5)
-
-    return manifest_files
-
-def create_lockfile(client, system_id, manifests_path, lockfile_filename):
-    try:
-        # Create the lockfile
-        client.files.insert(
-            systemId=system_id,
-            path=os.path.join(manifests_path, lockfile_filename),
-            file=b""
+        task = client.files.getTransferTask(
+            transferTaskId=task.uuid
         )
-    except Exception as e:
-        raise Exception(f"Failed to create lockfile: {e}")
-    
-def delete_lockfile(client, system_id, manifests_path, lockfile_filename):
-    # Delete the lock file
-    try:
-        client.files.delete(
-            systemId=system_id,
-            path=os.path.join(manifests_path, lockfile_filename),
-        )
-    except Exception as e:
-        raise Exception(f"Failed to delete lockfile: {e}")
+    return task
     
     
 def generate_new_manifests(

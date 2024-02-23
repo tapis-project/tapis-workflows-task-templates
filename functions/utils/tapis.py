@@ -2,7 +2,6 @@ from tapipy.tapis import Tapis
 
 
 def get_client(base_url, username=None, password=None, jwt=None):
-
     if (username == None or password == None) and jwt == None:
         raise Exception("Unable to authenticate with tapis: Must provide either a username-password combination or a JWT")
 

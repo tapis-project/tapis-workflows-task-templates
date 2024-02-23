@@ -9,15 +9,16 @@ from utils.etl import ManifestModel
 from utils.tapis import get_client
 
 
+# Instantiate a Tapis client
 try:
-    # Instantiate a Tapis client
     client = get_client(
         ctx.get_input("TAPIS_BASE_URL"),
-        username = ctx.get_input("TAPIS_USERNAME"),
-        password = ctx.get_input("TAPIS_PASSWORD")
+        username=ctx.get_input("TAPIS_USERNAME"),
+        password=ctx.get_input("TAPIS_PASSWORD"),
+        jwt=ctx.get_input("TAPIS_JWT")
     )
 except Exception as e:
-    ctx.stderr(1, f"Failed to initialize Tapis client: {e}")
+    ctx.stderr(str(e))
 
 try:
     manifest = ManifestModel(**json.loads(ctx.get_input("MANIFEST")))

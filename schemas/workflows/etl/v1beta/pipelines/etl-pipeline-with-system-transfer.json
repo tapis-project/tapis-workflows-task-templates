@@ -26,10 +26,6 @@
         }
     },
     "env": {
-        "LOCKFILE_FILENAME": {
-            "type": "string",
-            "value": "TAPIS_ETL_MANIFEST.lock"
-        },
         "TAPIS_SYSTEM_FILE_REF_EXTENSION": {
             "type": "string",
             "value": "TapisSystemFile.json"
@@ -38,7 +34,7 @@
     "tasks": [
         {
             "id": "prepare-systems",
-            "description": "Create required directories on all systems",
+            "description": "Create directories required by an etl pipelineon all systems",
             "type": "template",
             "uses": {
                 "name": "tapis/etl/prepare-systems@v1beta",
@@ -92,8 +88,59 @@
             }
         },
         {
-            "id": "ingest-data",
-            "description": "Transfer data files and manifest from the remote outbox to the local inbox",
+            "id": "pull-remote-outbox-manifests",
+            "description": "Transfer manifests from remote outbox to remote inbox",
+            "type": "template",
+            "uses": {
+                "name": "tapis/etl/pull-manifests@v1beta",
+                "source": {
+                    "url": "https://github.com/tapis-project/tapis-workflows-task-templates.git",
+                    "branch": "master"
+                }
+            },
+            "depends_on": [
+                {
+                    "id": "prepare-systems",
+                    "can_fail": false,
+                    "can_skip": true
+                }
+            ],
+            "input": {
+                "TAPIS_BASE_URL": {
+                    "value_from": {
+                        "args": "TAPIS_BASE_URL"
+                    }
+                },
+                "TAPIS_USERNAME": {
+                    "value_from": {
+                        "args": "TAPIS_USERNAME"
+                    }
+                },
+                "TAPIS_PASSWORD": {
+                    "value_from": {
+                        "args": "TAPIS_PASSWORD"
+                    }
+                },
+                "TAPIS_JWT": {
+                    "value_from": {
+                        "args": "TAPIS_PASSWORD"
+                    }
+                },
+                "INGRESS_SYSTEM": {
+                    "value_from": {
+                        "env": "REMOTE_INBOX"
+                    }
+                },
+                "EGRESS_SYSTEM": {
+                    "value_from": {
+                        "env": "REMOTE_OUTBOX"
+                    }
+                }
+            }
+        },
+        {
+            "id": "ingest-remote-outbox-data",
+            "description": "Transfer data files from the remote outbox to the local inbox",
             "type": "template",
             "uses": {
                 "name": "tapis/etl/ingest-data@v1beta",
@@ -237,11 +284,6 @@
                         "env": "LOCAL_INBOX_DATA_INTEGRITY_DONE_FILE_EXCLUDE_PATTERN"
                     }
                 },
-                "LOCKFILE_FILENAME": {
-                    "value_from": {
-                        "env": "LOCKFILE_FILENAME"
-                    }
-                },
                 "PHASE": {
                     "value": "inbound"
                 },
@@ -371,11 +413,6 @@
                         "env": "LOCAL_INBOX_MANIFESTS_PATH"
                     }
                 },
-                "LOCKFILE_FILENAME": {
-                    "value_from": {
-                        "env": "LOCKFILE_FILENAME"
-                    }
-                },
                 "MANIFEST": {
                     "value_from": {
                         "task_output": {
@@ -487,11 +524,6 @@
                     "required": false,
                     "value_from": {
                         "env": "LOCAL_OUTBOX_DATA_INTEGRITY_DONE_FILE_EXCLUDE_PATTERN"
-                    }
-                },
-                "LOCKFILE_FILENAME": {
-                    "value_from": {
-                        "env": "LOCKFILE_FILENAME"
                     }
                 },
                 "PHASE": {
@@ -688,11 +720,6 @@
                 "MANIFESTS_PATH": {
                     "value_from": {
                         "env": "LOCAL_OUTBOX_MANIFESTS_PATH"
-                    }
-                },
-                "LOCKFILE_FILENAME": {
-                    "value_from": {
-                        "env": "LOCKFILE_FILENAME"
                     }
                 },
                 "PHASE_COMPLETED": {

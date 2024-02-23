@@ -16,8 +16,8 @@ from utils.etl import (
 from utils.tapis import get_client
 
 
+# Instantiate a Tapis client
 try:
-    # Instantiate a Tapis client
     client = get_client(
         ctx.get_input("TAPIS_BASE_URL"),
         username=ctx.get_input("TAPIS_USERNAME"),

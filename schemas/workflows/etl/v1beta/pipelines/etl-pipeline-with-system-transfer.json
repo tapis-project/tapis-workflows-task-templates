@@ -163,7 +163,7 @@
                 {
                     "id": "pull-remote-outbox-manifests",
                     "can_fail": false,
-                    "can_skip": true
+                    "can_skip": false
                 }
             ],
             "input": {

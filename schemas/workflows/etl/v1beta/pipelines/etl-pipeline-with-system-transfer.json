@@ -205,7 +205,7 @@
             },
             "depends_on": [
                 {
-                    "id": "ingest-data",
+                    "id": "ingest-remote-outbox-data",
                     "can_fail": false,
                     "can_skip": false
                 }

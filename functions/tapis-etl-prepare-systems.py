@@ -33,8 +33,6 @@ try:
 except json.JSONDecodeError as e:
     ctx.stderr(1, f"{e}")
 
-print(remote_outbox)
-
 systems = [
     remote_outbox,
     local_inbox,
@@ -48,7 +46,7 @@ try:
         writable_system_id = system.get("writable_system_id")
         data_transfer_system_id = system.get("data_transfer_system_id")
         system_id = writable_system_id if writable_system_id != None else data_transfer_system_id
-        print("SYSTEM_ID", system_id)
+        
         # Create the data directory if it doesn't exist. Equivalent
         # to `mkdir -p`
         client.files.mkdir(
@@ -96,7 +94,7 @@ try:
         manifest = ManifestModel(
             filename=ROOT_MANIFEST_FILENAME,
             path=os.path.join(
-                local_inbox.manifests_path,
+                local_inbox.get("manifests_path"),
                 ROOT_MANIFEST_FILENAME
             ),
             files=[]

@@ -123,7 +123,7 @@ try:
         root_manifest.log(f"Transfer task(s) failed. {task}")
         ctx.stderr(1, f"Transfer task failed to complete. Status '{task.status}' | Error message for transfer task: {task.errorMessage}")
 
-    root_manifest.log()
+    print("TASK", task)
 except Exception as e:
     ctx.stderr(1, f"{e}")
 

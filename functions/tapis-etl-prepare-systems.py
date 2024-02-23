@@ -100,7 +100,6 @@ try:
             files=[]
         )
 
-        manifest.log("Created")
         manifest.create(local_inbox.get("writable_system_id"), client)
 except Exception as e:
     ctx.stderr(1, f"Failed to fetch manifest files: {e}")

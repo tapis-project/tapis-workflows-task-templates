@@ -33,6 +33,8 @@ try:
 except json.JSONDecodeError as e:
     ctx.stderr(1, f"{e}")
 
+print(remote_outbox)
+
 systems = [
     remote_outbox,
     local_inbox,
@@ -42,7 +44,10 @@ systems = [
 
 # Create the directories on the writable systems
 try:
-    for system in [system for system in systems if system.get("writable")]:
+    for system in [
+        system for system in systems
+        if system.get("writable_system_id") != None
+    ]:
         # Create the data directory if it doesn't exist. Equivalent
         # to `mkdir -p`
         client.files.mkdir(
@@ -77,7 +82,7 @@ ctx.add_hook(0, lock.release)
 # to track which 
 try:
     manifest_files = client.files.listFiles(
-        system_id=local_inbox.get("system_id"),
+        systemId=local_inbox.get("writable_system_id"),
         path=local_inbox.get("manifests_path")
     )
 
@@ -96,7 +101,7 @@ try:
             files=[]
         )
 
-        manifest.save(local_inbox.get("system_id"), client)
+        manifest.save(local_inbox.get("writable_system_id"), client)
 except Exception as e:
     ctx.stderr(1, f"Failed to fetch manifest files: {e}")
 

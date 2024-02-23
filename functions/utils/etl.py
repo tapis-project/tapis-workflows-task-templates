@@ -228,8 +228,8 @@ class PipelineLock:
         
             # Fetch all manifest files
             files = self._client.files.listFiles(
-                systemId=self.system.get("writable_system_id"),
-                path=self.system.get("manifests_path")
+                systemId=self._system.get("writable_system_id"),
+                path=self._system.get("manifests_path")
             )
 
             self._locked = LOCKFILE_FILENAME in [file.name for file in files]

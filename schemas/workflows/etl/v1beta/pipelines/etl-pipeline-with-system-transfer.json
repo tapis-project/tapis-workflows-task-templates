@@ -61,6 +61,7 @@
                     }
                 },
                 "TAPIS_JWT": {
+                    "required": false,
                     "value_from": {
                         "args": "TAPIS_JWT"
                     }
@@ -122,6 +123,7 @@
                     }
                 },
                 "TAPIS_JWT": {
+                    "required": false,
                     "value_from": {
                         "args": "TAPIS_JWT"
                     }
@@ -173,16 +175,17 @@
                     }
                 },
                 "TAPIS_JWT": {
+                    "required": false,
                     "value_from": {
                         "args": "TAPIS_JWT"
                     }
                 },
-                "LOCAL_INBOX": {
+                "INGRESS_SYSTEM": {
                     "value_from": {
                         "env": "LOCAL_INBOX"
                     }
                 },
-                "REMOTE_OUTBOX": {
+                "EGRESS_SYSTEM": {
                     "value_from": {
                         "env": "REMOTE_OUTBOX"
                     }

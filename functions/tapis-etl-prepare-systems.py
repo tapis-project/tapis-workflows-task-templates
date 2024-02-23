@@ -44,21 +44,22 @@ systems = [
 
 # Create the directories on the writable systems
 try:
-    for system in [
-        system for system in systems
-        if system.get("writable_system_id") != None
-    ]:
+    for system in systems:
+        writable_system_id = system.get("writable_system_id")
+        data_transfer_system_id = system.get("data_transfer_system_id")
+        system_id = writable_system_id if writable_system_id != None else data_transfer_system_id
+        print("SYSTEM_ID", system_id)
         # Create the data directory if it doesn't exist. Equivalent
         # to `mkdir -p`
         client.files.mkdir(
-            systemId=system.get("writable_system_id"),
+            systemId=system_id,
             path=system.get("data_path")
         )
 
         # Create the manifests directory if it doesn't exist. Equivalent
         # to `mkdir -p`
         client.files.mkdir(
-            systemId=system.get("writable_system_id"),
+            systemId=system_id,
             path=system.get("manifests_path")
         )
 except Exception as e:

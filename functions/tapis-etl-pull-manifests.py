@@ -50,7 +50,7 @@ ctx.add_hook(0, lock.release)
 # Get the root manifest 
 try:
     ingress_system_manifest_files = client.files.listFiles(
-        system_id=ingress_system.get("writable_system_id"),
+        systemId=ingress_system.get("writable_system_id"),
         path=ingress_system.get("manifests_path")
     )
 except Exception as e:
@@ -86,7 +86,7 @@ except Exception as e:
 # Load all manfiest files from the remote outbox
 try:
     remote_manifest_files = client.files.listFiles(
-        system_id=egress_system.get("system_id"),
+        systemId=egress_system.get("system_id"),
         path=egress_system.get("manifests_path")
     )
 except Exception as e:

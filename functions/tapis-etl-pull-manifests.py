@@ -86,7 +86,7 @@ except Exception as e:
 # Load all manfiest files from the remote outbox
 try:
     remote_manifest_files = client.files.listFiles(
-        systemId=egress_system.get("system_id"),
+        systemId=egress_system.get("data_transfer_system_id"),
         path=egress_system.get("manifests_path")
     )
 except Exception as e:
@@ -104,7 +104,7 @@ for file in remote_manifest_files:
 # ingress system
 elements = []
 for untracked_remote_manifest_file in untracked_remote_manifest_files:
-    system_id = ingress_system.get("system_id")
+    system_id = ingress_system.get("data_transfer_system_id")
     path = ingress_system.get('inbound_transfer_manifests_path').strip("/")
     filename = untracked_remote_manifest_file.name
     destination_uri = f"tapis://{os.path.join(system_id, path, filename)}"

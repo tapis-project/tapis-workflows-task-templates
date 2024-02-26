@@ -94,7 +94,7 @@ try:
         manifest = ManifestModel(
             filename=ROOT_MANIFEST_FILENAME,
             path=os.path.join(
-                local_inbox.get("ingress"),
+                local_inbox.get("ingress").get("path"),
                 ROOT_MANIFEST_FILENAME
             ),
             files=[]

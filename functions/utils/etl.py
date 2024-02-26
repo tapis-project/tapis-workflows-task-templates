@@ -15,8 +15,9 @@ class EnumManifestStatus(str, enum.Enum):
     Failed = "failed"
 
 class EnumPhase(str, enum.Enum):
-    Inbound = "inbound"
-    Outbound = "outbound"
+    Ingress = "ingress"
+    Transform = "transform"
+    Egress = "egress"
 
 class ManifestModel:
     def __init__(
@@ -231,8 +232,8 @@ class PipelineLock:
         
             # Fetch all manifest files
             files = self._client.files.listFiles(
-                systemId=self._system.get("writable_system_id"),
-                path=self._system.get("manifests_path")
+                systemId=self._system.get("manifests").get("system_id"),
+                path=self._system.get("manifests").get("path")
             )
 
             self._locked = LOCKFILE_FILENAME in [file.name for file in files]
@@ -245,8 +246,8 @@ class PipelineLock:
         try:
             # Create the lockfile
             self._client.files.insert(
-                systemId=self._system.get("writable_system_id"),
-                path=os.path.join(self._system.get("manifests_path"), LOCKFILE_FILENAME),
+                systemId=self._system.get("manifests").get("system_id"),
+                path=os.path.join(self._system.get("manifests").get("path"), LOCKFILE_FILENAME),
                 file=b""
             )
         except Exception as e:
@@ -256,8 +257,8 @@ class PipelineLock:
         # Delete the lock file
         try:
             self._client.files.delete(
-                systemId=self._system.get("writable_system_id"),
-                path=os.path.join(self._system.get("manifests_path"), LOCKFILE_FILENAME)
+                systemId=self._system.get("manifests").get("system_id"),
+                path=os.path.join(self._system.get("manifests").get("path"), LOCKFILE_FILENAME)
             )
         except Exception as e:
             raise Exception(f"Failed to delete lockfile: {e}")

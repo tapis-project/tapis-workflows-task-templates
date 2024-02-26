@@ -16,11 +16,29 @@
             "type": "string",
             "required": true
         },
+        "TAPIS_JWT": {
+            "type": "string",
+            "required": false
+        },
+
         "RESUBMIT_INBOUND": {
             "type": "string",
             "required": false
         },
         "RESUBMIT_OUTBOUND": {
+            "type": "string",
+            "required": false
+        },
+        
+        "RESUBMIT_INGRESS": {
+            "type": "string",
+            "required": false
+        },
+        "RESUBMIT_TRANSFORMS": {
+            "type": "string",
+            "required": false
+        },
+        "RESUBMIT_EGRESS": {
             "type": "string",
             "required": false
         }

@@ -2,9 +2,7 @@
 from owe_python_sdk.runtime import execution_context as ctx
 #-------- Workflow Context import: DO NOT REMOVE ----------------
 
-import json, os, time
-
-from tapipy.tapis import Tapis
+import json
 
 from utils.etl import (
     ManifestModel,
@@ -25,10 +23,10 @@ from utils.tapis import get_client
 # Set the variables related to resubmission.
 phase = ctx.get_input("PHASE")
 resubmit_manifest_name = None
-resubmit_inbound_manifest_name = ctx.get_input("RESUBMIT_INBOUND")
+resubmit_ingress_manifest_name = ctx.get_input("RESUBMIT_INGRESS")
 resubmit_outbound_manifest_name = ctx.get_input("RESUBMIT_OUTBOUND")
-if phase == EnumPhase.Inbound and resubmit_inbound_manifest_name != None:
-    resubmit_manifest_name = resubmit_inbound_manifest_name
+if phase == EnumPhase.Ingress and resubmit_ingress_manifest_name != None:
+    resubmit_manifest_name = resubmit_ingress_manifest_name
 
 if phase == EnumPhase.Outbound and resubmit_outbound_manifest_name != None:
     resubmit_manifest_name = resubmit_outbound_manifest_name
@@ -206,7 +204,7 @@ if data_integrity_profile != None and not validated:
     ctx.stdout("")
 
 # Create an output to be used by the first job in the etl pipeline
-if len(next_manifest.files) > 0 and phase == EnumPhase.Inbound:
+if len(next_manifest.files) > 0 and phase == EnumPhase.Ingress:
     tapis_system_file_ref_extension = ctx.get_input("TAPIS_SYSTEM_FILE_REF_EXTENSION")
     for i, file in enumerate(next_manifest.files):
         # Set the file_input_arrays to output

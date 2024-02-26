@@ -50,8 +50,8 @@ ctx.add_hook(0, lock.release)
 # Get the root manifest 
 try:
     ingress_system_manifest_files = client.files.listFiles(
-        systemId=ingress_system.get("writable_system_id"),
-        path=ingress_system.get("manifests_path")
+        systemId=ingress_system.get("ingress").get("system_id"),
+        path=ingress_system.get("ingress").get("path")
     )
 except Exception as e:
     ctx.stderr(1, f"Failed to fetch manifest files: {e}")
@@ -75,7 +75,7 @@ try:
         **json.loads(
             get_tapis_file_contents_json(
                 client,
-                ingress_system.get("writable_system_id"),
+                ingress_system.get("ingress").get("system_id"),
                 root_manifest_file.path
             )
         )
@@ -86,8 +86,8 @@ except Exception as e:
 # Load all manfiest files from the remote outbox
 try:
     remote_manifest_files = client.files.listFiles(
-        systemId=egress_system.get("data_transfer_system_id"),
-        path=egress_system.get("manifests_path")
+        systemId=egress_system.get("manifests").get("system_id"),
+        path=egress_system.get("manifests").get("path")
     )
 except Exception as e:
     ctx.stderr(1, f"Failed to fetch manifest files: {e}")
@@ -104,8 +104,8 @@ for file in remote_manifest_files:
 # ingress system
 elements = []
 for untracked_remote_manifest_file in untracked_remote_manifest_files:
-    system_id = ingress_system.get("data_transfer_system_id")
-    path = ingress_system.get('inbound_transfer_manifests_path').strip("/")
+    system_id = ingress_system.get("data").get("system_id")
+    path = ingress_system.get("ingress").get("path").strip("/")
     filename = untracked_remote_manifest_file.name
     destination_uri = f"tapis://{os.path.join(system_id, path, filename)}"
     elements.append({
@@ -113,21 +113,25 @@ for untracked_remote_manifest_file in untracked_remote_manifest_files:
         "destinationURI": destination_uri
     })
 
+if len(elements) == 0:
+    ctx.set_output("TRANSFER_TASK", None)
+    ctx.stdout("")
+
 # Peform the file transfer
 try:
     root_manifest.log(f"Starting transfer of {len(elements)} manifest(s) from the local inbox to the ")
     task = client.files.createTransferTask(elements=elements)
     task = poll_transfer_task(task)
-        
+    
+    ctx.set_output("TRANSFER_TASK", task.__dict__)  
+
     if task.status != "COMPLETED":
         root_manifest.log(f"Transfer task(s) failed. {task}")
         ctx.stderr(1, f"Transfer task failed to complete. Status '{task.status}' | Error message for transfer task: {task.errorMessage}")
 
-    print("TASK", task)
+    
 except Exception as e:
     ctx.stderr(1, f"{e}")
-
-ctx.stderr("SHORT CIRCUIT") # TODO REMOVE
 
 # NOTE IMPORTANT DO NOT REMOVE BELOW.
 # Calling stdout calls clean up hooks that were regsitered in the

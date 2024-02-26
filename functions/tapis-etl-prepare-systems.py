@@ -40,26 +40,26 @@ systems = [
     remote_inbox
 ]
 
-# Create the directories on the writable systems
+# Create the directories required of a Tapis ETL Pipeline
 try:
     for system in systems:
-        writable_system_id = system.get("writable_system_id")
-        data_transfer_system_id = system.get("data_transfer_system_id")
-        system_id = writable_system_id if writable_system_id != None else data_transfer_system_id
-        
-        # Create the data directory if it doesn't exist. Equivalent
-        # to `mkdir -p`
         client.files.mkdir(
-            systemId=system_id,
-            path=system.get("data_path")
+            systemId=system.get("data").get("system_id"),
+            path=system.get("data").get("path")
         )
 
-        # Create the manifests directory if it doesn't exist. Equivalent
-        # to `mkdir -p`
         client.files.mkdir(
-            systemId=system_id,
-            path=system.get("manifests_path")
+            systemId=system.get("manifests").get("system_id"),
+            path=system.get("manifests").get("path")
         )
+
+        if system.get("ingress") == None: continue
+        
+        client.files.mkdir(
+            systemId=system.get("ingress").get("system_id"),
+            path=system.get("ingress").get("path")
+        )
+
 except Exception as e:
     ctx.stderr(1, f"Failed to create directories: {e}")
 
@@ -81,8 +81,8 @@ ctx.add_hook(0, lock.release)
 # to track which 
 try:
     manifest_files = client.files.listFiles(
-        systemId=local_inbox.get("writable_system_id"),
-        path=local_inbox.get("manifests_path")
+        systemId=local_inbox.get("ingress").get("system_id"),
+        path=local_inbox.get("ingress").get("path")
     )
 
     root_manifest_exist = any([
@@ -94,15 +94,15 @@ try:
         manifest = ManifestModel(
             filename=ROOT_MANIFEST_FILENAME,
             path=os.path.join(
-                local_inbox.get("manifests_path"),
+                local_inbox.get("ingress"),
                 ROOT_MANIFEST_FILENAME
             ),
             files=[]
         )
 
-        manifest.create(local_inbox.get("writable_system_id"), client)
+        manifest.create(local_inbox.get("ingress").get("system_id"), client)
 except Exception as e:
-    ctx.stderr(1, f"Failed to fetch manifest files: {e}")
+    ctx.stderr(1, f"Failed to create root manifest file in the local inbox: {e}")
 
 # NOTE IMPORTANT DO NOT REMOVE BELOW.
 # Calling stdout calls clean up hooks that were regsitered in the

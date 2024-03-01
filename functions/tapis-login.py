@@ -6,7 +6,6 @@ from tapipy.tapis import Tapis
 
 from utils.tapis import get_client
 
-
 try:
     client = get_client(
         base_url=ctx.get_input("TAPIS_BASE_URL"),

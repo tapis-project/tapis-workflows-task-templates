@@ -1,14 +1,19 @@
+"""Transfers data files from the Remote Outbox to the Local Inbox"""
+
 #-------- Workflow Context import: DO NOT REMOVE ----------------
 from owe_python_sdk.runtime import execution_context as ctx
 #-------- Workflow Context import: DO NOT REMOVE ----------------
 
 import json, os
 
-from constants.etl import ROOT_MANIFEST_FILENAME
 from utils.etl import (
     ManifestModel,
-    PipelineLock,
-    get_tapis_file_contents_json
+    ManifestsLock,
+    EnumManifestStatus,
+    poll_transfer_task,
+    get_tapis_file_contents_json,
+    validate_manifest_data_files,
+    cleanup
 )
 
 from utils.tapis import get_client
@@ -27,100 +32,121 @@ except Exception as e:
 
 # Deserialize system details
 try:
-    remote_outbox = json.loads(ctx.get_input("REMOTE_OUTBOX"))
-    local_inbox = json.loads(ctx.get_input("LOCAL_INBOX"))
+    egress_system = json.loads(ctx.get_input("EGRESS_SYSTEM"))
+    ingress_system = json.loads(ctx.get_input("INGRESS_SYSTEM"))
 except json.JSONDecodeError as e:
     ctx.stderr(1, f"{e}")
 
 try:
     # Lock the manifests directory to prevent other concurrent pipeline runs
     # from mutating manifest files
-    lock = PipelineLock(client, local_inbox)
+    lock = ManifestsLock(client, ingress_system)
     lock.acquire()
+
+    # Register the lock release hook to be called on called to stderr and
+    # stdout. This will unlock the manifests lock when the program exits with any
+    # code
+    ctx.add_hook(1, lock.release)
+    ctx.add_hook(0, lock.release)
 except Exception as e:
     ctx.stderr(1, f"Failed to lock pipeline: {str(e)}")
 
-# Register the lockfile cleanup hook to be called on called to stderr and
-# stdout. This will unlock the manifests lock when the program exits with any
-# code
-ctx.add_hook(1, lock.release)
-ctx.add_hook(0, lock.release)
 
-# Get the root manifest 
+# Load all manfiest files that into the ingress directory of the ingress
+# system
 try:
-    local_inbox_manifest_files = client.files.listFiles(
-        system_id=local_inbox.get("writable_system_id"),
-        path=local_inbox.get("manifests_path")
+    ingress_manifest_files = client.files.listFiles(
+        systemId=ingress_system.get("manifests").get("system_id"),
+        path=ingress_system.get("manifests").get("path")
     )
 except Exception as e:
     ctx.stderr(1, f"Failed to fetch manifest files: {e}")
 
-root_manifest_file = next(
-    filter(
-        lambda file: file.name == ROOT_MANIFEST_FILENAME,
-        local_inbox_manifest_files
-    ), 
-    None
-)
-
-if root_manifest_file == None:
-    ctx.stderr(1, f"Critical Error: Missing the root manifest file")
-
-# Intialize the root manifest model
+# Load the ingress manifests
 try:
-    root_manifest = ManifestModel(
-        filename=root_manifest_file,
-        path=root_manifest_file.path,
-        **json.loads(
-            get_tapis_file_contents_json(
-                client,
-                local_inbox.get("writable_system_id"),
-                root_manifest_file.path
+    ingress_manifests = []
+    for ingress_manifest_file in ingress_manifest_files:
+        ingress_manifests.append(
+            ManifestModel(
+                filename=ingress_manifest_file.name,
+                path=ingress_manifest_file.path,
+                **json.loads(
+                    get_tapis_file_contents_json(
+                        client,
+                        ingress_system.get("manifests").get("system_id"),
+                        ingress_manifest_file.path
+                    )
+                )
             )
         )
-    )
 except Exception as e:
-    ctx.stderr(1, f"Failed to initialize root manifest | {e}")
+    ctx.stderr(1, f"Failed to initialize manifests: {e}")
 
-# Load all manfiest files from the remote outbox
-try:
-    remote_manifest_files = client.files.listFiles(
-        system_id=remote_outbox.get("system_id"),
-        path=remote_outbox.get("manifests_path")
-    )
-except Exception as e:
-    ctx.stderr(1, f"Failed to fetch manifest files: {e}")
+# Transfer all files in each manifest to the data directory of the ingress
+# system
+for ingress_manifest in ingress_manifests:
+    # Check to see if the ingress system passes data integrity checks
+    try:
+        validated, err = validate_manifest_data_files(
+            ingress_system,
+            ingress_manifest,
+            client
+        )
+    except Exception as e:
+        ctx.stderr(1, f"Error validating manifest: {e}")
 
-# Check which manifest files are in the root manifests files list. Add all
-# manifest files that are missing
-current_manifest_filenames = [file.name for file in root_manifest.files]
-untracked_remote_manifest_files = []
-for file in remote_manifest_files:
-    if file.name not in current_manifest_filenames:
-        untracked_remote_manifest_files.append(file)
-
-# Transfer all untracked manifest files from the remote outbox to the
-# local inbox
-remote_manifest_transfer_elements = []
-for untracked_remote_manifest_file in untracked_remote_manifest_files:
-    # Transfer the untracked manifests to the local inbox
-    # Create transfer task
-    elements = []
-    for data_file in untracked_remote_manifest_file.files:
+    try:
+        # Log the failed data integrity check in the manifest
+        if not validated:
+            ingress_manifest.log(f"Data integrity checks failed | {err}")
+            ingress_manifest.set_status(EnumManifestStatus.IntegrityCheckFailed)
+            ingress_manifest.save(ingress_system.get("data").get("system_id"), client)
+            continue
         
-        url = f.get("url")
+        ingress_manifest.log(f"Data integrity checks successful")
+        ingress_manifest.save(ingress_system.get("data").get("system_id"), client)
+    except Exception as e:
+        ctx.stderr(1, f"Error updating manifest: {e}")
+
+    elements = []
+    for data_file in ingress_manifests.files:
+        # Build the transfer elements
+        url = data_file.get("url")
+        destination_system_id = ingress_system.get("data").get("system_id")
+        destination_path = ingress_system.get("data").get("path")
         destination_filename = url.rsplit("/", 1)[1]
-        protocol = url.rsplit("://")[0]
-        destination_uri = f"{protocol}://{remote_inbox_system_id}/{os.path.join(destination_path.strip('/'), destination_filename)}"
+        destination_uri = f"tapis://{destination_system_id}/{os.path.join(destination_path.strip('/'), destination_filename)}"
         elements.append({
-            # FIXME .replace of system name in destinationURI should be deleted as soon as the insert
-            # operation is available for Globus-type systems
-            "sourceURI": source_uri
+            "sourceURI": data_file.get("url"),
             "destinationURI": destination_uri
         })
 
-# NOTE IMPORTANT DO NOT REMOVE BELOW.
-# Calling stdout calls clean up hooks that were regsitered in the
-# beginning of the script
-ctx.stdout("")
+    # Transfer elements
+    try:
+        ingress_manifest.log(f"Starting transfer of {len(elements)} data files from the remote outbox to the local inbox")
+        
+        # Start the transfer task and poll until terminal state
+        task = client.files.createTransferTask(elements=elements)
+        task = poll_transfer_task(task)
+    except Exception as e:
+        ctx.stderr(1, f"Error transferring files: {e}")
+    
+    # Transfer task in terminal state, output transfer task data
+    ctx.set_output("TRANSFER_TASK", task.__dict__)
+
+    try:
+        if task.status != "COMPLETED":
+            task_err = f"Transfer task failed | Task UUID: {task.uuid} | Status: '{task.status}' | Error: {task.errorMessage}"
+            ingress_manifest.set_status(EnumManifestStatus.Failed)
+            ingress_manifest.log(task_err)
+            ingress_manifest.save(ingress_system.get("manifests").get("system_id"), client)
+            ctx.stderr(1, task_err)
+
+        ingress_manifest.set_status(EnumManifestStatus.Completed)
+        ingress_manifest.log(f"Transfer task completed | Task UUID: {task.uuid}")
+        ingress_manifest.save(ingress_system.get("manifests").get("system_id"), client)
+    except Exception as e:
+        ctx.stderr(1, f"Error updating manifests after transfer: {e}")
+
+cleanup()
 

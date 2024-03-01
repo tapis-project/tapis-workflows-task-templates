@@ -1,5 +1,5 @@
 {
-    "description": "Pulls text from a web page and runs sentiment analysis",
+    "description": "Pulls text from a web page and runs keyword analysis",
     "execution_profile": {
         "duplicate_submission_policy": "allow"
     },

@@ -16,10 +16,12 @@
     ],
     "input": {
         "URL": {
-            "value": null,
             "value_from": {
                 "args": "URL"
             }
         }
+    },
+    "output": {
+        "TEXT": {"type": "string"}
     }
 }

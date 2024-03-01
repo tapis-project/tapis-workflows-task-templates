@@ -1,3 +1,6 @@
+"""Creates all directories necessary to run an ETL pipeline in all provided
+systems"""
+
 #-------- Workflow Context import: DO NOT REMOVE ----------------
 from owe_python_sdk.runtime import execution_context as ctx
 #-------- Workflow Context import: DO NOT REMOVE ----------------
@@ -7,7 +10,8 @@ import json, os
 from constants.etl import ROOT_MANIFEST_FILENAME
 from utils.etl import (
     ManifestModel,
-    PipelineLock
+    ManifestsLock,
+    cleanup
 )
 
 from utils.tapis import get_client
@@ -53,20 +57,19 @@ try:
             path=system.get("manifests").get("path")
         )
 
-        if system.get("ingress") == None: continue
+        if system.get("control") == None: continue
         
         client.files.mkdir(
-            systemId=system.get("ingress").get("system_id"),
-            path=system.get("ingress").get("path")
+            systemId=system.get("control").get("system_id"),
+            path=system.get("control").get("path")
         )
-
 except Exception as e:
     ctx.stderr(1, f"Failed to create directories: {e}")
 
 try:
     # Lock the manifests directory to prevent other concurrent pipeline runs
     # from mutating manifest files
-    lock = PipelineLock(client, local_inbox)
+    lock = ManifestsLock(client, local_inbox)
     lock.acquire()
 except Exception as e:
     ctx.stderr(1, f"Failed to lock pipeline: {str(e)}")
@@ -104,8 +107,5 @@ try:
 except Exception as e:
     ctx.stderr(1, f"Failed to create root manifest file in the local inbox: {e}")
 
-# NOTE IMPORTANT DO NOT REMOVE BELOW.
-# Calling stdout calls clean up hooks that were regsitered in the
-# beginning of the script
-ctx.stdout("")
+cleanup()
 

@@ -14,7 +14,8 @@ from utils.etl import (
     await_lockfile_fetch_manifest_files,
     generate_new_manifests,
     DataIntegrityValidator,
-    DataIntegrityProfile
+    DataIntegrityProfile,
+    cleanup,
 )
 
 from utils.tapis import get_client
@@ -28,7 +29,7 @@ resubmit_outbound_manifest_name = ctx.get_input("RESUBMIT_OUTBOUND")
 if phase == EnumPhase.Ingress and resubmit_ingress_manifest_name != None:
     resubmit_manifest_name = resubmit_ingress_manifest_name
 
-if phase == EnumPhase.Outbound and resubmit_outbound_manifest_name != None:
+if phase == EnumPhase.Egress and resubmit_outbound_manifest_name != None:
     resubmit_manifest_name = resubmit_outbound_manifest_name
 
 try:
@@ -42,25 +43,9 @@ try:
 except Exception as e:
     ctx.stderr(str(e))
 
-try:
-    # Create the manifests directory if it doesn't exist. Equivalent
-    # to `mkdir -p`
-    system_id = ctx.get_input("SYSTEM_ID")
-    manifests_path = ctx.get_input("MANIFESTS_PATH")
-    client.files.mkdir(
-        systemId=system_id,
-        path=manifests_path
-    )
-
-    # Create the data directory if it doesn't exist. Equivalent
-    # to `mkdir -p`
-    data_path = ctx.get_input("DATA_PATH")
-    client.files.mkdir(
-        systemId=system_id,
-        path=data_path
-    )
-except Exception as e:
-    ctx.stderr(1, f"Failed to create directories: {e}")
+system_id = ctx.get_input("SYSTEM_ID")
+manifests_path = ctx.get_input("MANIFESTS_PATH")
+data_path = ctx.get_input("DATA_PATH")
 
 try:
     # Wait for the Lockfile to disappear.
@@ -212,8 +197,6 @@ if len(next_manifest.files) > 0 and phase == EnumPhase.Ingress:
 
 # Output the json of the current manifest
 ctx.set_output("ACTIVE_MANIFEST", json.dumps(vars(next_manifest)))
-# NOTE IMPORTANT DO NOT REMOVE BELOW.
-# Calling stdout calls clean up hooks that were regsitered in the
-# beginning of the script
-ctx.stdout("")
+
+cleanup()
 

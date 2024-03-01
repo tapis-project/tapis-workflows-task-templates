@@ -26,6 +26,7 @@ class ManifestModel:
         path,
         files=None,
         status: EnumManifestStatus=EnumManifestStatus.Pending,
+        phase: EnumPhase=EnumPhase.Ingress,
         logs=None,
         created_at=None,
         last_modified=None,
@@ -34,6 +35,7 @@ class ManifestModel:
         self.filename = filename
         self.path = path
         self.status = status
+        self.phase = phase
         self.files = []
         self.logs = logs if logs != None else []
         self.created_at = created_at
@@ -52,6 +54,7 @@ class ManifestModel:
         return json.dumps(
             {
                 "status": self.status,
+                "phase": self.phase,
                 "files": self.files,
                 "logs": self.logs,
                 "created_at": self.created_at,
@@ -68,6 +71,12 @@ class ManifestModel:
         }
     
     def set_status(self, status):
+        self.status = status
+        self.log(f"Status change: {status}")
+
+    def set_phase(self, phase: EnumPhase, status=EnumManifestStatus.Pending):
+        self.phase = phase
+        self.log(f"Phase change: {phase}")
         self.status = status
         self.log(f"Status change: {status}")
 
@@ -131,7 +140,7 @@ class DataIntegrityValidator:
         self.client = client
         self.errors = []
 
-    def _done_file_validation(self, manifest, system_id, profile):
+    def _done_file_validation(self, manifest_files, system_id, profile):
         # Fetch the done files
         all_files = self.client.files.listFiles(
             systemId=system_id,
@@ -143,7 +152,7 @@ class DataIntegrityValidator:
             if match_patterns(file.name, profile.include_pattern, profile.exclude_pattern):
                 done_files.append(file)
 
-        for file_in_manifest in manifest.files:
+        for file_in_manifest in manifest_files.files:
             validated = False
             for done_file in done_files:
                 if file_in_manifest.get("name") in done_file.name:
@@ -156,9 +165,9 @@ class DataIntegrityValidator:
         # Not really sure if this check is necessary. Perhaps just return false
         return len(self.errors) < 1
 
-    def _byte_check_validation(self, manifest, system_id):
+    def _byte_check_validation(self, manifest_files, system_id):
         validations = []
-        for file_in_manifest in manifest.files:
+        for file_in_manifest in manifest_files:
             file_on_system = self.client.flies.listFiles(
                 systemId=system_id,
                 path=file_in_manifest.path
@@ -210,7 +219,7 @@ class DataIntegrityValidator:
             err if error_count > 0 else None
         )
     
-class PipelineLock:
+class ManifestsLock:
     def __init__(self, client, system):
         self._client = client
         self._system = system
@@ -272,42 +281,59 @@ def poll_transfer_task(client, task):
     return task
     
     
-def generate_new_manifests(
-    system_id,
-    data_path,
-    include_pattern,
-    exclude_pattern,
-    manifests_path,
-    manifest_generation_policy,
-    manifests,
-    client
-):
+def generate_manifests(system, client):
+    # Fetch manifest files
     try:
-        # Fetch the all data files
-        unfiltered_data_files = client.files.listFiles(
-            systemId=system_id,
-            path=data_path
+        manifest_files = fetch_system_files(
+            systemId=system.get("manifests").get("system_id"),
+            path=system.get("manifests").get("path"),
+            include_pattern=system.get("manifests").get("include_pattern"),
+            exclude_pattern=system.get("manifests").get("exclude_pattern")
         )
     except Exception as e:
-        raise Exception(f"Failed to fetch data files: {str(e)}")
-    
-    try:
-        data_files = unfiltered_data_files
-        if include_pattern != None or exclude_pattern != None:
-            data_files = [
-                data_file for data_file in unfiltered_data_files
-                if match_patterns(data_file.name, include_pattern, exclude_pattern)
-            ]
-    except Exception as e:
-        raise Exception(f"Error while filtering data files using provided include and exclude patterns: {str(e)}")
+        raise Exception(f"Failed to fetch manifest files: {e}")
 
-    # Create a list of all registered files
+    try:
+        # Get all of the contents of each manifest file and create an instance
+        # of a manifest model
+        manifests = []
+        for manifest_file in manifest_files:
+            manifests.append(
+                ManifestModel(
+                    filename=manifest_file.get("name"),
+                    path=manifest_file.get("path"),
+                    **json.loads(
+                        get_tapis_file_contents_json(
+                            client,
+                            system.get("manifests").get("system_id"),
+                            manifest_file.get("path")
+                        )
+                    )
+                )
+            )
+    except Exception as e:
+        raise Exception(f"Critical: Failed to create manifest model for manifest file at path {manifest_file.get('path')} | {e}")
+
+    # Fetch the data files
+    try:
+        data_files = fetch_system_files(
+            systemId=system.get("data").get("system_id"),
+            path=system.get("data").get("path"),
+            include_pattern=system.get("data").get("include_pattern"),
+            exclude_pattern=system.get("data").get("exclude_pattern")
+        )
+    except Exception as e:
+        raise Exception(f"Failed to fetch data files: {e}")
+    
+    # Create a list of all data files that have already been registered in a
+    # manifest
     registered_data_file_paths = []
     for manifest in manifests:
         for manifest_data_file in manifest.files:
             registered_data_file_paths.append(manifest_data_file["path"])
 
-    # Find all data files that have not yet been registered with a manifest
+    # Create a list all data files that have not yet been registered with a
+    # manifest
     unregistered_data_files = [
         data_file for data_file in data_files
         if data_file.path not in registered_data_file_paths
@@ -319,13 +345,17 @@ def generate_new_manifests(
     # TODO consider querying for the file(s) sizes 2 times in a row at some interval and if
     # the size is different, keep polling until the last 2 sizes(for the same file(s)) are the same
     new_manifests = []
+    manifest_generation_policy = system.get("manifests").get("generation_policy")
     if manifest_generation_policy == "auto_one_per_file":
         for unregistered_data_file in unregistered_data_files:
             manifest_filename = f"{str(uuid4())}.json"
             new_manifests.append(
                 ManifestModel(
                     filename=manifest_filename,
-                    path=os.path.join(manifests_path, manifest_filename),
+                    path=os.path.join(
+                        system.get("manifests").get("path"),
+                        manifest_filename
+                    ),
                     files=[unregistered_data_file]
                 )
             )
@@ -337,7 +367,10 @@ def generate_new_manifests(
         new_manifests.append(
             ManifestModel(
                 filename=manifest_filename,
-                path=os.path.join(manifests_path, manifest_filename),
+                path=os.path.join(
+                    system.get("manifests").get("path"),
+                    manifest_filename
+                ),
                 files=unregistered_data_files
             )
         )
@@ -345,8 +378,68 @@ def generate_new_manifests(
     try:
         # Persist all of the new manifests
         for new_manifest in new_manifests:
-            new_manifest.create(system_id, client)
+            new_manifest.create(system.get("manifests").get("path"), client)
     except Exception as e:
         raise Exception(f"Failed to create manifests: {e}")
 
     return new_manifests
+
+def requires_manifest_generation(system):
+    return system.get("manifests").get("generation_policy") in [
+        "auto_one_for_all",
+        "auto_one_per_file"
+    ]
+
+def fetch_system_files(
+    system_id,
+    path,
+    client,
+    include_pattern=None,
+    exclude_pattern=None
+):
+    try:
+        # Fetch the all files
+        unfiltered_files = client.files.listFiles(
+            systemId=system_id,
+            path=path
+        )
+
+        if include_pattern == None and exclude_pattern == None:
+            return unfiltered_files
+        
+        filtered_files = []
+        for data_file in unfiltered_files:
+            if match_patterns(data_file.name, include_pattern, exclude_pattern):
+                filtered_files.append(data_file)
+
+        return filtered_files
+    except Exception as e:
+        raise Exception(f"Failed to fetch data files: {str(e)}")
+
+def cleanup(ctx, stdout_message=""):
+    # Calling stdout calls clean up hooks that were regsitered in the
+    # beginning of the script
+    ctx.stdout(stdout_message)
+
+def validate_manifest_data_files(system, manifest, client):
+    # This step ensures that the file(s) in the manifest are ready for the current
+    # operation (data processing or transfer) to be performed against them.
+    validated = True
+    if system.get("data").get("integrity_profile") == None:
+        return validated
+    
+    try: 
+        data_integrity_profile = DataIntegrityProfile(
+            **system.get("data").get("integrity_profile")
+        )
+    except Exception as e:
+        raise Exception(f"Failed to create DataIntegrityProfile | {e}")
+
+    # Check the integrity of each data file in the manifests based on the data
+    # integrity profile
+    data_integrity_validator = DataIntegrityValidator(client)
+    return data_integrity_validator.validate(
+        manifest.files,
+        system.get("data").get("system_id"),
+        data_integrity_profile
+    )

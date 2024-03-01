@@ -5,7 +5,7 @@
     "tapis/web-page-summarize@v1beta": {
         "path": "schemas/workflows/ml/v1/pipelines/web-page-summarize.json"
     },
-    "tapis/login@vlatest": {
+    "tapis/login@latest": {
         "path": "schemas/sdk/latest/login.json"
     },
     "tapis/sdk@latest": {
@@ -19,6 +19,15 @@
     },
     "tapis/pods/restart@v1beta": {
         "path": "schemas/pods/latest/restart.json"
+    },
+    "tapis/etl/prepare-systems@v1beta": {
+        "path": "schemas/workflows/etl/v1beta/prepare-systems.json"
+    },
+    "tapis/etl/pull-manifests@v1beta": {
+        "path": "schemas/workflows/etl/v1beta/pull-manifests.json"
+    },
+    "tapis/etl/ingest-data@v1beta": {
+        "path": "schemas/workflows/etl/v1beta/ingest-data.json"
     },
     "tapis/etl/gen-manifests@v1beta": {
         "path": "schemas/workflows/etl/v1beta/gen-manifests.json"

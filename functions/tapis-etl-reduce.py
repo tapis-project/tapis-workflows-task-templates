@@ -11,7 +11,7 @@ try:
     items = []
     for input_id in input_ids:
         items.append(ctx.get_input(input_id))
-
+    
     values = [item == comparator for item in items]
     result = all(values)
     if len(values) == 0:

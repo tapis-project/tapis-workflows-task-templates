@@ -4,17 +4,17 @@ from owe_python_sdk.runtime import execution_context as ctx
 
 from tapipy.tapis import Tapis
 
+from utils.tapis import get_client
 
 try:
-    t = Tapis(
+    client = get_client(
         base_url=ctx.get_input("TAPIS_BASE_URL"),
         username=ctx.get_input("TAPIS_USERNAME"),
-        password=ctx.get_input("TAPIS_PASSWORD")
+        password=ctx.get_input("TAPIS_PASSWORD"),
+        jwt=ctx.get_input("TAPIS_JWT")
     )
 
-    t.get_tokens()
-
-    ctx.set_output("TAPIS_JWT", t.get_access_jwt())
+    ctx.set_output("TAPIS_JWT", client.get_access_jwt())
     ctx.stdout("Successfully authenticated")
 except Exception as e:
-    ctx.stderr(1, f"Failed to login: {e}")
+    ctx.stderr(1, f"Failed to authenticate: {e}")

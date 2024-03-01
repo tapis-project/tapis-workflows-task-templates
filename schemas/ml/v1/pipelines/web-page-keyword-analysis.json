@@ -1,5 +1,5 @@
 {
-    "description": "Pulls text from a web page and runs sentiment analysis",
+    "description": "Pulls text from a web page and runs keyword analysis",
     "execution_profile": {
         "duplicate_submission_policy": "allow"
     },
@@ -106,8 +106,23 @@
             }
         },
         {
+            "id": "preprocess-data",
+            "type": "template",
+            "input": {
+                "URL": {
+                    "type": "string",
+                    "value_from": {
+                        "task_output": {
+                            "task_id": "start-pod",
+                            "output_id": "POD_URL"
+                        }
+                    }
+                }
+            }
+        },
+        {
             "id": "inference",
-            "description": "Perform text summarization on the provided body of text",
+            "description": "Perform keyword extraction on the provided body of text",
             "type": "template",
             "depends_on": [
                 {"id": "tapis-authenticate"},
@@ -115,7 +130,7 @@
                 {"id": "scrape-web-page"}
             ],
             "uses": {
-                "name": "tapis/ml/text-summarize@v1",
+                "name": "tapis/ml/keyword-extraction@v1",
                 "source": {
                     "url": "https://github.com/tapis-project/tapis-workflows-task-templates.git",
                     "branch": "master"

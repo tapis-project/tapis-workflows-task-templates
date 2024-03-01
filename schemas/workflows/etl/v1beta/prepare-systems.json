@@ -4,24 +4,14 @@
         "flavor": "c1tiny"
     },
     "installer": "pip",
-    "packages": ["bs4", "requests"],
+    "packages": ["tapipy"],
     "runtime": "python:3.9",
-    "entrypoint": "tapis-owe-functions/functions/web-scrape.py",
+    "entrypoint": "tapis-owe-functions/functions/tapis-etl-prepare-systems.py",
     "git_repositories": [
         {
             "url": "https://github.com/tapis-project/tapis-workflows-task-templates.git",
             "branch": "master",
             "directory": "tapis-owe-functions"
         }
-    ],
-    "input": {
-        "URL": {
-            "value_from": {
-                "args": "URL"
-            }
-        }
-    },
-    "output": {
-        "TEXT": {"type": "string"}
-    }
+    ]
 }

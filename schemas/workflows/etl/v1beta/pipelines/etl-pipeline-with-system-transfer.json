@@ -16,6 +16,11 @@
             "type": "string",
             "required": true
         },
+        "TAPIS_JWT": {
+            "type": "string",
+            "required": false
+        },
+
         "RESUBMIT_INBOUND": {
             "type": "string",
             "required": false
@@ -23,19 +28,196 @@
         "RESUBMIT_OUTBOUND": {
             "type": "string",
             "required": false
+        },
+        
+        "RESUBMIT_INGRESS": {
+            "type": "string",
+            "required": false
+        },
+        "RESUBMIT_TRANSFORMS": {
+            "type": "string",
+            "required": false
+        },
+        "RESUBMIT_EGRESS": {
+            "type": "string",
+            "required": false
         }
     },
     "env": {
-        "LOCKFILE_FILENAME": {
-            "type": "string",
-            "value": "TAPIS_ETL_MANIFEST.lock"
-        },
         "TAPIS_SYSTEM_FILE_REF_EXTENSION": {
             "type": "string",
             "value": "TapisSystemFile.json"
         }
     },
     "tasks": [
+        {
+            "id": "prepare-systems",
+            "description": "Create directories required by an etl pipeline on all systems",
+            "type": "template",
+            "uses": {
+                "name": "tapis/etl/prepare-systems@v1beta",
+                "source": {
+                    "url": "https://github.com/tapis-project/tapis-workflows-task-templates.git",
+                    "branch": "master"
+                }
+            },
+            "depends_on": [],
+            "conditions": [
+                {
+                    "ne": [
+                        {"args": "SKIP_PREPARE_SYSTEMS"},
+                        true
+                    ]
+                }
+            ],
+            "input": {
+                "TAPIS_BASE_URL": {
+                    "value_from": {
+                        "args": "TAPIS_BASE_URL"
+                    }
+                },
+                "TAPIS_USERNAME": {
+                    "value_from": {
+                        "args": "TAPIS_USERNAME"
+                    }
+                },
+                "TAPIS_PASSWORD": {
+                    "value_from": {
+                        "args": "TAPIS_PASSWORD"
+                    }
+                },
+                "TAPIS_JWT": {
+                    "required": false,
+                    "value_from": {
+                        "args": "TAPIS_JWT"
+                    }
+                },
+                "LOCAL_INBOX": {
+                    "value_from": {
+                        "env": "LOCAL_INBOX"
+                    }
+                },
+                "LOCAL_OUTBOX": {
+                    "value_from": {
+                        "env": "LOCAL_OUTBOX"
+                    }
+                },
+                "REMOTE_INBOX": {
+                    "value_from": {
+                        "env": "REMOTE_INBOX"
+                    }
+                },
+                "REMOTE_OUTBOX": {
+                    "value_from": {
+                        "env": "REMOTE_OUTBOX"
+                    }
+                }
+            }
+        },
+        {
+            "id": "pull-remote-outbox-manifests",
+            "description": "Transfer manifests from remote outbox to remote inbox",
+            "type": "template",
+            "uses": {
+                "name": "tapis/etl/pull-manifests@v1beta",
+                "source": {
+                    "url": "https://github.com/tapis-project/tapis-workflows-task-templates.git",
+                    "branch": "master"
+                }
+            },
+            "depends_on": [
+                {
+                    "id": "prepare-systems",
+                    "can_fail": false,
+                    "can_skip": true
+                }
+            ],
+            "input": {
+                "TAPIS_BASE_URL": {
+                    "value_from": {
+                        "args": "TAPIS_BASE_URL"
+                    }
+                },
+                "TAPIS_USERNAME": {
+                    "value_from": {
+                        "args": "TAPIS_USERNAME"
+                    }
+                },
+                "TAPIS_PASSWORD": {
+                    "value_from": {
+                        "args": "TAPIS_PASSWORD"
+                    }
+                },
+                "TAPIS_JWT": {
+                    "required": false,
+                    "value_from": {
+                        "args": "TAPIS_JWT"
+                    }
+                },
+                "INGRESS_SYSTEM": {
+                    "value_from": {
+                        "env": "LOCAL_INBOX"
+                    }
+                },
+                "EGRESS_SYSTEM": {
+                    "value_from": {
+                        "env": "REMOTE_OUTBOX"
+                    }
+                }
+            }
+        },
+        {
+            "id": "ingest-remote-outbox-data",
+            "description": "Transfer data files from the remote outbox to the local inbox",
+            "type": "template",
+            "uses": {
+                "name": "tapis/etl/ingest-data@v1beta",
+                "source": {
+                    "url": "https://github.com/tapis-project/tapis-workflows-task-templates.git",
+                    "branch": "master"
+                }
+            },
+            "depends_on": [
+                {
+                    "id": "pull-remote-outbox-manifests",
+                    "can_fail": false,
+                    "can_skip": false
+                }
+            ],
+            "input": {
+                "TAPIS_BASE_URL": {
+                    "value_from": {
+                        "args": "TAPIS_BASE_URL"
+                    }
+                },
+                "TAPIS_USERNAME": {
+                    "value_from": {
+                        "args": "TAPIS_USERNAME"
+                    }
+                },
+                "TAPIS_PASSWORD": {
+                    "value_from": {
+                        "args": "TAPIS_PASSWORD"
+                    }
+                },
+                "TAPIS_JWT": {
+                    "required": false,
+                    "value_from": {
+                        "args": "TAPIS_JWT"
+                    }
+                },
+                "INGRESS_SYSTEM": {
+                    "value_from": {
+                        "env": "LOCAL_INBOX"
+                    }
+                },
+                "EGRESS_SYSTEM": {
+                    "value_from": {
+                        "env": "REMOTE_OUTBOX"
+                    }
+                }
+            }
+        },
         {
             "id": "gen-inbound-manifests",
             "description": "Generates a manifests for data files in the data directory of the local inbox system",
@@ -47,7 +229,13 @@
                     "branch": "master"
                 }
             },
-            "depends_on": [],
+            "depends_on": [
+                {
+                    "id": "ingest-remote-outbox-data",
+                    "can_fail": false,
+                    "can_skip": false
+                }
+            ],
             "input": {
                 "TAPIS_BASE_URL": {
                     "value_from": {
@@ -69,9 +257,9 @@
                         "env": "LOCAL_INBOX_SYSTEM_ID"
                     }
                 },
-                "MANIFEST_PATH": {
+                "MANIFESTS_PATH": {
                     "value_from": {
-                        "env": "LOCAL_INBOX_MANIFEST_PATH"
+                        "env": "LOCAL_INBOX_MANIFESTS_PATH"
                     }
                 },
                 "MANIFEST_GENERATION_POLICY": {
@@ -84,14 +272,45 @@
                         "env": "LOCAL_INBOX_MANIFEST_PRIORITY"
                     }
                 },
-                "LOCAL_DATA_PATH": {
+                "DATA_PATH": {
                     "value_from": {
                         "env": "LOCAL_INBOX_DATA_PATH"
                     }
                 },
-                "LOCKFILE_FILENAME": {
+                "INCLUDE_PATTERN": {
+                    "required": false,
                     "value_from": {
-                        "env": "LOCKFILE_FILENAME"
+                        "env": "LOCAL_INBOX_INCLUDE_PATTERN"
+                    }
+                },
+                "EXCLUDE_PATTERN": {
+                    "required": false,
+                    "value_from": {
+                        "env": "LOCAL_INBOX_EXCLUDE_PATTERN"
+                    }
+                },
+                "DATA_INTEGRITY_TYPE": {
+                    "required": false,
+                    "value_from": {
+                        "env": "LOCAL_INBOX_DATA_INTEGRITY_TYPE"
+                    }
+                },
+                "DATA_INTEGRITY_DONE_FILES_PATH": {
+                    "required": false,
+                    "value_from": {
+                        "env": "LOCAL_INBOX_DATA_INTEGRITY_DONE_FILES_PATH"
+                    }
+                },
+                "DATA_INTEGRITY_DONE_FILE_INCLUDE_PATTERN": {
+                    "required": false,
+                    "value_from": {
+                        "env": "LOCAL_INBOX_DATA_INTEGRITY_DONE_FILE_INCLUDE_PATTERN"
+                    }
+                },
+                "DATA_INTEGRITY_DONE_FILE_EXCLUDE_PATTERN": {
+                    "required": false,
+                    "value_from": {
+                        "env": "LOCAL_INBOX_DATA_INTEGRITY_DONE_FILE_EXCLUDE_PATTERN"
                     }
                 },
                 "PHASE": {
@@ -155,6 +374,36 @@
             "id": "update-inbound-manifest-status",
             "description": "Sets the status of the inbound manifest currently being processed to completed/failed",
             "type": "template",
+            "uses": {
+                "name": "tapis/etl/update-manifest-status@v1beta",
+                "source": {
+                    "url": "https://github.com/tapis-project/tapis-workflows-task-templates.git",
+                    "branch": "master"
+                }
+            },
+            "conditions": [
+                {
+                    "and": [
+                        {
+                            "eq": [
+                                {"args": "RESUBMIT_OUTBOUND"},
+                                null
+                            ]
+                        },
+                        {
+                            "ne": [
+                                {
+                                    "task_output": {
+                                        "task_id": "gen-inbound-manifests",
+                                        "output_id": "ACTIVE_MANIFEST"
+                                    }
+                                },
+                                "null"
+                            ]
+                        }
+                    ]
+                }
+            ],
             "depends_on": [
                 {
                     "id": "gen-inbound-manifests",
@@ -167,13 +416,6 @@
                     "can_skip": false
                 }
             ],
-            "uses": {
-                "name": "tapis/etl/update-manifest-status@v1beta",
-                "source": {
-                    "url": "https://github.com/tapis-project/tapis-workflows-task-templates.git",
-                    "branch": "master"
-                }
-            },
             "input": {
                 "TAPIS_BASE_URL": {
                     "value_from": {
@@ -195,14 +437,9 @@
                         "env": "LOCAL_INBOX_SYSTEM_ID"
                     }
                 },
-                "MANIFEST_PATH": {
+                "MANIFESTS_PATH": {
                     "value_from": {
-                        "env": "LOCAL_INBOX_MANIFEST_PATH"
-                    }
-                },
-                "LOCKFILE_FILENAME": {
-                    "value_from": {
-                        "env": "LOCKFILE_FILENAME"
+                        "env": "LOCAL_INBOX_MANIFESTS_PATH"
                     }
                 },
                 "MANIFEST": {
@@ -221,30 +458,7 @@
                         }
                     }
                 }
-            },
-            "conditions": [
-                {
-                    "and": [
-                        {
-                            "eq": [
-                                {"args": "RESUBMIT_OUTBOUND"},
-                                null
-                            ]
-                        },
-                        {
-                            "ne": [
-                                {
-                                    "task_output": {
-                                        "task_id": "gen-inbound-manifests",
-                                        "output_id": "ACTIVE_MANIFEST"
-                                    }
-                                },
-                                null
-                            ]
-                        }
-                    ]
-                }
-            ]
+            }
         },
         {
             "id": "gen-outbound-manifests",
@@ -285,9 +499,9 @@
                         "env": "LOCAL_INBOX_SYSTEM_ID"
                     }
                 },
-                "MANIFEST_PATH": {
+                "MANIFESTS_PATH": {
                     "value_from": {
-                        "env": "LOCAL_OUTBOX_MANIFEST_PATH"
+                        "env": "LOCAL_OUTBOX_MANIFESTS_PATH"
                     }
                 },
                 "MANIFEST_GENERATION_POLICY": {
@@ -300,14 +514,45 @@
                         "env": "LOCAL_OUTBOX_MANIFEST_PRIORITY"
                     }
                 },
-                "LOCAL_DATA_PATH": {
+                "DATA_PATH": {
                     "value_from": {
                         "env": "LOCAL_OUTBOX_DATA_PATH"
                     }
                 },
-                "LOCKFILE_FILENAME": {
+                "INCLUDE_PATTERN": {
+                    "required": false,
                     "value_from": {
-                        "env": "LOCKFILE_FILENAME"
+                        "env": "LOCAL_OUTBOX_INCLUDE_PATTERN"
+                    }
+                },
+                "EXCLUDE_PATTERN": {
+                    "required": false,
+                    "value_from": {
+                        "env": "LOCAL_OUTBOX_EXCLUDE_PATTERN"
+                    }
+                },
+                "DATA_INTEGRITY_TYPE": {
+                    "required": false,
+                    "value_from": {
+                        "env": "LOCAL_OUTBOX_DATA_INTEGRITY_TYPE"
+                    }
+                },
+                "DATA_INTEGRITY_DONE_FILES_PATH": {
+                    "required": false,
+                    "value_from": {
+                        "env": "LOCAL_OUTBOX_DATA_INTEGRITY_DONE_FILES_PATH"
+                    }
+                },
+                "DATA_INTEGRITY_DONE_FILE_INCLUDE_PATTERN": {
+                    "required": false,
+                    "value_from": {
+                        "env": "LOCAL_OUTBOX_DATA_INTEGRITY_DONE_FILE_INCLUDE_PATTERN"
+                    }
+                },
+                "DATA_INTEGRITY_DONE_FILE_EXCLUDE_PATTERN": {
+                    "required": false,
+                    "value_from": {
+                        "env": "LOCAL_OUTBOX_DATA_INTEGRITY_DONE_FILE_EXCLUDE_PATTERN"
                     }
                 },
                 "PHASE": {
@@ -338,6 +583,29 @@
                     "branch": "master"
                 }
             },
+            "conditions": [
+                {
+                    "and": [
+                        {
+                            "eq": [
+                                {"args": "RESUBMIT_INBOUND"},
+                                null
+                            ]
+                        },
+                        {
+                            "ne": [
+                                {
+                                    "task_output": {
+                                        "task_id": "gen-outbound-manifests",
+                                        "output_id": "ACTIVE_MANIFEST"
+                                    }
+                                },
+                                "null"
+                            ]
+                        }
+                    ]
+                }
+            ],
             "depends_on": [
                 {"id": "gen-outbound-manifests"}
             ],
@@ -388,15 +656,7 @@
                         "env": "LOCAL_OUTBOX_SYSTEM_ID"
                     }
                 }
-            },
-            "conditions": [
-                {
-                    "eq": [
-                        {"args": "RESUBMIT_INBOUND"},
-                        null
-                    ]
-                }
-            ]
+            }
         },
         {
             "id": "outbound-status-reduce",
@@ -417,13 +677,22 @@
             ],
             "input": {
                 "COMPARATOR": {
-                    "value": "FINISHED"
+                    "value": "COMPLETED"
                 },
                 "CONTAINS": {
                     "value": "STATUS"
                 },
                 "DEFAULT": {
                     "value": "FAILED"
+                },
+                "STATUS": {
+                    "type": "string",
+                    "value_from": {
+                        "task_output": {
+                            "task_id": "tapis-transfer-results",
+                            "output_id": "STATUS"
+                        }
+                    }
                 }
             },
             "conditions": [
@@ -477,14 +746,9 @@
                         "env": "LOCAL_INBOX_SYSTEM_ID"
                     }
                 },
-                "MANIFEST_PATH": {
+                "MANIFESTS_PATH": {
                     "value_from": {
-                        "env": "LOCAL_OUTBOX_MANIFEST_PATH"
-                    }
-                },
-                "LOCKFILE_FILENAME": {
-                    "value_from": {
-                        "env": "LOCKFILE_FILENAME"
+                        "env": "LOCAL_OUTBOX_MANIFESTS_PATH"
                     }
                 },
                 "PHASE_COMPLETED": {

@@ -106,14 +106,16 @@ class ManifestModel:
 def get_tapis_file_contents_json(client, system_id, path):
     return client.files.getContents(systemId=system_id, path=path)
 
-def match_patterns(target, include_pattern, exclude_pattern):
+def match_patterns(target, include_patterns, exclude_patterns):
     matches_include = True
-    if include_pattern != None:
+    for include_pattern in include_patterns:
         matches_include = fnmatch(target, include_pattern)
+        if matches_include: break
 
     matches_exclude = False
-    if exclude_pattern != None:
+    for exclude_pattern in exclude_patterns:
         matches_exclude = fnmatch(target, exclude_pattern)
+        if matches_exclude: break
 
     return matches_include and not matches_exclude
 
@@ -122,13 +124,13 @@ class DataIntegrityProfile:
         self,
         type_,
         done_files_path=None,
-        include_pattern=None,
-        exclude_pattern=None
+        include_patterns=[],
+        exclude_patterns=[]
     ):
         self.type = type_
         self.done_files_path = done_files_path
-        self.include_pattern = include_pattern
-        self.exclude_pattern = exclude_pattern
+        self.include_patterns = include_patterns
+        self.exclude_patterns = exclude_patterns
 
         if self.type == "checksum" or self.type == "byte_check":
             pass
@@ -149,7 +151,7 @@ class DataIntegrityValidator:
 
         done_files = []
         for file in all_files:
-            if match_patterns(file.name, profile.include_pattern, profile.exclude_pattern):
+            if match_patterns(file.name, profile.include_patterns, profile.exclude_patterns):
                 done_files.append(file)
 
         for file_in_manifest in manifest_files.files:
@@ -287,8 +289,8 @@ def generate_manifests(system, client):
         manifest_files = fetch_system_files(
             systemId=system.get("manifests").get("system_id"),
             path=system.get("manifests").get("path"),
-            include_pattern=system.get("manifests").get("include_pattern"),
-            exclude_pattern=system.get("manifests").get("exclude_pattern")
+            include_patterns=system.get("manifests").get("include_patterns"),
+            exclude_patterns=system.get("manifests").get("exclude_patterns")
         )
     except Exception as e:
         raise Exception(f"Failed to fetch manifest files: {e}")
@@ -319,8 +321,8 @@ def generate_manifests(system, client):
         data_files = fetch_system_files(
             systemId=system.get("data").get("system_id"),
             path=system.get("data").get("path"),
-            include_pattern=system.get("data").get("include_pattern"),
-            exclude_pattern=system.get("data").get("exclude_pattern")
+            include_patterns=system.get("data").get("include_patterns"),
+            exclude_patterns=system.get("data").get("exclude_patterns")
         )
     except Exception as e:
         raise Exception(f"Failed to fetch data files: {e}")
@@ -394,8 +396,8 @@ def fetch_system_files(
     system_id,
     path,
     client,
-    include_pattern=None,
-    exclude_pattern=None
+    include_patterns=[],
+    exclude_patterns=[]
 ):
     try:
         # Fetch the all files
@@ -404,12 +406,12 @@ def fetch_system_files(
             path=path
         )
 
-        if include_pattern == None and exclude_pattern == None:
+        if len(include_patterns) == 0 and len(exclude_patterns) == 0:
             return unfiltered_files
         
         filtered_files = []
         for data_file in unfiltered_files:
-            if match_patterns(data_file.name, include_pattern, exclude_pattern):
+            if match_patterns(data_file.name, include_patterns, exclude_patterns):
                 filtered_files.append(data_file)
 
         return filtered_files

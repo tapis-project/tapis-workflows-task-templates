@@ -105,12 +105,12 @@ try:
 except Exception as e:
     ctx.stderr(1, f"Failed to fetch manifest files: {e}")
 
-# Check which manifest files are in the root manifests file's files list. Add all
+# Check which manifest files are in the root manifest's files list. Add all
 # manifest files that are missing to the untracked manifests list
-current_manifest_filenames = [file.name for file in root_manifest.files]
+tracked_manifest_filenames = [file.name for file in root_manifest.files]
 untracked_remote_manifest_files = []
 for file in egress_manifest_files:
-    if file.name not in current_manifest_filenames:
+    if file.name not in tracked_manifest_filenames:
         untracked_remote_manifest_files.append(file)
 
 # Transfer all untracked manifest files from the egress system to the

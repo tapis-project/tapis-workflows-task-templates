@@ -37,6 +37,8 @@ try:
     ingress_system = json.loads(ctx.get_input("INGRESS_SYSTEM"))
 except json.JSONDecodeError as e:
     ctx.stderr(1, f"{e}")
+except Exception as e:
+    ctx.stderr(1, f"Server Error: {e}")
 
 try:
     # Lock the manifests directories to prevent other concurrent pipeline runs
@@ -64,7 +66,6 @@ except Exception as e:
 
 # Get the root manifest 
 try:
-    # TODO Lock the control directory also?
     control_files = client.files.listFiles(
         systemId=ingress_system.get("control").get("system_id"),
         path=ingress_system.get("control").get("path")
@@ -117,7 +118,7 @@ for file in egress_manifest_files:
 # ingress system
 elements = []
 for untracked_remote_manifest_file in untracked_remote_manifest_files:
-    system_id = ingress_system.get("data").get("system_id")
+    system_id = ingress_system.get("manifests").get("system_id")
     path = ingress_system.get("manifests").get("path").strip("/")
     filename = untracked_remote_manifest_file.name
     destination_uri = f"tapis://{os.path.join(system_id, path, filename)}"
@@ -128,11 +129,11 @@ for untracked_remote_manifest_file in untracked_remote_manifest_files:
 
 if len(elements) == 0:
     ctx.set_output("TRANSFER_TASK", None)
-    ctx.stdout("")
+    cleanup(ctx)
 
 # Peform the file transfer
 try:
-    root_manifest.log(f"Starting transfer of {len(elements)} manifest(s) from the local inbox to the ")
+    root_manifest.log(f"Starting transfer of {len(elements)} manifest(s) from the egress system to the ingress system")
     task = client.files.createTransferTask(elements=elements)
     task = poll_transfer_task(task)
     
@@ -149,5 +150,5 @@ try:
 except Exception as e:
     ctx.stderr(1, f"{e}")
 
-cleanup()
+cleanup(ctx)
 

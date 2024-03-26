@@ -1,3 +1,5 @@
+import time
+
 from typing import Any
 from tapipy.tapis import Tapis
 
@@ -26,3 +28,10 @@ def get_client(base_url, username=None, password=None, jwt=None):
         raise(f"Failed to authenticate: {e}")
 
     
+def poll_job(client, job, interval_sec=500):
+    while job.status not in ["FINISHED", "CANCELLED", "FAILED"]:
+        # Wait the polling frequency time then try poll again
+        time.sleep(interval_sec)
+        job = client.jobs.getJob(jobUuid=job.uuid)
+
+    return job

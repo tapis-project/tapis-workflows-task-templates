@@ -111,19 +111,33 @@ if manifest_to_resubmit == None:
     manifest_priority = local_inbox.get("manifests").get("priority")
     next_manifest = unprocessed_manifests[0 - int(manifest_priority in ["newest", "any"])]
 
-# Update the status of the next manifest to 'active'
-try:
-    next_manifest.set_status(EnumManifestStatus.Active)
-    next_manifest.save(manifests_system_id, client)
-except Exception as e:
-    ctx.stderr(1, f"Failed to update manifest to 'active': {e}")
-
 # # Create an output to be used by the first job in the etl pipeline
 # if len(next_manifest.files) > 0 and phase == EnumPhase.Ingress:
 #     tapis_system_file_ref_extension = ctx.get_input("TAPIS_SYSTEM_FILE_REF_EXTENSION")
 #     for i, file in enumerate(next_manifest.files):
 #         # Set the file_input_arrays to output
 #         ctx.set_output(f"{i}-etl-data-file-ref.{tapis_system_file_ref_extension}", json.dumps({"file": file}))
+
+# Add the jobs to the manifest
+default_jobs = json.loads(ctx.get_input("DEFAULT_ETL_JOBS", "[]"))
+jobs = next_manifest.jobs if len(next_manifest.jobs) > 0 else default_jobs
+try:
+    if len(jobs) == 0: 
+        next_manifest.log("No ETL Jobs provided")
+        next_manifest.set_status(EnumManifestStatus.Failed)
+        next_manifest.save(manifests_system_id, client)
+
+        ctx.stderr(1, "Missing ETL Job | At least 1 Tapis Job definition must be provided in the ETL Pipeline definition or in the Manifest.")
+except Exception as e:
+    ctx.stderr(1, f"Failed to update manifest: {e}")
+
+try:
+    next_manifest.log("Setting Jobs")
+    next_manifest.jobs = jobs
+    next_manifest.set_status(EnumManifestStatus.Active)
+    next_manifest.save(manifests_system_id, client)
+except Exception as e:
+    ctx.stderr(1, f"Failed to update manifest: {e}")
 
 # Output the json of the next transform manifest
 ctx.set_output("MANIFEST", json.dumps(vars(next_manifest)))

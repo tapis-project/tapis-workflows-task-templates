@@ -32,8 +32,8 @@
     "tapis/etl/select-transform-manifest@v1beta": {
         "path": "schemas/workflows/etl/v1beta/select-transform-manifest.json"
     },
-    "tapis/etl/run-manifest-jobs@v1beta": {
-        "path": "schemas/workflows/etl/v1beta/run-manifest-jobs.json"
+    "tapis/etl/transforms@v1beta": {
+        "path": "schemas/workflows/etl/v1beta/transforms.json"
     },
     "tapis/etl/tapis-system-transfer@v1beta": {
         "path": "schemas/workflows/etl/v1beta/tapis-system-transfer.json"

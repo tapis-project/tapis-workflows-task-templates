@@ -6,7 +6,7 @@
     "installer": "pip",
     "packages": ["tapipy"],
     "runtime": "python:3.9",
-    "entrypoint": "tapis-owe-functions/functions/tapis-etl-run-manifest-jobs.py",
+    "entrypoint": "tapis-owe-functions/functions/tapis-etl-transforms.py",
     "git_repositories": [
         {
             "url": "https://github.com/tapis-project/tapis-workflows-task-templates.git",

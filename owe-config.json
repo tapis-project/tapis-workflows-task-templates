@@ -23,14 +23,17 @@
     "tapis/etl/prepare-systems@v1beta": {
         "path": "schemas/workflows/etl/v1beta/prepare-systems.json"
     },
-    "tapis/etl/pull-manifests@v1beta": {
-        "path": "schemas/workflows/etl/v1beta/pull-manifests.json"
+    "tapis/etl/pull-get-manifests@v1beta": {
+        "path": "schemas/workflows/etl/v1beta/pull-gen-manifests.json"
     },
     "tapis/etl/ingest-data@v1beta": {
         "path": "schemas/workflows/etl/v1beta/ingest-data.json"
     },
-    "tapis/etl/gen-manifests@v1beta": {
-        "path": "schemas/workflows/etl/v1beta/gen-manifests.json"
+    "tapis/etl/select-transform-manifest@v1beta": {
+        "path": "schemas/workflows/etl/v1beta/select-transform-manifest.json"
+    },
+    "tapis/etl/transforms@v1beta": {
+        "path": "schemas/workflows/etl/v1beta/transforms.json"
     },
     "tapis/etl/tapis-system-transfer@v1beta": {
         "path": "schemas/workflows/etl/v1beta/tapis-system-transfer.json"

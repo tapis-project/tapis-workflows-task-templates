@@ -10,6 +10,7 @@ from utils.etl import (
     ManifestModel,
     ManifestsLock,
     EnumManifestStatus,
+    EnumPhase,
     poll_transfer_task,
     get_tapis_file_contents_json,
     validate_manifest_data_files,
@@ -52,7 +53,7 @@ except Exception as e:
     ctx.stderr(1, f"Failed to lock pipeline: {str(e)}")
 
 
-# Load all manfiest files that into the ingress directory of the ingress
+# Load all manfiest files from the manifests directory of the ingress
 # system
 try:
     ingress_manifest_files = client.files.listFiles(
@@ -62,33 +63,34 @@ try:
 except Exception as e:
     ctx.stderr(1, f"Failed to fetch manifest files: {e}")
 
-# Load the ingress manifests
+# Load manifests that have a phase of "ingress"
 try:
     ingress_manifests = []
     for ingress_manifest_file in ingress_manifest_files:
-        ingress_manifests.append(
-            ManifestModel(
-                filename=ingress_manifest_file.name,
-                path=ingress_manifest_file.path,
-                **json.loads(
-                    get_tapis_file_contents_json(
-                        client,
-                        ingress_system.get("manifests").get("system_id"),
-                        ingress_manifest_file.path
-                    )
+        manifest = ManifestModel(
+            filename=ingress_manifest_file.name,
+            path=ingress_manifest_file.path,
+            **json.loads(
+                get_tapis_file_contents_json(
+                    client,
+                    ingress_system.get("manifests").get("system_id"),
+                    ingress_manifest_file.path
                 )
             )
         )
+        if manifest.phase == EnumPhase.Ingress:
+            ingress_manifests.apend(manifest)
 except Exception as e:
     ctx.stderr(1, f"Failed to initialize manifests: {e}")
 
-# Transfer all files in each manifest to the data directory of the ingress
-# system
+# Transfer all files in each manifest to the data directory of the ingress system
 for ingress_manifest in ingress_manifests:
-    # Check to see if the ingress system passes data integrity checks
+    if ingress_manifest == EnumManifestStatus.Completed:
+        continue
+    # Check to see if the data files in the ingress manifests pass data integrity checks
     try:
         validated, err = validate_manifest_data_files(
-            ingress_system,
+            egress_system,
             ingress_manifest,
             client
         )
@@ -124,15 +126,14 @@ for ingress_manifest in ingress_manifests:
     # Transfer elements
     try:
         ingress_manifest.log(f"Starting transfer of {len(elements)} data files from the remote outbox to the local inbox")
-        
         # Start the transfer task and poll until terminal state
         task = client.files.createTransferTask(elements=elements)
         task = poll_transfer_task(task)
     except Exception as e:
         ctx.stderr(1, f"Error transferring files: {e}")
     
-    # Transfer task in terminal state, output transfer task data
-    ctx.set_output("TRANSFER_TASK", task.__dict__)
+    # Add the transfer data to the manfiest
+    ingress_manifest.transfers.append(task.__dict__)
 
     try:
         if task.status != "COMPLETED":
@@ -148,5 +149,35 @@ for ingress_manifest in ingress_manifests:
     except Exception as e:
         ctx.stderr(1, f"Error updating manifests after transfer: {e}")
 
-cleanup()
+# Modify the path and url of the files tracked in the manifest to replace
+# egress system path and system id with the ingress system data path and 
+# ingress system transform system id
+unconverted_manifests = [
+    manifest for manifest in ingress_manifests
+    if (
+        manifest.phase == EnumPhase.Ingress
+        and manifest.status == EnumManifestStatus.Completed
+    )
+]
+
+try:
+    for unconverted_manifest in unconverted_manifests:
+        modified_data_files = []
+        for data_file in unconverted_manifest.files:
+            transform_system_id = ingress_system.get("manifests").get("system_id")
+            ingress_data_files_path = unconverted_manifest.get("data").get("path")
+            path = os.path.join(f"/{ingress_data_files_path.strip('/')}", data_file.name)
+            modified_data_files.append({
+                **data_file,
+                "url": f'tapis://{transform_system_id}/{os.path.join(path, data_file.name).strip("/")}',
+                "path": path
+            })
+        
+        unconverted_manifest.files = modified_data_files
+        unconverted_manifest.set_phase(EnumPhase.Transform)
+        unconverted_manifest.save(ingress_system.get("manifests").get("system_id"), client)
+except Exception as e:
+    ctx.stderr(1, f"Error converting manifest: {e}")
+
+cleanup(ctx)
 

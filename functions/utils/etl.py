@@ -24,7 +24,10 @@ class ManifestModel:
         self,
         filename,
         path,
-        files=None,
+        remote_files=None,
+        transfers=None,
+        local_files=None,
+        jobs=None,
         status: EnumManifestStatus=EnumManifestStatus.Pending,
         phase: EnumPhase=EnumPhase.Ingress,
         logs=None,
@@ -36,26 +39,56 @@ class ManifestModel:
         self.path = path
         self.status = status
         self.phase = phase
-        self.files = []
+        self.remote_files = []
+        self.transfers = []
+        self.local_files = []
+        self.jobs = []
         self.logs = logs if logs != None else []
         self.created_at = created_at
         self.last_modified = last_modified
         self.metadata = metadata if metadata != None else {}
 
-        files = files if files != None else []
-        for file in files:
-            if type(file) == dict:
-                self.files.append(file)
+        local_files = local_files if local_files != None else []
+        for local_file in local_files:
+            if type(local_file) == dict:
+                self.local_files.append(local_file)
                 continue
 
-            self.files.append(file.__dict__)
+            self.local_files.append(local_file.__dict__)
+
+        remote_files = remote_files if remote_files != None else []
+        for remote_file in remote_files:
+            if type(remote_file) == dict:
+                self.remote_files.append(remote_file)
+                continue
+
+            self.remote_files.append(remote_file.__dict__)
+
+        transfers = transfers if transfers != None else []
+        for transfer in transfers:
+            if type(transfer) == dict:
+                self.transfers.append(transfer)
+                continue
+
+            self.transfers.append(transfer.__dict__)
+
+        jobs = jobs if jobs != None else []
+        for job in jobs:
+            if type(job) == dict:
+                self.jobs.append(job)
+                continue
+
+            self.jobs.append(job.__dict__)
 
     def _to_json(self):
         return json.dumps(
             {
                 "status": self.status,
                 "phase": self.phase,
-                "files": self.files,
+                "local_files": self.local_files,
+                "transfers": self.transfers,
+                "remote_files": self.remote_files,
+                "jobs": self.jobs,
                 "logs": self.logs,
                 "created_at": self.created_at,
                 "last_modified": self.last_modified,
@@ -274,9 +307,9 @@ class ManifestsLock:
         except Exception as e:
             raise Exception(f"Failed to delete lockfile: {e}")
         
-def poll_transfer_task(client, task):
+def poll_transfer_task(client, task, interval_sec=5):
     while task.status not in ["COMPLETED", "FAILED", "FAILED_OPT", "CANCELLED"]:
-        time.sleep(5)
+        time.sleep(interval_sec)
         task = client.files.getTransferTask(
             transferTaskId=task.uuid
         )

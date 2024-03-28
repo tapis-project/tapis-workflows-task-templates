@@ -20,21 +20,11 @@
             "type": "string",
             "required": false
         },
-
-        "RESUBMIT_INBOUND": {
-            "type": "string",
-            "required": false
-        },
-        "RESUBMIT_OUTBOUND": {
-            "type": "string",
-            "required": false
-        },
-        
         "RESUBMIT_INGRESS": {
             "type": "string",
             "required": false
         },
-        "RESUBMIT_TRANSFORMS": {
+        "RESUBMIT_TRANSFORM": {
             "type": "string",
             "required": false
         },
@@ -115,11 +105,11 @@
             }
         },
         {
-            "id": "pull-remote-outbox-manifests",
+            "id": "pull-gen-remote-outbox-manifests",
             "description": "Transfer manifests from remote outbox to remote inbox",
             "type": "template",
             "uses": {
-                "name": "tapis/etl/pull-manifests@v1beta",
+                "name": "tapis/etl/pull-gen-manifests@v1beta",
                 "source": {
                     "url": "https://github.com/tapis-project/tapis-workflows-task-templates.git",
                     "branch": "master"
@@ -179,7 +169,7 @@
             },
             "depends_on": [
                 {
-                    "id": "pull-remote-outbox-manifests",
+                    "id": "pull-gen-remote-outbox-manifests",
                     "can_fail": false,
                     "can_skip": false
                 }
@@ -219,11 +209,11 @@
             }
         },
         {
-            "id": "gen-inbound-manifests",
-            "description": "Generates a manifests for data files in the data directory of the local inbox system",
+            "id": "select-transform-manifest",
+            "description": "Outputs the next manifest to be processed",
             "type": "template",
             "uses": {
-                "name": "tapis/etl/gen-manifests@v1beta",
+                "name": "tapis/etl/select-transform-manifest@v1beta",
                 "source": {
                     "url": "https://github.com/tapis-project/tapis-workflows-task-templates.git",
                     "branch": "master"
@@ -252,74 +242,15 @@
                         "args": "TAPIS_PASSWORD"
                     }
                 },
-                "SYSTEM_ID": {
+                "LOCAL_INBOX": {
                     "value_from": {
-                        "env": "LOCAL_INBOX_SYSTEM_ID"
+                        "env": "LOCAL_INBOX"
                     }
                 },
-                "MANIFESTS_PATH": {
-                    "value_from": {
-                        "env": "LOCAL_INBOX_MANIFESTS_PATH"
-                    }
-                },
-                "MANIFEST_GENERATION_POLICY": {
-                    "value_from": {
-                        "env": "LOCAL_INBOX_MANIFEST_GENERATION_POLICY"
-                    }
-                },
-                "MANIFEST_PRIORITY": {
-                    "value_from": {
-                        "env": "LOCAL_INBOX_MANIFEST_PRIORITY"
-                    }
-                },
-                "DATA_PATH": {
-                    "value_from": {
-                        "env": "LOCAL_INBOX_DATA_PATH"
-                    }
-                },
-                "INCLUDE_PATTERN": {
+                "RESUBMIT_TRANSFORM": {
                     "required": false,
                     "value_from": {
-                        "env": "LOCAL_INBOX_INCLUDE_PATTERN"
-                    }
-                },
-                "EXCLUDE_PATTERN": {
-                    "required": false,
-                    "value_from": {
-                        "env": "LOCAL_INBOX_EXCLUDE_PATTERN"
-                    }
-                },
-                "DATA_INTEGRITY_TYPE": {
-                    "required": false,
-                    "value_from": {
-                        "env": "LOCAL_INBOX_DATA_INTEGRITY_TYPE"
-                    }
-                },
-                "DATA_INTEGRITY_DONE_FILES_PATH": {
-                    "required": false,
-                    "value_from": {
-                        "env": "LOCAL_INBOX_DATA_INTEGRITY_DONE_FILES_PATH"
-                    }
-                },
-                "DATA_INTEGRITY_DONE_FILE_INCLUDE_PATTERN": {
-                    "required": false,
-                    "value_from": {
-                        "env": "LOCAL_INBOX_DATA_INTEGRITY_DONE_FILE_INCLUDE_PATTERN"
-                    }
-                },
-                "DATA_INTEGRITY_DONE_FILE_EXCLUDE_PATTERN": {
-                    "required": false,
-                    "value_from": {
-                        "env": "LOCAL_INBOX_DATA_INTEGRITY_DONE_FILE_EXCLUDE_PATTERN"
-                    }
-                },
-                "PHASE": {
-                    "value": "inbound"
-                },
-                "RESUBMIT_INBOUND": {
-                    "required": false,
-                    "value_from": {
-                        "args": "RESUBMIT_INBOUND"
+                        "args": "RESUBMIT_TRANSFORM"
                     }
                 },
                 "TAPIS_SYSTEM_FILE_REF_EXTENSION": {
@@ -330,14 +261,100 @@
             },
             "conditions": [
                 {
-                    "eq": [
-                        {"args": "RESUBMIT_OUTBOUND"},
-                        null
+                    "and": [
+                        {
+                            "eq": [
+                                {"args": "RESUBMIT_INGRESS"},
+                                null
+                            ]
+                        },
+                        {
+                            "eq": [
+                                {"args": "RESUBMIT_EGRESS"},
+                                null
+                            ]
+                        }
                     ]
                 }
             ]
         },
-        
+        {
+            "id": "submit-tapis-jobs",
+            "description": "Submits all tapis jobs",
+            "type": "template",
+            "uses": {
+                "name": "tapis/etl/run-mainfest-jobs@v1beta",
+                "source": {
+                    "url": "https://github.com/tapis-project/tapis-workflows-task-templates.git",
+                    "branch": "master"
+                }
+            },
+            "depends_on": [
+                {
+                    "id": "select-transform-manifest",
+                    "can_fail": false,
+                    "can_skip": false
+                }
+            ],
+            "input": {
+                "TAPIS_BASE_URL": {
+                    "value_from": {
+                        "args": "TAPIS_BASE_URL"
+                    }
+                },
+                "TAPIS_USERNAME": {
+                    "value_from": {
+                        "args": "TAPIS_USERNAME"
+                    }
+                },
+                "TAPIS_PASSWORD": {
+                    "value_from": {
+                        "args": "TAPIS_PASSWORD"
+                    }
+                },
+                "LOCAL_INBOX": {
+                    "value_from": {
+                        "env": "LOCAL_INBOX"
+                    }
+                },
+                "DEFAULT_ETL_JOBS": {
+                    "value_from": {
+                        "env": "DEFAULT_ETL_JOBS"
+                    }
+                },
+                "MANIFEST": {
+                    "value_from": {
+                        "task_output": {
+                            "task_id": "select-transform-manifest",
+                            "output_id": "MANIFEST"
+                        }
+                    }
+                },
+                "TAPIS_SYSTEM_FILE_REF_EXTENSION": {
+                    "value_from": {
+                        "env": "TAPIS_SYSTEM_FILE_REF_EXTENSION"
+                    }
+                }
+            },
+            "conditions": [
+                {
+                    "and": [
+                        {
+                            "eq": [
+                                {"args": "RESUBMIT_INGRESS"},
+                                null
+                            ]
+                        },
+                        {
+                            "eq": [
+                                {"args": "RESUBMIT_EGRESS"},
+                                null
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
         {
             "id": "inbound-status-reduce",
             "description": "Returns true if all jobs finished, returns false if any jobs fail. NOTE: Depedencies for this task are determined by the Tapis Workflows API when creating this pipeline. This task will not work outside of the context of an ETL pipeline with Tapis Workflows API",
@@ -564,14 +581,7 @@
                     }
                 }
             },
-            "conditions": [
-                {
-                    "eq": [
-                        {"args": "RESUBMIT_INBOUND"},
-                        null
-                    ]
-                }
-            ]
+            "conditions": []
         },
         {
             "id": "tapis-transfer-results",
@@ -588,7 +598,13 @@
                     "and": [
                         {
                             "eq": [
-                                {"args": "RESUBMIT_INBOUND"},
+                                {"args": "RESUBMIT_INGRESS"},
+                                null
+                            ]
+                        },
+                        {
+                            "eq": [
+                                {"args": "RESUBMIT_TRANSFORM"},
                                 null
                             ]
                         },
@@ -695,14 +711,7 @@
                     }
                 }
             },
-            "conditions": [
-                {
-                    "eq": [
-                        {"args": "RESUBMIT_INBOUND"},
-                        null
-                    ]
-                }
-            ]
+            "conditions": []
         },
         {
             "id": "update-outbound-manifest-status",
@@ -768,14 +777,7 @@
                     }
                 }
             },
-            "conditions": [
-                {
-                    "eq": [
-                        {"args": "RESUBMIT_INBOUND"},
-                        null
-                    ]
-                }
-            ]
+            "conditions": []
         }
     ]
 }

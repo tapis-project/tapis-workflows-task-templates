@@ -71,21 +71,23 @@ try:
     # from mutating manifest files
     lock = ManifestsLock(client, local_inbox)
     lock.acquire()
+    
+    # Register the lockfile cleanup hook to be called on called to stderr and
+    # stdout. This will unlock the manifests lock when the program exits with any
+    # code
+    ctx.add_hook(1, lock.release)
+    ctx.add_hook(0, lock.release)
 except Exception as e:
     ctx.stderr(1, f"Failed to lock pipeline: {str(e)}")
 
-# Register the lockfile cleanup hook to be called on called to stderr and
-# stdout. This will unlock the manifests lock when the program exits with any
-# code
-ctx.add_hook(1, lock.release)
-ctx.add_hook(0, lock.release)
 
 # Create the root manifest if it does not exist. The root manifest is used
-# to track which 
+# to track which manifests have been transferred from the Remote Outbox's manifests
+# path
 try:
     manifest_files = client.files.listFiles(
-        systemId=local_inbox.get("ingress").get("system_id"),
-        path=local_inbox.get("ingress").get("path")
+        systemId=local_inbox.get("control").get("system_id"),
+        path=local_inbox.get("control").get("path")
     )
 
     root_manifest_exist = any([
@@ -97,15 +99,15 @@ try:
         manifest = ManifestModel(
             filename=ROOT_MANIFEST_FILENAME,
             path=os.path.join(
-                local_inbox.get("ingress").get("path"),
+                local_inbox.get("control").get("path"),
                 ROOT_MANIFEST_FILENAME
             ),
             files=[]
         )
 
-        manifest.create(local_inbox.get("ingress").get("system_id"), client)
+        manifest.create(local_inbox.get("control").get("system_id"), client)
 except Exception as e:
     ctx.stderr(1, f"Failed to create root manifest file in the local inbox: {e}")
 
-cleanup()
+cleanup(ctx)
 

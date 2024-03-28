@@ -83,17 +83,14 @@ try:
 except Exception as e:
     ctx.stderr(1, f"Failed to initialize manifests: {e}")
 
-# Transfer all files in each manifest to the data directory of the ingress
-# system
+# Transfer all files in each manifest to the data directory of the ingress system
 for ingress_manifest in ingress_manifests:
     if ingress_manifest == EnumManifestStatus.Completed:
         continue
-    # Check to see if the ingress system passes data integrity checks
-    # TODO FIXME I don't think this is right. We need to check the data integrity profile of the
-    # egress system before transferring right?
+    # Check to see if the data files in the ingress manifests pass data integrity checks
     try:
         validated, err = validate_manifest_data_files(
-            ingress_system,
+            egress_system,
             ingress_manifest,
             client
         )

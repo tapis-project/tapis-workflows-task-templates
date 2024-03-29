@@ -14,7 +14,8 @@ from utils.etl import (
     get_tapis_file_contents_json,
     requires_manifest_generation,
     generate_manifests,
-    cleanup
+    cleanup,
+    EnumPhase
 )
 
 from utils.tapis import get_client
@@ -60,7 +61,7 @@ except Exception as e:
 try:
     # Do nothing if the remote system does not require manifests to be generated
     if requires_manifest_generation(egress_system):
-        generate_manifests(egress_system, client)
+        generate_manifests(egress_system, client, EnumPhase.Ingress)
 except Exception as e:
     ctx.stderr(1, f"Error handling remote iobox manifest generation")
 
@@ -108,7 +109,7 @@ except Exception as e:
 
 # Check which manifest files are in the root manifest's files list. Add all
 # manifest files that are missing to the untracked manifests list
-tracked_manifest_filenames = [file.name for file in root_manifest.files]
+tracked_manifest_filenames = [file.name for file in root_manifest.local_files]
 untracked_remote_manifest_files = []
 for file in egress_manifest_files:
     if file.name not in tracked_manifest_filenames:

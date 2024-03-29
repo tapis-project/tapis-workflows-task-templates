@@ -2,9 +2,6 @@
     "tapis/etl-pipeline@v1beta": {
         "path": "schemas/workflows/etl/v1beta/pipelines/etl-pipeline-with-system-transfer.json"
     },
-    "tapis/web-page-summarize@v1beta": {
-        "path": "schemas/workflows/ml/v1/pipelines/web-page-summarize.json"
-    },
     "tapis/login@latest": {
         "path": "schemas/sdk/latest/login.json"
     },
@@ -23,11 +20,14 @@
     "tapis/etl/prepare-systems@v1beta": {
         "path": "schemas/workflows/etl/v1beta/prepare-systems.json"
     },
-    "tapis/etl/pull-get-manifests@v1beta": {
+    "tapis/etl/pull-gen-manifests@v1beta": {
         "path": "schemas/workflows/etl/v1beta/pull-gen-manifests.json"
     },
-    "tapis/etl/ingest-data@v1beta": {
-        "path": "schemas/workflows/etl/v1beta/ingest-data.json"
+    "tapis/etl/gen-local-outbox-manifests@v1beta": {
+        "path": "schemas/workflows/etl/v1beta/gen-local-outbox-manifests.json"
+    },
+    "tapis/etl/push-pull-data@v1beta": {
+        "path": "schemas/workflows/etl/v1beta/push-pull-data.json"
     },
     "tapis/etl/select-transform-manifest@v1beta": {
         "path": "schemas/workflows/etl/v1beta/select-transform-manifest.json"
@@ -35,14 +35,8 @@
     "tapis/etl/transforms@v1beta": {
         "path": "schemas/workflows/etl/v1beta/transforms.json"
     },
-    "tapis/etl/tapis-system-transfer@v1beta": {
-        "path": "schemas/workflows/etl/v1beta/tapis-system-transfer.json"
-    },
-    "tapis/etl/update-manifest-status@v1beta": {
-        "path": "schemas/workflows/etl/v1beta/update-manifest-status.json"
-    },
-    "tapis/etl/reduce@v1beta": {
-        "path": "schemas/workflows/etl/v1beta/reduce.json"
+    "tapis/etl/transfer-output@v1beta": {
+        "path": "schemas/workflows/etl/v1beta/transfer-output.json"
     },
     "tapis/workflows/tapis/job@latest": {
         "path": "schemas/workflows/tapis/latest/job.json"
@@ -50,6 +44,9 @@
     "tapis/ml/v1/text-summarize@v1": {
         "path": "schemas/ml/v1/text-summarize.json"
     },    
+    "tapis/web-page-summarize@v1beta": {
+        "path": "schemas/workflows/ml/v1/pipelines/web-page-summarize.json"
+    },
     "web/scrape@latest": {
         "path": "schemas/web/latest/web-scrape.json"
     }

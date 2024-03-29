@@ -5,7 +5,12 @@ from owe_python_sdk.runtime import execution_context as ctx
 import os, json, time
 from tapipy.tapis import Tapis
 
-from utils.etl import ManifestModel
+from utils.etl import (
+    ManifestsLock,
+    ManifestModel,
+    get_tapis_file_contents_json,
+    EnumManifestStatus
+)
 from utils.tapis import get_client
 
 
@@ -20,14 +25,60 @@ try:
 except Exception as e:
     ctx.stderr(str(e))
 
+# Deserialize system details
 try:
-    manifest = ManifestModel(**json.loads(ctx.get_input("MANIFEST")))
+    egress_system = json.loads(ctx.get_input("EGRESS_SYSTEM"))
+    ingress_system = json.loads(ctx.get_input("INGRESS_SYSTEM"))
+except json.JSONDecodeError as e:
+    ctx.stderr(1, f"{e}")
+
+try:
+    # Lock the manifests directory to prevent other concurrent pipeline runs
+    # from mutating manifest files
+    lock = ManifestsLock(client, egress_system)
+    lock.acquire()
+
+    # Register the lock release hook to be called on called to stderr and
+    # stdout. This will unlock the manifests lock when the program exits with any
+    # code
+    ctx.add_hook(1, lock.release)
+    ctx.add_hook(0, lock.release)
 except Exception as e:
-    ctx.stderr(1, f"Error initializing manifest: {e}")
+    ctx.stderr(1, f"Failed to lock pipeline: {str(e)}")
+
+# Load all manfiest files from the manifests directory of the ingress
+# system
+try:
+    egress_manifest_files = client.files.listFiles(
+        systemId=egress_system.get("manifests").get("system_id"),
+        path=egress_system.get("manifests").get("path")
+    )
+except Exception as e:
+    ctx.stderr(1, f"Failed to fetch manifest files: {e}")
+
+# Load manifests
+try:
+    egress_manifests = []
+    for egress_manifest_file in egress_manifest_files:
+        manifest = ManifestModel(
+            filename=egress_manifest_file.name,
+            path=egress_manifest_file.path,
+            **json.loads(
+                get_tapis_file_contents_json(
+                    client,
+                    egress_system.get("manifests").get("system_id"),
+                    egress_manifest_file.path
+                )
+            )
+        )
+        if manifest.status == EnumManifestStatus.Pending:
+            egress_manifests.apend(manifest)
+except Exception as e:
+    ctx.stderr(1, f"Failed to initialize manifests: {e}")
 
 try:
     # Log the transfer start
-    manifest.log(f"Starting transfer of {len(manifest.files)} file(s)")
+    manifest.log(f"Starting transfer of {len(manifest.local_files)} file(s)")
 
     # Create the destination dir on the remote inbox if it doesn't exist
     remote_inbox_system_id = ctx.get_input("REMOTE_INBOX_SYSTEM_ID")
@@ -38,7 +89,7 @@ try:
     )
     # Create transfer task
     elements = []
-    for f in manifest.files:
+    for f in manifest.local_files:
         ctx.set_output("MANIFEST_FILE", f)
         # NOTE: remove this input as soon as insert operation is available for Globus-type systems
         local_inbox_system_id = ctx.get_input("LOCAL_INBOX_SYSTEM_ID")

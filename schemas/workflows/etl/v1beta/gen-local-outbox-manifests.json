@@ -6,7 +6,7 @@
     "installer": "pip",
     "packages": ["tapipy"],
     "runtime": "python:3.9",
-    "entrypoint": "tapis-owe-functions/functions/tapis-etl-ingest-data.py",
+    "entrypoint": "tapis-owe-functions/functions/tapis-etl-gen-local-outbox-manifests.py",
     "git_repositories": [
         {
             "url": "https://github.com/tapis-project/tapis-workflows-task-templates.git",

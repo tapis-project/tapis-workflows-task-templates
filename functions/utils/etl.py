@@ -1,5 +1,6 @@
 import enum, json, time, os
 
+from typing import List, Literal
 from fnmatch import fnmatch
 from uuid import uuid4
 from datetime import datetime
@@ -175,7 +176,7 @@ class DataIntegrityValidator:
         self.client = client
         self.errors = []
 
-    def _done_file_validation(self, manifest_files, system_id, profile):
+    def _done_file_validation(self, files_in_manifest, system_id, profile):
         # Fetch the done files
         all_files = self.client.files.listFiles(
             systemId=system_id,
@@ -187,7 +188,7 @@ class DataIntegrityValidator:
             if match_patterns(file.name, profile.include_patterns, profile.exclude_patterns):
                 done_files.append(file)
 
-        for file_in_manifest in manifest_files.files:
+        for file_in_manifest in files_in_manifest:
             validated = False
             for done_file in done_files:
                 if file_in_manifest.get("name") in done_file.name:
@@ -200,9 +201,9 @@ class DataIntegrityValidator:
         # Not really sure if this check is necessary. Perhaps just return false
         return len(self.errors) < 1
 
-    def _byte_check_validation(self, manifest_files, system_id):
+    def _byte_check_validation(self, files_in_manifest, system_id):
         validations = []
-        for file_in_manifest in manifest_files:
+        for file_in_manifest in files_in_manifest:
             file_on_system = self.client.flies.listFiles(
                 systemId=system_id,
                 path=file_in_manifest.path
@@ -220,23 +221,23 @@ class DataIntegrityValidator:
 
         return all(validations)
 
-    def _checksum_validation(sefl, manifest, system_id):
+    def _checksum_validation(sefl, files_in_manifest, system_id):
         raise NotImplementedError("Data integrity profile type 'checksum' is not implemented")
 
     def validate(
         self,
-        manifest: ManifestModel,
+        files_in_manifest: List[object],
         system_id: str,
         profile: DataIntegrityProfile
     ):
         validated = False
         try:
             if profile.type == "done_file":
-                validated = self._done_file_validation(manifest, system_id, profile)
+                validated = self._done_file_validation(files_in_manifest, system_id, profile)
             elif profile.type == "checksum":
-                validated = self._checksum_validation(manifest, system_id)
+                validated = self._checksum_validation(files_in_manifest, system_id)
             elif profile.type == "byte_check":
-                validated = self._byte_check_validation(manifest, system_id, profile)
+                validated = self._byte_check_validation(files_in_manifest, system_id, profile)
         except Exception as e:
             self.errors.append(str(e))
         
@@ -316,7 +317,7 @@ def poll_transfer_task(client, task, interval_sec=5):
     return task
     
     
-def generate_manifests(system, client):
+def generate_manifests(system, client, phase: EnumPhase):
     # Fetch manifest files
     try:
         manifest_files = fetch_system_files(
@@ -363,8 +364,9 @@ def generate_manifests(system, client):
     # Create a list of all data files that have already been registered in a
     # manifest
     registered_data_file_paths = []
+    files_property = "local_files" if phase == EnumPhase.Ingress else "remote_files"
     for manifest in manifests:
-        for manifest_data_file in manifest.files:
+        for manifest_data_file in getattr(manifest, files_property):
             registered_data_file_paths.append(manifest_data_file["path"])
 
     # Create a list all data files that have not yet been registered with a
@@ -387,6 +389,7 @@ def generate_manifests(system, client):
             new_manifests.append(
                 ManifestModel(
                     filename=manifest_filename,
+                    phase=phase,
                     path=os.path.join(
                         system.get("manifests").get("path"),
                         manifest_filename
@@ -456,7 +459,7 @@ def cleanup(ctx, stdout_message=""):
     # beginning of the script
     ctx.stdout(stdout_message)
 
-def validate_manifest_data_files(system, manifest, client):
+def validate_manifest_data_files(system, files_in_manifest, client):
     # This step ensures that the file(s) in the manifest are ready for the current
     # operation (data processing or transfer) to be performed against them.
     validated = True
@@ -474,7 +477,7 @@ def validate_manifest_data_files(system, manifest, client):
     # integrity profile
     data_integrity_validator = DataIntegrityValidator(client)
     return data_integrity_validator.validate(
-        manifest.files,
+        files_in_manifest,
         system.get("data").get("system_id"),
         data_integrity_profile
     )

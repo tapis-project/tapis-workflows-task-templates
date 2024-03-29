@@ -111,13 +111,6 @@ if manifest_to_resubmit == None:
     manifest_priority = local_inbox.get("manifests").get("priority")
     next_manifest = unprocessed_manifests[0 - int(manifest_priority in ["newest", "any"])]
 
-# # Create an output to be used by the first job in the etl pipeline
-# if len(next_manifest.files) > 0 and phase == EnumPhase.Ingress:
-#     tapis_system_file_ref_extension = ctx.get_input("TAPIS_SYSTEM_FILE_REF_EXTENSION")
-#     for i, file in enumerate(next_manifest.files):
-#         # Set the file_input_arrays to output
-#         ctx.set_output(f"{i}-etl-data-file-ref.{tapis_system_file_ref_extension}", json.dumps({"file": file}))
-
 # Add the jobs to the manifest
 default_jobs = json.loads(ctx.get_input("DEFAULT_ETL_JOBS", "[]"))
 jobs = next_manifest.jobs if len(next_manifest.jobs) > 0 else default_jobs

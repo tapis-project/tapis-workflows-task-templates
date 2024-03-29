@@ -4,11 +4,11 @@ from typing import Any
 from tapipy.tapis import Tapis
 
 
-def get_client(base_url, username=None, password=None, jwt=None):
+def get_client(base_url, username=None, password=None, jwt=None, **kwargs):
     if (username == None or password == None) and jwt == None:
         raise Exception("Unable to authenticate with tapis: Must provide either a username-password combination or a JWT")
 
-    kwargs = {
+    auth_kwargs = {
         "username": username,
         "password": password,
         "jwt": jwt
@@ -17,6 +17,7 @@ def get_client(base_url, username=None, password=None, jwt=None):
     try:
         client = Tapis(
             base_url=base_url,
+            **auth_kwargs,
             **kwargs
         )
         

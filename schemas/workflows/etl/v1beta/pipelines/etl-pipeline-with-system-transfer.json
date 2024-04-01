@@ -286,7 +286,7 @@
             "description": "Submits all tapis jobs",
             "type": "template",
             "uses": {
-                "name": "tapis/etl/run-mainfest-jobs@v1beta",
+                "name": "tapis/etl/transforms@v1beta",
                 "source": {
                     "url": "https://github.com/tapis-project/tapis-workflows-task-templates.git",
                     "branch": "master"

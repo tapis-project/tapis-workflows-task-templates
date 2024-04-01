@@ -30,7 +30,7 @@ try:
         jwt=ctx.get_input("TAPIS_JWT")
     )
 except Exception as e:
-    ctx.stderr(str(e))
+    ctx.stderr(f"Failed to initalize Tapis client: {str(e)}")
 
 # Deserialize system details
 try:
@@ -107,7 +107,7 @@ try:
 except Exception as e:
     ctx.stderr(1, f"Failed to fetch manifest files: {e}")
 
-# Check which manifest files are in the root manifest's files list. Add all
+# Check which manifest files are in the root manifest's local files list. Add all
 # manifest files that are missing to the untracked manifests list
 tracked_manifest_filenames = [file.name for file in root_manifest.local_files]
 untracked_remote_manifest_files = []
@@ -129,6 +129,7 @@ for untracked_remote_manifest_file in untracked_remote_manifest_files:
     })
 
 if len(elements) == 0:
+    print("No tasks to process")
     ctx.set_output("TRANSFER_TASK", None)
     cleanup(ctx)
 
@@ -149,7 +150,7 @@ try:
     root_manifest.log(f"Transfer task completed | Task UUID: {task.uuid}")
     root_manifest.save(ingress_system.get("control").get("system_id"), client)
 except Exception as e:
-    ctx.stderr(1, f"{e}")
+    ctx.stderr(1, f"Error transferring files: {e}")
 
 cleanup(ctx)
 

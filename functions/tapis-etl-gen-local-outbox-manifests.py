@@ -53,7 +53,7 @@ try:
     if requires_manifest_generation(egress_system):
         generate_manifests(egress_system, client, EnumPhase.Egress)
 except Exception as e:
-    ctx.stderr(1, f"Error handling remote iobox manifest generation: {e}")
+    ctx.stderr(1, f"Error handling iobox manifest generation: {e}")
 
 cleanup(ctx)
 

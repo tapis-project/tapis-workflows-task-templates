@@ -118,6 +118,7 @@ for file in egress_manifest_files:
 # Transfer all untracked manifest files from the egress system to the
 # ingress system
 elements = []
+print(f"Untracked Remote Manifest files: {untracked_remote_manifest_files}")
 for untracked_remote_manifest_file in untracked_remote_manifest_files:
     system_id = ingress_system.get("manifests").get("system_id")
     path = ingress_system.get("manifests").get("path").strip("/")

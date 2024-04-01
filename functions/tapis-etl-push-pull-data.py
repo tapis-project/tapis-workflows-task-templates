@@ -13,6 +13,7 @@ from utils.etl import (
     EnumPhase,
     poll_transfer_task,
     get_tapis_file_contents_json,
+    get_manifest_files,
     validate_manifest_data_files,
     cleanup
 )
@@ -60,8 +61,9 @@ except Exception as e:
 
 # Load all manfiest files from the manifests directory of the manifests system
 try:
-    manifest_files = client.files.listFiles(
-        systemId=manifests_system.get("manifests").get("system_id"),
+    manifest_files = get_manifest_files(
+        client=client,
+        system_id=manifests_system.get("manifests").get("system_id"),
         path=manifests_system.get("manifests").get("path")
     )
 except Exception as e:

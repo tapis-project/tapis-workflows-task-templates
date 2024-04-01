@@ -8,8 +8,8 @@ from utils.etl import (
     ManifestModel,
     ManifestsLock,
     EnumManifestStatus,
-    EnumPhase,
     get_tapis_file_contents_json,
+    get_manifest_files,
     cleanup,
 )
 
@@ -50,8 +50,9 @@ except Exception as e:
 
 # Load all manfiest files from the manifests directory of the local inbox
 try:
-    manifest_files = client.files.listFiles(
-        systemId=manifests_system_id,
+    manifest_files = get_manifest_files(
+        client=client,
+        system_id=manifests_system_id,
         path=local_inbox.get("manifests").get("path")
     )
 except Exception as e:

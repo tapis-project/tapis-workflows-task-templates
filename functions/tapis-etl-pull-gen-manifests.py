@@ -12,6 +12,7 @@ from utils.etl import (
     ManifestsLock,
     poll_transfer_task,
     get_tapis_file_contents_json,
+    get_manifest_files,
     requires_manifest_generation,
     generate_manifests,
     cleanup,
@@ -100,8 +101,9 @@ except Exception as e:
 
 # Load all manfiest files from the remote outbox
 try:
-    egress_manifest_files = client.files.listFiles(
-        systemId=egress_system.get("manifests").get("system_id"),
+    egress_manifest_files = get_manifest_files(
+        client=client,
+        system_id=egress_system.get("manifests").get("system_id"),
         path=egress_system.get("manifests").get("path")
     )
 except Exception as e:
@@ -113,7 +115,7 @@ tracked_manifest_filenames = [file.name for file in root_manifest.local_files]
 untracked_remote_manifest_files = []
 for file in egress_manifest_files:
     # Prevent the from being tracked by including it with the list of tracked files
-    if file.name not in [*tracked_manifest_filenames, LOCKFILE_FILENAME]:
+    if file.name not in tracked_manifest_filenames:
         untracked_remote_manifest_files.append(file)
 
 # Transfer all untracked manifest files from the egress system to the

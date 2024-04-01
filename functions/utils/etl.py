@@ -137,8 +137,15 @@ class ManifestModel:
             file=self._to_json()
         )
 
+
+
 def get_tapis_file_contents_json(client, system_id, path):
     return client.files.getContents(systemId=system_id, path=path)
+
+def get_manifest_files(client, system_id, path):
+    """Fetches the manifest files while ignoring the etl lockfile"""
+    files = client.files.listFiles(systemId=system_id, path=path)
+    return [file for file in files if file.name != LOCKFILE_FILENAME]
 
 def match_patterns(target, include_patterns, exclude_patterns):
     matches_include = True
@@ -324,7 +331,10 @@ def generate_manifests(system, client, phase: EnumPhase):
             systemId=system.get("manifests").get("system_id"),
             path=system.get("manifests").get("path"),
             include_patterns=system.get("manifests").get("include_patterns"),
-            exclude_patterns=system.get("manifests").get("exclude_patterns")
+            exclude_patterns=[
+                *system.get("manifests").get("exclude_patterns"),
+                LOCKFILE_FILENAME # Ignore the lockfile.
+            ]
         )
     except Exception as e:
         raise Exception(f"Failed to fetch manifest files: {e}")
@@ -446,9 +456,9 @@ def fetch_system_files(
             return unfiltered_files
         
         filtered_files = []
-        for data_file in unfiltered_files:
-            if match_patterns(data_file.name, include_patterns, exclude_patterns):
-                filtered_files.append(data_file)
+        for file in unfiltered_files:
+            if match_patterns(file.name, include_patterns, exclude_patterns):
+                filtered_files.append(file)
 
         return filtered_files
     except Exception as e:

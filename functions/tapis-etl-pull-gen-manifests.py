@@ -6,7 +6,7 @@ from owe_python_sdk.runtime import execution_context as ctx
 
 import json, os
 
-from constants.etl import ROOT_MANIFEST_FILENAME
+from constants.etl import ROOT_MANIFEST_FILENAME, LOCKFILE_FILENAME
 from utils.etl import (
     ManifestModel,
     ManifestsLock,
@@ -112,13 +112,13 @@ except Exception as e:
 tracked_manifest_filenames = [file.name for file in root_manifest.local_files]
 untracked_remote_manifest_files = []
 for file in egress_manifest_files:
-    if file.name not in tracked_manifest_filenames:
+    # Prevent the from being tracked by including it with the list of tracked files
+    if file.name not in [*tracked_manifest_filenames, LOCKFILE_FILENAME]:
         untracked_remote_manifest_files.append(file)
 
 # Transfer all untracked manifest files from the egress system to the
 # ingress system
 elements = []
-print(f"Untracked Remote Manifest files: {untracked_remote_manifest_files}")
 for untracked_remote_manifest_file in untracked_remote_manifest_files:
     system_id = ingress_system.get("manifests").get("system_id")
     path = ingress_system.get("manifests").get("path").strip("/")
@@ -130,7 +130,6 @@ for untracked_remote_manifest_file in untracked_remote_manifest_files:
     })
 
 if len(elements) == 0:
-    print("No tasks to process")
     ctx.set_output("TRANSFER_TASK", None)
     cleanup(ctx)
 

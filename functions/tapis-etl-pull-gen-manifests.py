@@ -90,7 +90,7 @@ try:
         **json.loads(
             get_tapis_file_contents_json(
                 client,
-                ingress_system.get("ingress").get("system_id"),
+                ingress_system.get("control").get("system_id"),
                 root_manifest_file.path
             )
         )
@@ -143,11 +143,11 @@ try:
     if task.status != "COMPLETED":
         task_err = f"Transfer task failed | Task UUID: {task.uuid} | Status '{task.status}' | Error message for transfer task: {task.errorMessage}"
         root_manifest.log(task_err)
-        root_manifest.save(ingress_system.get("ingress").get("system_id"), client)
+        root_manifest.save(ingress_system.get("control").get("system_id"), client)
         ctx.stderr(1, task_err)
 
     root_manifest.log(f"Transfer task completed | Task UUID: {task.uuid}")
-    root_manifest.save(ingress_system.get("ingress").get("system_id"), client)
+    root_manifest.save(ingress_system.get("control").get("system_id"), client)
 except Exception as e:
     ctx.stderr(1, f"{e}")
 

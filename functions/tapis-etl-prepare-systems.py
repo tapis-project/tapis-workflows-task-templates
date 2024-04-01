@@ -101,8 +101,7 @@ try:
             path=os.path.join(
                 local_inbox.get("control").get("path"),
                 ROOT_MANIFEST_FILENAME
-            ),
-            files=[]
+            )
         )
 
         manifest.create(local_inbox.get("control").get("system_id"), client)

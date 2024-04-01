@@ -122,7 +122,7 @@ class ManifestModel:
     def create(self, system_id, client):
         self.created_at = time.time()
         self.last_modified = self.created_at
-        self.log(f"Created. Tracking {len(self.files)} file(s)")
+        self.log("Created")
         self._persist(system_id, client)
 
     def save(self, system_id, client):

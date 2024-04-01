@@ -341,9 +341,24 @@
             },
             "conditions": [
                 {
-                    "eq": [
-                        {"args": "RESUBMIT_EGRESS"},
-                        null
+                    "and": [
+                        {
+                            "eq": [
+                                {"args": "RESUBMIT_EGRESS"},
+                                null
+                            ]
+                        },
+                        {
+                            "ne": [
+                                {
+                                    "task_output": {
+                                        "task_id": "select-transform-manifest",
+                                        "output_id": "MANIFEST"
+                                    }
+                                },
+                                null
+                            ]
+                        }
                     ]
                 }
             ]

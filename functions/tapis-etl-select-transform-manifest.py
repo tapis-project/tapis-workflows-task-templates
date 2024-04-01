@@ -98,7 +98,7 @@ unprocessed_manifests = [
 # No manifests to process. Exit successfully
 if len(unprocessed_manifests) == 0 and manifest_to_resubmit == None:
     ctx.set_output("MANIFEST", json.dumps(None))
-    ctx.stdout("")
+    ctx.stdout("No manifests to process")
 
 # Set the next manifest to the manifest to be submitted
 if manifest_to_resubmit != None: # Is resubmission

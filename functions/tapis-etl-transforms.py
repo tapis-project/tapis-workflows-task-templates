@@ -2,15 +2,14 @@
 from owe_python_sdk.runtime import execution_context as ctx
 #-------- Workflow Context import: DO NOT REMOVE ----------------
 
-import json, time
+import json
 
 from utils.etl import (
-    get_client,
     ManifestsLock,
     ManifestModel,
     cleanup
 )
-from utils.tapis import poll_job
+from utils.tapis import poll_job, get_client
 
 
 

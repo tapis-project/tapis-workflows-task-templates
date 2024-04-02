@@ -89,7 +89,7 @@ try:
             manifest.phase == phase
             and manifest.status != EnumManifestStatus.Completed
         ):
-            manifests.apend(manifest)
+            manifests.append(manifest)
 except Exception as e:
     ctx.stderr(1, f"Failed to initialize manifests: {e}")
 

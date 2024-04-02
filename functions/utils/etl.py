@@ -329,10 +329,7 @@ def poll_transfer_task(client, task, interval_sec=5):
 def generate_manifests(system, client, phase: EnumPhase):
     # Fetch manifest files
     try:
-        print("EXCLUDES", [
-                *system.get("manifests").get("exclude_patterns"),
-                LOCKFILE_FILENAME # Ignore the lockfile.
-            ])
+        print("MANIFESTS")
         manifest_files = fetch_system_files(
             system_id=system.get("manifests").get("system_id"),
             path=system.get("manifests").get("path"),
@@ -369,6 +366,7 @@ def generate_manifests(system, client, phase: EnumPhase):
 
     # Fetch the data files
     try:
+        print("DATA")
         data_files = fetch_system_files(
             system_id=system.get("data").get("system_id"),
             path=system.get("data").get("path"),
@@ -460,6 +458,8 @@ def fetch_system_files(
             systemId=system_id,
             path=path
         )
+
+        print("UNFILTERED", [f.name for f in unfiltered_files])
 
         if len(include_patterns) == 0 and len(exclude_patterns) == 0:
             return unfiltered_files

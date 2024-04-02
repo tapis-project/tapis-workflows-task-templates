@@ -41,7 +41,7 @@
     },
     "tasks": [
         {
-            "id": "prepare-systems",
+            "id": "01-prepare-systems",
             "description": "Create directories required by an etl pipeline on all systems",
             "type": "template",
             "uses": {
@@ -105,7 +105,7 @@
             }
         },
         {
-            "id": "pull-gen-remote-outbox-manifests",
+            "id": "02-pull-gen-remote-outbox-manifests",
             "description": "Transfer manifests from remote outbox to remote inbox",
             "type": "template",
             "uses": {
@@ -117,7 +117,7 @@
             },
             "depends_on": [
                 {
-                    "id": "prepare-systems",
+                    "id": "01-prepare-systems",
                     "can_fail": false,
                     "can_skip": true
                 }
@@ -157,7 +157,7 @@
             }
         },
         {
-            "id": "ingest-remote-outbox-data",
+            "id": "03-ingest-remote-outbox-data",
             "description": "Transfer data files from the remote outbox to the local inbox",
             "type": "template",
             "uses": {
@@ -169,7 +169,7 @@
             },
             "depends_on": [
                 {
-                    "id": "pull-gen-remote-outbox-manifests",
+                    "id": "02-pull-gen-remote-outbox-manifests",
                     "can_fail": false,
                     "can_skip": false
                 }
@@ -212,7 +212,7 @@
             }
         },
         {
-            "id": "select-transform-manifest",
+            "id": "04-select-transform-manifest",
             "description": "Outputs the next manifest to be processed",
             "type": "template",
             "uses": {
@@ -224,7 +224,7 @@
             },
             "depends_on": [
                 {
-                    "id": "ingest-remote-outbox-data",
+                    "id": "03-ingest-remote-outbox-data",
                     "can_fail": false,
                     "can_skip": false
                 }
@@ -282,7 +282,7 @@
             ]
         },
         {
-            "id": "submit-tapis-jobs",
+            "id": "05-submit-tapis-jobs",
             "description": "Submits all tapis jobs",
             "type": "template",
             "uses": {
@@ -294,7 +294,7 @@
             },
             "depends_on": [
                 {
-                    "id": "select-transform-manifest",
+                    "id": "04-select-transform-manifest",
                     "can_fail": false,
                     "can_skip": false
                 }
@@ -364,7 +364,7 @@
             ]
         },
         {
-            "id": "gen-local-outbox-manifests",
+            "id": "06-gen-local-outbox-manifests",
             "description": "Generates a manifests for output data files in data directory of the local outbox system.",
             "type": "template",
             "uses": {
@@ -376,7 +376,7 @@
             },
             "depends_on": [
                 {
-                    "id": "submit-tapis-jobs",
+                    "id": "05-submit-tapis-jobs",
                     "can_skip": true
                 }
             ],
@@ -415,7 +415,7 @@
             "conditions": []
         },
         {
-            "id": "tapis-transfer-results",
+            "id": "07-tapis-transfer-results",
             "type": "template",
             "uses": {
                 "name": "tapis/etl/push-pull-data@v1beta",
@@ -426,7 +426,7 @@
             },
             "conditions": [],
             "depends_on": [
-                {"id": "gen-local-outbox-manifests"}
+                {"id": "06-gen-local-outbox-manifests"}
             ],
             "input": {
                 "TAPIS_BASE_URL": {

@@ -1,6 +1,6 @@
 import enum, json, time, os
 
-from typing import List, Literal
+from typing import List
 from fnmatch import fnmatch
 from uuid import uuid4
 from datetime import datetime
@@ -146,6 +146,7 @@ def get_manifest_files(client, system_id, path):
     return [file for file in files if file.name != LOCKFILE_FILENAME]
 
 def match_patterns(target, include_patterns, exclude_patterns):
+    print("TARGET", target, include_pattern, exclude_patterns)
     inclusions = [] if len(include_patterns) > 0 else [True]
     for include_pattern in include_patterns:
         inclusion = fnmatch(target, include_pattern)
@@ -163,12 +164,12 @@ def match_patterns(target, include_patterns, exclude_patterns):
 class DataIntegrityProfile:
     def __init__(
         self,
-        type_,
+        type,
         done_files_path=None,
         include_patterns=[],
         exclude_patterns=[]
     ):
-        self.type = type_
+        self.type = type
         self.done_files_path = done_files_path
         self.include_patterns = include_patterns
         self.exclude_patterns = exclude_patterns

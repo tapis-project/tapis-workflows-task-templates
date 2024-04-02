@@ -370,6 +370,7 @@ def generate_manifests(system, client, phase: EnumPhase):
             include_patterns=system.get("data").get("include_patterns"),
             exclude_patterns=system.get("data").get("exclude_patterns")
         )
+        print("DATA_FILES", data_files)
     except Exception as e:
         raise Exception(f"Failed to fetch data files: {e}")
     
@@ -387,6 +388,7 @@ def generate_manifests(system, client, phase: EnumPhase):
         data_file for data_file in data_files
         if data_file.path not in registered_data_file_paths
     ]
+    print("UNREGISTERED DATA FILES", unregistered_data_files)
 
     # Check the manifest generation policy to determine whether all new
     # data files should be added to a single manifest, or a manifest

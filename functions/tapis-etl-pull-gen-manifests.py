@@ -62,6 +62,7 @@ except Exception as e:
 try:
     # Do nothing if the remote system does not require manifests to be generated
     if requires_manifest_generation(egress_system):
+        print("Requires manifest generation")
         generate_manifests(egress_system, client, EnumPhase.Ingress)
 except Exception as e:
     ctx.stderr(1, f"Error handling remote iobox manifest generation")

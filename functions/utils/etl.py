@@ -329,7 +329,6 @@ def poll_transfer_task(client, task, interval_sec=5):
 def generate_manifests(system, client, phase: EnumPhase):
     # Fetch manifest files
     try:
-        print("MANIFESTS")
         manifest_files = fetch_system_files(
             system_id=system.get("manifests").get("system_id"),
             path=system.get("manifests").get("path"),
@@ -366,7 +365,6 @@ def generate_manifests(system, client, phase: EnumPhase):
 
     # Fetch the data files
     try:
-        print("DATA")
         data_files = fetch_system_files(
             system_id=system.get("data").get("system_id"),
             path=system.get("data").get("path"),
@@ -374,7 +372,6 @@ def generate_manifests(system, client, phase: EnumPhase):
             include_patterns=system.get("data").get("include_patterns"),
             exclude_patterns=system.get("data").get("exclude_patterns")
         )
-        print("DATA FILES", [f.name for f in data_files])
     except Exception as e:
         raise Exception(f"Failed to fetch data files: {e}")
     
@@ -458,10 +455,6 @@ def fetch_system_files(
             systemId=system_id,
             path=path
         )
-
-        print("SYSTEM ID", system_id)
-        print("PATH", path)
-        print("UNFILTERED", [f.name for f in unfiltered_files])
 
         if len(include_patterns) == 0 and len(exclude_patterns) == 0:
             return unfiltered_files

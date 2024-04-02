@@ -359,7 +359,7 @@ def generate_manifests(system, client, phase: EnumPhase):
 
     # Fetch the data files
     try:
-        print("DATA SYSTEM", system.get("data").include_patterns, system.get("data").exclude_patterns)
+        print("DATA SYSTEM", system.get("data").get("include_patterns"), system.get("data").get("exclude_patterns"))
         data_files = fetch_system_files(
             system_id=system.get("data").get("system_id"),
             path=system.get("data").get("path"),

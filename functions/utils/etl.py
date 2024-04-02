@@ -330,6 +330,7 @@ def generate_manifests(system, client, phase: EnumPhase):
         manifest_files = fetch_system_files(
             system_id=system.get("manifests").get("system_id"),
             path=system.get("manifests").get("path"),
+            client=client,
             include_patterns=system.get("manifests").get("include_patterns"),
             exclude_patterns=[
                 *system.get("manifests").get("exclude_patterns"),
@@ -365,6 +366,7 @@ def generate_manifests(system, client, phase: EnumPhase):
         data_files = fetch_system_files(
             system_id=system.get("data").get("system_id"),
             path=system.get("data").get("path"),
+            client=client,
             include_patterns=system.get("data").get("include_patterns"),
             exclude_patterns=system.get("data").get("exclude_patterns")
         )

@@ -6,6 +6,7 @@ from owe_python_sdk.runtime import execution_context as ctx
 
 import json, os
 
+from constants.etl import LOCKFILE_FILENAME
 from utils.etl import (
     ManifestModel,
     ManifestsLock,
@@ -13,11 +14,10 @@ from utils.etl import (
     EnumPhase,
     poll_transfer_task,
     get_tapis_file_contents_json,
-    get_manifest_files,
+    fetch_system_files,
     validate_manifest_data_files,
     cleanup
 )
-
 from utils.tapis import get_client
 
 
@@ -61,10 +61,15 @@ except Exception as e:
 
 # Load all manfiest files from the manifests directory of the manifests system
 try:
-    manifest_files = get_manifest_files(
-        client=client,
+    manifest_files = fetch_system_files(
         system_id=manifests_system.get("manifests").get("system_id"),
-        path=manifests_system.get("manifests").get("path")
+        path=manifests_system.get("manifests").get("path"),
+        client=client,
+        include_patterns=manifests_system.get("manifests").get("include_patterns"),
+        exclude_patterns=[
+            *manifests_system.get("manifests").get("exclude_patterns"),
+            LOCKFILE_FILENAME # Ignore the lockfile.
+        ]
     )
 except Exception as e:
     ctx.stderr(1, f"Failed to fetch manifest files: {e}")

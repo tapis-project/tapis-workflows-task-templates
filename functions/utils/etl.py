@@ -140,11 +140,6 @@ class ManifestModel:
 def get_tapis_file_contents_json(client, system_id, path):
     return client.files.getContents(systemId=system_id, path=path)
 
-def get_manifest_files(client, system_id, path):
-    """Fetches the manifest files while ignoring the etl lockfile"""
-    files = client.files.listFiles(systemId=system_id, path=path)
-    return [file for file in files if file.name != LOCKFILE_FILENAME]
-
 def match_patterns(target, include_patterns, exclude_patterns):
     print("TARGET", target, include_patterns, exclude_patterns)
     inclusions = [] if len(include_patterns) > 0 else [True]

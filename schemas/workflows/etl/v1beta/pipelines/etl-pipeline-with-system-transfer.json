@@ -328,7 +328,7 @@
                 "MANIFEST": {
                     "value_from": {
                         "task_output": {
-                            "task_id": "select-transform-manifest",
+                            "task_id": "04-select-transform-manifest",
                             "output_id": "MANIFEST"
                         }
                     }
@@ -352,7 +352,7 @@
                             "ne": [
                                 {
                                     "task_output": {
-                                        "task_id": "select-transform-manifest",
+                                        "task_id": "04-select-transform-manifest",
                                         "output_id": "MANIFEST"
                                     }
                                 },

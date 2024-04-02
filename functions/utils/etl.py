@@ -148,17 +148,20 @@ def get_manifest_files(client, system_id, path):
     return [file for file in files if file.name != LOCKFILE_FILENAME]
 
 def match_patterns(target, include_patterns, exclude_patterns):
-    matches_include = True
+    print("TARGET", target, "   ")
+    inclusions = [] if len(include_patterns) > 0 else [True]
     for include_pattern in include_patterns:
-        matches_include = fnmatch(target, include_pattern)
-        if matches_include: break
+        inclusion = fnmatch(target, include_pattern)
+        inclusions.append(inclusion)
+        if inclusion: break
 
-    matches_exclude = False
+    exclusions = []
     for exclude_pattern in exclude_patterns:
-        matches_exclude = fnmatch(target, exclude_pattern)
-        if matches_exclude: break
+        exclusion = fnmatch(target, exclude_pattern)
+        exclusions.append(exclusion)
+        if exclusion: break
 
-    return matches_include and not matches_exclude
+    return any(inclusions) and not any(exclusions)
 
 class DataIntegrityProfile:
     def __init__(
@@ -370,7 +373,6 @@ def generate_manifests(system, client, phase: EnumPhase):
             include_patterns=system.get("data").get("include_patterns"),
             exclude_patterns=system.get("data").get("exclude_patterns")
         )
-        print("DATA_FILES", data_files)
     except Exception as e:
         raise Exception(f"Failed to fetch data files: {e}")
     
@@ -388,7 +390,6 @@ def generate_manifests(system, client, phase: EnumPhase):
         data_file for data_file in data_files
         if data_file.path not in registered_data_file_paths
     ]
-    print("UNREGISTERED DATA FILES", unregistered_data_files)
 
     # Check the manifest generation policy to determine whether all new
     # data files should be added to a single manifest, or a manifest
@@ -455,6 +456,13 @@ def fetch_system_files(
             systemId=system_id,
             path=path
         )
+
+        print("UNFILTERED", unfiltered_files, "   ")
+
+        print("INCLUDE", include_patterns, "   ")
+
+        print("EXCLUDE", include_patterns, "   ")
+
 
         if len(include_patterns) == 0 and len(exclude_patterns) == 0:
             return unfiltered_files

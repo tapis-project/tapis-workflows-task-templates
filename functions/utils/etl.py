@@ -148,7 +148,6 @@ def get_manifest_files(client, system_id, path):
     return [file for file in files if file.name != LOCKFILE_FILENAME]
 
 def match_patterns(target, include_patterns, exclude_patterns):
-    print("TARGET", target, "   ")
     inclusions = [] if len(include_patterns) > 0 else [True]
     for include_pattern in include_patterns:
         inclusion = fnmatch(target, include_pattern)
@@ -330,6 +329,10 @@ def poll_transfer_task(client, task, interval_sec=5):
 def generate_manifests(system, client, phase: EnumPhase):
     # Fetch manifest files
     try:
+        print("EXCLUDES", [
+                *system.get("manifests").get("exclude_patterns"),
+                LOCKFILE_FILENAME # Ignore the lockfile.
+            ])
         manifest_files = fetch_system_files(
             system_id=system.get("manifests").get("system_id"),
             path=system.get("manifests").get("path"),
@@ -373,6 +376,7 @@ def generate_manifests(system, client, phase: EnumPhase):
             include_patterns=system.get("data").get("include_patterns"),
             exclude_patterns=system.get("data").get("exclude_patterns")
         )
+        print("DATA FILES", [f.name for f in data_files])
     except Exception as e:
         raise Exception(f"Failed to fetch data files: {e}")
     
@@ -456,13 +460,6 @@ def fetch_system_files(
             systemId=system_id,
             path=path
         )
-
-        print("UNFILTERED", unfiltered_files, "   ")
-
-        print("INCLUDE", include_patterns, "   ")
-
-        print("EXCLUDE", include_patterns, "   ")
-
 
         if len(include_patterns) == 0 and len(exclude_patterns) == 0:
             return unfiltered_files

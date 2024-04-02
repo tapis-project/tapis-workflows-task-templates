@@ -459,6 +459,8 @@ def fetch_system_files(
             path=path
         )
 
+        print("SYSTEM ID", system_id)
+        print("PATH", path)
         print("UNFILTERED", [f.name for f in unfiltered_files])
 
         if len(include_patterns) == 0 and len(exclude_patterns) == 0:

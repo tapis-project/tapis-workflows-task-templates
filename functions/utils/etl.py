@@ -408,7 +408,7 @@ def generate_manifests(system, client, phase: EnumPhase):
                         system.get("manifests").get("path"),
                         manifest_filename
                     ),
-                    files=[unregistered_data_file]
+                    **{files_property: [unregistered_data_file]}
                 )
             )
     elif (
@@ -423,7 +423,7 @@ def generate_manifests(system, client, phase: EnumPhase):
                     system.get("manifests").get("path"),
                     manifest_filename
                 ),
-                files=unregistered_data_files
+                **{files_property: [unregistered_data_file]}
             )
         )
 

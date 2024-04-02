@@ -139,7 +139,7 @@ if len(elements) == 0:
 try:
     root_manifest.log(f"Starting transfer of {len(elements)} manifest(s) from the egress system to the ingress system")
     task = client.files.createTransferTask(elements=elements)
-    task = poll_transfer_task(task)
+    task = poll_transfer_task(client, task)
     
     ctx.set_output("TRANSFER_TASK", task.__dict__)
 

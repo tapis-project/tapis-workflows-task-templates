@@ -131,17 +131,11 @@ class ManifestModel:
         
 
     def _persist(self, system_id, client):
-        print("BEFORE PERSIST")
-        print("SYSTEM ID", system_id)
-        print("PATH", self.path)
         client.files.insert(
             systemId=system_id,
             path=self.path,
             file=self._to_json()
         )
-        print("AFTER PERSIST")
-
-
 
 def get_tapis_file_contents_json(client, system_id, path):
     return client.files.getContents(systemId=system_id, path=path)

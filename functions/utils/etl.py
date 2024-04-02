@@ -434,7 +434,7 @@ def generate_manifests(system, client, phase: EnumPhase):
     try:
         # Persist all of the new manifests
         for new_manifest in new_manifests:
-            new_manifest.create(system.get("manifests").get("path"), client)
+            new_manifest.create(system.get("manifests").get("system_id"), client)
     except Exception as e:
         raise Exception(f"Failed to create manifests: {e}")
 

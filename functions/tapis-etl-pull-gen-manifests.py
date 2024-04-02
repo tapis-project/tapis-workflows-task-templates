@@ -141,7 +141,7 @@ try:
     task = client.files.createTransferTask(elements=elements)
     task = poll_transfer_task(task)
     
-    ctx.set_output("TRANSFER_TASK", task.__dict__)  
+    ctx.set_output("TRANSFER_TASK", task.__dict__)
 
     if task.status != "COMPLETED":
         task_err = f"Transfer task failed | Task UUID: {task.uuid} | Status '{task.status}' | Error message for transfer task: {task.errorMessage}"

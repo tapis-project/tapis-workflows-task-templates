@@ -132,6 +132,8 @@ class ManifestModel:
 
     def _persist(self, system_id, client):
         print("BEFORE PERSIST")
+        print("SYSTEM ID", system_id)
+        print("PATH", self.path)
         client.files.insert(
             systemId=system_id,
             path=self.path,

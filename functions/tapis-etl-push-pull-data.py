@@ -116,11 +116,11 @@ for manifest in manifests:
         if not validated:
             manifest.log(f"Data integrity checks failed | {err}")
             manifest.set_status(EnumManifestStatus.IntegrityCheckFailed)
-            manifest.save(ingress_system.get("data").get("system_id"), client)
+            manifest.save(ingress_system.get("manifests").get("system_id"), client)
             continue
         
         manifest.log(f"Data integrity checks successful")
-        manifest.save(ingress_system.get("data").get("system_id"), client)
+        manifest.save(ingress_system.get("manifests").get("system_id"), client)
     except Exception as e:
         ctx.stderr(1, f"Error updating manifest: {e}")
 

@@ -146,7 +146,7 @@ def get_manifest_files(client, system_id, path):
     return [file for file in files if file.name != LOCKFILE_FILENAME]
 
 def match_patterns(target, include_patterns, exclude_patterns):
-    print("TARGET", target, include_pattern, exclude_patterns)
+    print("TARGET", target, include_patterns, exclude_patterns)
     inclusions = [] if len(include_patterns) > 0 else [True]
     for include_pattern in include_patterns:
         inclusion = fnmatch(target, include_pattern)

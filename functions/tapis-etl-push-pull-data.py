@@ -102,9 +102,9 @@ except Exception as e:
 for manifest in manifests:
     # Which property contains the correct data files depends on the phase. For the
     # ingress phase it's remote_files and for egress it's local_files
-    data_files = getattr(manifest, "remote_files")
+    data_files = getattr(manifest, "local_files")
     if phase == EnumPhase.Ingress:
-        data_files = getattr(manifest, "local_files")
+        data_files = getattr(manifest, "remote_files")
 
     # Check to see if the data files in the manifests pass data integrity checks
     try:

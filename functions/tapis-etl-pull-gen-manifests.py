@@ -146,21 +146,28 @@ try:
     task = client.files.createTransferTask(elements=elements)
     task = poll_transfer_task(client, task)
     
+    print("Before transfer task output")
     ctx.set_output("TRANSFER_TASK", task.__dict__)
+    print("After transfer task output")
 
     if task.status != "COMPLETED":
+        print("NOT COMPLETED")
         task_err = f"Transfer task failed | Task UUID: {task.uuid} | Status '{task.status}' | Error message for transfer task: {task.errorMessage}"
         root_manifest.log(task_err)
         root_manifest.save(ingress_system.get("control").get("system_id"), client)
         ctx.stderr(1, task_err)
 
+    print("BEOFERE EXTEND")
     root_manifest.remote_files.extend([
         file.__dict__ for file in 
         untracked_remote_manifest_files
     ])
+    print("AFTER EXTEND")
     root_manifest.log(f"Transfer task completed | Task UUID: {task.uuid}")
     root_manifest.transfers.append(task.__dict__)
+    print("BEOFRE SAVE")
     root_manifest.save(ingress_system.get("control").get("system_id"), client)
+    print("AFTER SAVE")
 except Exception as e:
     ctx.stderr(1, f"Error transferring files: {e}")
 

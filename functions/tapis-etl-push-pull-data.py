@@ -147,7 +147,7 @@ for manifest in manifests:
         manifest.log(f"Starting transfer of {len(elements)} data files from the remote outbox to the local inbox")
         # Start the transfer task and poll until terminal state
         task = client.files.createTransferTask(elements=elements)
-        task = poll_transfer_task(task)
+        task = poll_transfer_task(client, task)
     except Exception as e:
         ctx.stderr(1, f"Error transferring files: {e}")
     

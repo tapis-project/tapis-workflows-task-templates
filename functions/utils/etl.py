@@ -141,7 +141,6 @@ def get_tapis_file_contents_json(client, system_id, path):
     return client.files.getContents(systemId=system_id, path=path)
 
 def match_patterns(target, include_patterns, exclude_patterns):
-    print("TARGET", target, include_patterns, exclude_patterns)
     inclusions = [] if len(include_patterns) > 0 else [True]
     for include_pattern in include_patterns:
         inclusion = fnmatch(target, include_pattern)

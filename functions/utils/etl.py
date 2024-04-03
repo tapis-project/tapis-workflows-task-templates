@@ -82,18 +82,6 @@ class ManifestModel:
             self.jobs.append(job.__dict__)
 
     def _to_json(self):
-        print({
-                "status": self.status,
-                "phase": self.phase,
-                "local_files": self.local_files,
-                "transfers": self.transfers,
-                "remote_files": self.remote_files,
-                "jobs": self.jobs,
-                "logs": self.logs,
-                "created_at": self.created_at,
-                "last_modified": self.last_modified,
-                "metadata": self.metadata
-            })
         return json.dumps(
             {
                 "status": self.status,

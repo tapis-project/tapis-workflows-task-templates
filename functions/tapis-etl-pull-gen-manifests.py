@@ -146,7 +146,7 @@ try:
     task = client.files.createTransferTask(elements=elements)
     task = poll_transfer_task(client, task)
     
-    ctx.set_output("TRANSFER_TASK_UUID", task.uuid)
+    ctx.set_output("TRANSFER_TASK", task.__dict__)
 
     if task.status != "COMPLETED":
         task_err = f"Transfer task failed | Task UUID: {task.uuid} | Status '{task.status}' | Error message for transfer task: {task.errorMessage}"
@@ -154,7 +154,10 @@ try:
         root_manifest.save(ingress_system.get("control").get("system_id"), client)
         ctx.stderr(1, task_err)
 
-    root_manifest.remote_files.extend(untracked_remote_manifest_files)
+    root_manifest.remote_files.extend([
+        file.__dict__ for file in 
+        untracked_remote_manifest_files
+    ])
     root_manifest.log(f"Transfer task completed | Task UUID: {task.uuid}")
     root_manifest.save(ingress_system.get("control").get("system_id"), client)
 except Exception as e:

@@ -159,6 +159,7 @@ try:
         untracked_remote_manifest_files
     ])
     root_manifest.log(f"Transfer task completed | Task UUID: {task.uuid}")
+    root_manifest.transfers.append(task.__dict__)
     root_manifest.save(ingress_system.get("control").get("system_id"), client)
 except Exception as e:
     ctx.stderr(1, f"Error transferring files: {e}")

@@ -359,7 +359,6 @@ def generate_manifests(system, client, phase: EnumPhase):
 
     # Fetch the data files
     try:
-        print("DATA SYSTEM", system.get("data").get("include_patterns"), system.get("data").get("exclude_patterns"))
         data_files = fetch_system_files(
             system_id=system.get("data").get("system_id"),
             path=system.get("data").get("path"),
@@ -367,14 +366,13 @@ def generate_manifests(system, client, phase: EnumPhase):
             include_patterns=system.get("data").get("include_patterns"),
             exclude_patterns=system.get("data").get("exclude_patterns")
         )
-        print("DATA FILES", [f.name for f in data_files])
     except Exception as e:
         raise Exception(f"Failed to fetch data files: {e}")
     
     # Create a list of all data files that have already been registered in a
     # manifest
     registered_data_file_paths = []
-    files_property = "local_files" if phase == EnumPhase.Ingress else "remote_files"
+    files_property = "remote_files" if phase == EnumPhase.Ingress else "local_files"
     for manifest in manifests:
         for manifest_data_file in getattr(manifest, files_property):
             registered_data_file_paths.append(manifest_data_file["path"])

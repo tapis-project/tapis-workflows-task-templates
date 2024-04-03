@@ -152,7 +152,7 @@ for manifest in manifests:
         ctx.stderr(1, f"Error transferring files: {e}")
     
     # Add the transfer data to the manfiest
-    manifest.transfers.append(task.__dict__)
+    manifest.transfers.append(task.uuid)
 
     try:
         if task.status != "COMPLETED":

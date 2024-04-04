@@ -186,10 +186,10 @@ try:
             for data_file in unconverted_manifest.remote_files:
                 ingress_system_id = ingress_system.get("data").get("system_id")
                 ingress_data_files_path = ingress_system.get("data").get("path")
-                path = os.path.join(f"/{ingress_data_files_path.strip('/')}", data_file.name)
+                path = os.path.join(f"/{ingress_data_files_path.strip('/')}", data_file["name"])
                 modified_data_files.append({
                     **data_file,
-                    "url": f'tapis://{ingress_system_id}/{os.path.join(path, data_file.name).strip("/")}',
+                    "url": f'tapis://{ingress_system_id}/{os.path.join(path, data_file["name"]).strip("/")}',
                     "path": path
                 })
             

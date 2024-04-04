@@ -74,8 +74,8 @@ try:
     all_manifests = []
     for manifest_file in manifest_files:
         manifest = ManifestModel(
-            filename=manifest_file.name,
-            path=manifest_file.path,
+            filename=manifest_file["name"],
+            path=manifest_file["path"],
             **json.loads(
                 get_tapis_file_contents_json(
                     client,
@@ -84,7 +84,7 @@ try:
                 )
             )
         )
-        if manifest.name == resubmit_manifest_name:
+        if manifest.filename == resubmit_manifest_name:
             manifest_to_resubmit = manifest
 
         all_manifests.append(manifest)

@@ -66,12 +66,6 @@ class ManifestModel:
             self.remote_files.append(remote_file.__dict__)
 
         transfers = transfers if transfers != None else []
-        for transfer in transfers:
-            if type(transfer) == dict:
-                self.transfers.append(transfer)
-                continue
-
-            self.transfers.append(transfer.__dict__)
 
         jobs = jobs if jobs != None else []
         for job in jobs:

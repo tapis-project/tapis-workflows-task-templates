@@ -245,6 +245,11 @@
                         "args": "TAPIS_PASSWORD"
                     }
                 },
+                "DEFAULT_ETL_JOBS": {
+                    "value_from": {
+                        "env": "DEFAULT_ETL_JOBS"
+                    }
+                },
                 "LOCAL_INBOX": {
                     "value_from": {
                         "env": "LOCAL_INBOX"

@@ -116,7 +116,7 @@ except Exception as e:
 
 # Check which manifest files are in the root manifest's local files list. Add all
 # manifest files that are missing to the untracked manifests list
-tracked_manifest_filenames = [file.name for file in root_manifest.remote_files]
+tracked_manifest_filenames = [file["name"] for file in root_manifest.remote_files]
 untracked_remote_manifest_files = []
 for file in egress_manifest_files:
     # Prevent the from being tracked by including it with the list of tracked files

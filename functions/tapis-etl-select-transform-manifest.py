@@ -74,8 +74,8 @@ try:
     all_manifests = []
     for manifest_file in manifest_files:
         manifest = ManifestModel(
-            filename=manifest_file["name"],
-            path=manifest_file["path"],
+            filename=manifest_file.name,
+            path=manifest_file.path,
             **json.loads(
                 get_tapis_file_contents_json(
                     client,
@@ -116,7 +116,7 @@ if manifest_to_resubmit == None:
     unprocessed_manifests.sort(key=lambda m: m.created_at, reverse=True)
     # Default to oldest manifest
     manifest_priority = local_inbox.get("manifests").get("priority")
-    next_manifest = unprocessed_manifests[0 - int(manifest_priority in ["newest", "any"])]
+    next_manifest = unprocessed_manifests[0 - int(manifest_priority != "oldest")]
 
 # Add the jobs to the manifest
 default_jobs = json.loads(ctx.get_input("DEFAULT_ETL_JOBS", "[]"))

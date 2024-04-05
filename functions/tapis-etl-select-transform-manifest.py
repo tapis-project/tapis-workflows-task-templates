@@ -106,17 +106,16 @@ if len(unprocessed_manifests) == 0 and manifest_to_resubmit == None:
     ctx.set_output("MANIFEST", json.dumps(None))
     ctx.stdout("No manifests to process")
 
+# Sort unprocessed manifests from oldest to newest
+unprocessed_manifests.sort(key=lambda m: m.created_at, reverse=True)
+
 # Set the next manifest to the manifest to be submitted
+# Default to oldest manifest
+manifest_priority = local_inbox.get("manifests").get("priority")
+next_manifest = unprocessed_manifests[0 - int(manifest_priority != "oldest")]
 if manifest_to_resubmit != None: # Is resubmission
     next_manifest = manifest_to_resubmit
     next_manifest.log("Resubmitting")
-
-if manifest_to_resubmit == None:
-    # Sort unprocessed manifests from oldest to newest
-    unprocessed_manifests.sort(key=lambda m: m.created_at, reverse=True)
-    # Default to oldest manifest
-    manifest_priority = local_inbox.get("manifests").get("priority")
-    next_manifest = unprocessed_manifests[0 - int(manifest_priority != "oldest")]
 
 # Add the jobs to the manifest
 default_jobs = json.loads(ctx.get_input("DEFAULT_ETL_JOBS", "[]"))

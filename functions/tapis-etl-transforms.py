@@ -42,7 +42,12 @@ try:
     i = 0
     while i < total_jobs:
         job_def = job_defs[i]
-        job = poll_job(client.jobs.submitJob(**job_def), interval_sec=ctx.get_input("JOB_POLLING_INTERVAL", 500))
+        job = client.jobs.submitJob(**job_def)
+        job = poll_job(
+            client,
+            job,
+            interval_sec=ctx.get_input("JOB_POLLING_INTERVAL", 500)
+        )
         manifest.jobs[i] = {**manifest.jobs[i], "status": job.status}
         manifest.log(f"Job entered terminal state: {job.status}")
         if job.status in ["FAILED", "CANCELLED"]:

@@ -22,7 +22,7 @@ try:
         jwt=ctx.get_input("TAPIS_JWT")
     )
 except Exception as e:
-    ctx.stderr(str(e))
+    ctx.stderr(1, str(e))
 
 # Load the manifest
 manifest = ManifestModel(**json.loads(ctx.get_input("MANIFEST")))
@@ -50,7 +50,7 @@ try:
             break
 
 except Exception as e:
-    ctx.stderr(f"Error running Tapis Job(s) {e}")
+    ctx.stderr(1, f"Error running Tapis Job(s) {e}")
 
 # Update the manifests with the new status
 try:

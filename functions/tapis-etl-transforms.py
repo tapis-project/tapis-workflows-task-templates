@@ -76,62 +76,85 @@ try:
         parameter_set = job_def.get("parameterSet", {})
         env_variables = parameter_set.get("envVariables", [])
 
+        tapis_etl_env_vars = {
+            "TAPIS_WORKFLOWS_TASK_ID": os.environ.get("_OWE_TASK_ID"),
+            "TAPIS_WORKFLOWS_PIPELINE_ID": os.environ.get("_OWE_PIPELINE_ID"),
+            "TAPIS_WORKFLOWS_PIPELINE_RUN_UUID": os.environ.get("_OWE_PIPELINE_RUN_UUID"),
+            "TAPIS_ETL_HOST_DATA_INPUT_DIR": os.path.join(
+                    f'/{local_inbox_data_system.rootDir.lsrip("/")}',
+                    local_inbox.get("data").get("path").lstrip("/")
+                ),
+            "TAPIS_ETL_HOST_DATA_OUTPUT_DIR": os.path.join(
+                    f'/{local_outbox_data_system.rootDir.lsrip("/")}',
+                    local_outbox.get("data").get("path").lstrip("/")
+                ),
+            "TAPIS_ETL_MANIFEST_FILENAME": manifest.filename,
+            "TAPIS_ETL_MANIFEST_PATH": manifest_target_path,
+            "TAPIS_ETL_MANIFEST_MIME_TYPE": "application/json"
+        }
+
         env_variables.extend([
             {
                 "key": "TAPIS_WORKFLOWS_TASK_ID",
-                "value": os.environ.get("_OWE_TASK_ID"),
+                "value": tapis_etl_env_vars.get("TAPIS_WORKFLOWS_TASK_ID"),
                 "description": "Tapis Workflows Task ID",
                 "include": True,
             },
             {
                 "key": "TAPIS_WORKFLOWS_PIPELINE_ID",
-                "value": os.environ.get("_OWE_PIPELINE_ID"),
+                "value": tapis_etl_env_vars.get("TAPIS_WORKFLOWS_PIPELINE_ID"),
                 "description": "Tapis Workflows Pipeline ID",
                 "include": True,
             },
             {
                 "key": "TAPIS_WORKFLOWS_PIPELINE_RUN_UUID",
-                "value": os.environ.get("_OWE_PIPELINE_RUN_UUID"),
+                "value": tapis_etl_env_vars.get("TAPIS_WORKFLOWS_PIPELINE_RUN_UUID"),
                 "description": "Tapis Workflows Pipeline Run UUID",
                 "include": True,
             },
             {
                 "key": "TAPIS_ETL_HOST_DATA_INPUT_DIR",
-                "value": os.path.join(
-                    f'/{local_inbox_data_system.rootDir.lsrip("/")}',
-                    local_inbox.get("data").get("path").lstrip("/")
-                ),
+                "value": tapis_etl_env_vars.get("TAPIS_ETL_HOST_DATA_INPUT_DIR"),
                 "description": "The directory that contains the initial data files to be processed",
                 "include": True,
             },
             {
                 "key": "TAPIS_ETL_HOST_DATA_OUTPUT_DIR",
-                "value": os.path.join(
-                    f'/{local_outbox_data_system.rootDir.lsrip("/")}',
-                    local_outbox.get("data").get("path").lstrip("/")
-                ),
+                "value": tapis_etl_env_vars.get("TAPIS_ETL_HOST_DATA_OUTPUT_DIR"),
                 "description": "The directory to which output data files should be placed",
                 "include": True,
             },
             {
                 "key": "TAPIS_ETL_MANIFEST_FILENAME",
-                "value": manifest.filename,
+                "value": tapis_etl_env_vars.get("TAPIS_ETL_MANIFEST_FILENAME"),
                 "description": "The filename of the manifest file",
                 "include": True,
             },
             {
                 "key": "TAPIS_ETL_MANIFEST_PATH",
-                "value": manifest_target_path,
+                "value": tapis_etl_env_vars.get("TAPIS_ETL_MANIFEST_PATH"),
                 "description": "The path to the manifest file",
                 "include": True,
             },
             {
                 "key": "TAPIS_ETL_MANIFEST_MIME_TYPE",
-                "value": "application/json",
+                "value": tapis_etl_env_vars.get("TAPIS_ETL_MANIFEST_MIME_TYPE"),
                 "description": "The MIME type of the manifest file",
                 "include": True,
             }
         ])
+
+        # Add envrionment variables for user-defined mappings to tapis etl env vars
+        env_mappings = job_def.get("extensions").get("tapis_etl").get("env_mappings")
+        for user_defined_env_key, tapis_etl_env_key in env_mappings.items():
+            if user_defined_env_key not in tapis_etl_env_vars:
+                print(f"WARNING: Invalid envrionment variable mapping: '{tapis_etl_env_key}' does not exist")
+            env_variables.append({
+                "key": user_defined_env_key,
+                "value": tapis_etl_env_vars.get(tapis_etl_env_key),
+                "description": f"User-defined envrionment variable '{user_defined_env_key}' set to the value of envrionment variable '{tapis_etl_env_key}'",
+                "include": True,
+            })
 
         job = client.jobs.submitJob(**job_def)
         job = poll_job(

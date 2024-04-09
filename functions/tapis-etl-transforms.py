@@ -81,11 +81,11 @@ try:
             "TAPIS_WORKFLOWS_PIPELINE_ID": os.environ.get("_OWE_PIPELINE_ID"),
             "TAPIS_WORKFLOWS_PIPELINE_RUN_UUID": os.environ.get("_OWE_PIPELINE_RUN_UUID"),
             "TAPIS_ETL_HOST_DATA_INPUT_DIR": os.path.join(
-                    f'/{local_inbox_data_system.rootDir.lsrip("/")}',
+                    f'/{local_inbox_data_system.rootDir.lstrip("/")}',
                     local_inbox.get("data").get("path").lstrip("/")
                 ),
             "TAPIS_ETL_HOST_DATA_OUTPUT_DIR": os.path.join(
-                    f'/{local_outbox_data_system.rootDir.lsrip("/")}',
+                    f'/{local_outbox_data_system.rootDir.lstrip("/")}',
                     local_outbox.get("data").get("path").lstrip("/")
                 ),
             "TAPIS_ETL_MANIFEST_FILENAME": manifest.filename,

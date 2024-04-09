@@ -78,6 +78,24 @@ try:
 
         env_variables.extend([
             {
+                "key": "TAPIS_WORKFLOWS_TASK_ID",
+                "value": os.environ.get("_OWE_TASK_ID"),
+                "description": "Tapis Workflows Task ID",
+                "include": True,
+            },
+            {
+                "key": "TAPIS_WORKFLOWS_PIPELINE_ID",
+                "value": os.environ.get("_OWE_PIPELINE_ID"),
+                "description": "Tapis Workflows Pipeline ID",
+                "include": True,
+            },
+            {
+                "key": "TAPIS_WORKFLOWS_PIPELINE_RUN_UUID",
+                "value": os.environ.get("_OWE_PIPELINE_RUN_UUID"),
+                "description": "Tapis Workflows Pipeline Run UUID",
+                "include": True,
+            },
+            {
                 "key": "TAPIS_ETL_HOST_DATA_INPUT_DIR",
                 "value": os.path.join(
                     f'/{local_inbox_data_system.rootDir.lsrip("/")}',

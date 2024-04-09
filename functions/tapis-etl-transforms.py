@@ -71,7 +71,7 @@ try:
         })
         job_def["fileInputs"] = file_inputs
 
-        # Modify the Tapis Job definition's envrionement variables to include
+        # Modify the Tapis Job definition's environement variables to include
         # references to Tapis ETL data specific to this run
         parameter_set = job_def.get("parameterSet", {})
         env_variables = parameter_set.get("envVariables", [])
@@ -144,15 +144,15 @@ try:
             }
         ])
 
-        # Add envrionment variables for user-defined mappings to tapis etl env vars
+        # Add environment variables for user-defined mappings to tapis etl env vars
         env_mappings = job_def.get("extensions", {}).get("tapis_etl", {}).get("env_mappings")
         for user_defined_env_key, tapis_etl_env_key in env_mappings.items():
             if user_defined_env_key not in tapis_etl_env_vars:
-                print(f"WARNING: Invalid envrionment variable mapping: '{tapis_etl_env_key}' does not exist")
+                print(f"WARNING: Invalid environment variable mapping: '{tapis_etl_env_key}' does not exist")
             env_variables.append({
                 "key": user_defined_env_key,
                 "value": tapis_etl_env_vars.get(tapis_etl_env_key),
-                "description": f"User-defined envrionment variable '{user_defined_env_key}' set to the value of envrionment variable '{tapis_etl_env_key}'",
+                "description": f"User-defined environment variable '{user_defined_env_key}' set to the value of environment variable '{tapis_etl_env_key}'",
                 "include": True,
             })
 

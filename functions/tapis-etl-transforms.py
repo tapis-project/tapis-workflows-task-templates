@@ -145,7 +145,7 @@ try:
         ])
 
         # Add envrionment variables for user-defined mappings to tapis etl env vars
-        env_mappings = job_def.get("extensions").get("tapis_etl").get("env_mappings")
+        env_mappings = job_def.get("extensions", {}).get("tapis_etl", {}).get("env_mappings")
         for user_defined_env_key, tapis_etl_env_key in env_mappings.items():
             if user_defined_env_key not in tapis_etl_env_vars:
                 print(f"WARNING: Invalid envrionment variable mapping: '{tapis_etl_env_key}' does not exist")

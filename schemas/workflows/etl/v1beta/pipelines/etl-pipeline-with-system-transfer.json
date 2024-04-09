@@ -325,6 +325,11 @@
                         "env": "LOCAL_INBOX"
                     }
                 },
+                "LOCAL_OUTBOX": {
+                    "value_from": {
+                        "env": "LOCAL_OUTBOX"
+                    }
+                },
                 "DEFAULT_ETL_JOBS": {
                     "value_from": {
                         "env": "DEFAULT_ETL_JOBS"

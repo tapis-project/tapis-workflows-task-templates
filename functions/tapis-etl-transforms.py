@@ -155,8 +155,15 @@ try:
                 "description": f"User-defined environment variable '{user_defined_env_key}' set to the value of environment variable '{tapis_etl_env_key}'",
                 "include": True,
             })
+        
+        # Set the environment variables to the job definition
+        parameter_set["envVariables"] = env_variables
+        job_def["parameterSet"] = parameter_set
 
+        # Submit the Job
         job = client.jobs.submitJob(**job_def)
+
+        # Poll the job until it reaches a terminal state
         job = poll_job(
             client,
             job,

@@ -4,7 +4,7 @@
 from owe_python_sdk.runtime import execution_context as ctx
 #-------- Workflow Context import: DO NOT REMOVE ----------------
 
-import json, os
+import json
 
 from utils.etl import (
     ManifestsLock,

@@ -415,7 +415,7 @@ def generate_manifests(system, client, phase: EnumPhase):
                     manifest_filename
                 ),
                 url=None,
-                **{files_property: [unregistered_data_file]}
+                **{files_property: unregistered_data_files}
             )
         )
 

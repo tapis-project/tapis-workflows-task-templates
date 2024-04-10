@@ -81,6 +81,7 @@ try:
         manifest = ManifestModel(
             filename=manifest_file.name,
             path=manifest_file.path,
+            url=manifest_file.url,
             **json.loads(
                 get_tapis_file_contents_json(
                     client,

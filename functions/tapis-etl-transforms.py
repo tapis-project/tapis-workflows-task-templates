@@ -66,7 +66,7 @@ try:
         file_inputs.append({
             "name": "TAPIS_ETL_MANIFEST",
             "description": "A file that contains a Tapis ETL manifest object. This object contains a list of the files to be processed by the first ETL Job in an ETL Pipeline.",
-            "sourcePath": manifest.path,
+            "sourceUrl": manifest.url,
             "targetPath": manifest_target_path
         })
         job_def["fileInputs"] = file_inputs

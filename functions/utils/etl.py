@@ -25,6 +25,7 @@ class ManifestModel:
         self,
         filename,
         path,
+        url,
         remote_files=None,
         transfers=None,
         local_files=None,
@@ -38,6 +39,7 @@ class ManifestModel:
     ):
         self.filename = filename
         self.path = path
+        self.url = url
         self.status = status
         self.phase = phase
         self.remote_files = []
@@ -338,6 +340,7 @@ def generate_manifests(system, client, phase: EnumPhase):
                 ManifestModel(
                     filename=manifest_file.get("name"),
                     path=manifest_file.get("path"),
+                    url=manifest_file.get("url"),
                     **json.loads(
                         get_tapis_file_contents_json(
                             client,
@@ -395,6 +398,7 @@ def generate_manifests(system, client, phase: EnumPhase):
                         system.get("manifests").get("path"),
                         manifest_filename
                     ),
+                    url=None,
                     **{files_property: [unregistered_data_file]}
                 )
             )
@@ -410,6 +414,7 @@ def generate_manifests(system, client, phase: EnumPhase):
                     system.get("manifests").get("path"),
                     manifest_filename
                 ),
+                url=None,
                 **{files_property: [unregistered_data_file]}
             )
         )

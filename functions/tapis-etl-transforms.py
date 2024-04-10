@@ -7,10 +7,10 @@ import json, os
 from utils.etl import (
     ManifestsLock,
     ManifestModel,
+    EnumManifestStatus,
     cleanup
 )
 from utils.tapis import poll_job, get_client
-
 
 
 # Instantiate a Tapis client
@@ -156,27 +156,38 @@ try:
                 "include": True,
             })
         
-        # Set the environment variables to the job definition
+        # Set the parameter set back to the job definition
         parameter_set["envVariables"] = env_variables
         job_def["parameterSet"] = parameter_set
 
+        # Remove the 'extensions' property from the job definition to avoid any
+        # potential extraneous key errors
+        if "extensions" in job_def:
+            del job_def["extensions"]
+
         # Submit the Job
         job = client.jobs.submitJob(**job_def)
-
+        print("JOB", job)
         # Poll the job until it reaches a terminal state
         job = poll_job(
             client,
             job,
-            interval_sec=ctx.get_input("JOB_POLLING_INTERVAL", 300)
+            interval_sec=int(ctx.get_input("JOB_POLLING_INTERVAL", 300))
         )
+        print("JOB AFTER POLL", job)
+
+        # Update the status of the job in the manifest
         manifest.jobs[i] = {**manifest.jobs[i], "status": job.status}
         manifest.log(f"Job entered terminal state: {job.status}")
+
         if job.status in ["FAILED", "CANCELLED"]:
+            manifest.set_status(EnumManifestStatus.Failed)
             failed_or_cancelled_job = job
             break
 
 except Exception as e:
-    ctx.stderr(1, f"Error running Tapis Job(s) {e}")
+    manifest.set_status(EnumManifestStatus.Failed)
+    manifest.log(f"Error running Tapis Job(s): {e}")
 
 # Update the manifests with the new status
 try:

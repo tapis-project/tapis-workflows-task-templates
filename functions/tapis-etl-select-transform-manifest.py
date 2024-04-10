@@ -127,7 +127,8 @@ try:
         next_manifest.set_status(EnumManifestStatus.Failed)
         next_manifest.save(manifests_system_id, client)
 
-        ctx.stderr(1, "Missing ETL Job | At least 1 Tapis Job definition must be provided in the ETL Pipeline definition or in the Manifest.")
+        ctx.set_output("MANIFEST", json.dumps(None))
+        ctx.stdout("No ETL Jobs provided")
 except Exception as e:
     ctx.stderr(1, f"Failed to update manifest: {e}")
 

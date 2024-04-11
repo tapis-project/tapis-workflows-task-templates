@@ -163,8 +163,8 @@ for manifest in manifests:
             manifest.save(manifests_system.get("manifests").get("system_id"), client)
             ctx.stderr(1, task_err)
 
-        manifest.set_status(EnumManifestStatus.Completed)
         manifest.log(f"Transfer task completed | Task UUID: {task.uuid}")
+        manifest.set_status(EnumManifestStatus.Completed)
         manifest.save(manifests_system.get("manifests").get("system_id"), client)
     except Exception as e:
         ctx.stderr(1, f"Error updating manifests after transfer: {e}")

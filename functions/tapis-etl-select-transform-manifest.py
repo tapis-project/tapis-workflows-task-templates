@@ -133,7 +133,7 @@ except Exception as e:
     ctx.stderr(1, f"Failed to update manifest: {e}")
 
 try:
-    next_manifest.log("Setting Jobs")
+    next_manifest.log(f"Setting ({str(len(jobs))}) Job(s) ")
     next_manifest.jobs = jobs
     next_manifest.set_status(EnumManifestStatus.Active)
     next_manifest.save(manifests_system_id, client)

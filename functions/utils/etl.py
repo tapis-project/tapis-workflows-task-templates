@@ -410,6 +410,7 @@ def generate_manifests(system, client, phase: EnumPhase):
         new_manifests.append(
             ManifestModel(
                 filename=manifest_filename,
+                phase=phase,
                 path=os.path.join(
                     system.get("manifests").get("path"),
                     manifest_filename

@@ -38,7 +38,6 @@ if is_resubmission:
         if job_def.get("status") in ["FAILED", "CANCELLED"]
     ]
 
-
 try: 
     local_inbox = json.loads(ctx.get_input("LOCAL_INBOX"))
     local_inbox_data_system = client.systems.getSystem(

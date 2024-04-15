@@ -35,7 +35,7 @@ job_defs = manifest.jobs
 if is_resubmission:
     job_defs = [
         job_def for job_def in job_defs
-        if job_def.get("status") in ["FAILED", "CANCELLED"]
+        if job_def.get("extensions", {}).get("tapis_etl", {}).get("last_status", "PENDING") in ["FAILED", "CANCELLED"]
     ]
 
 try: 
@@ -52,141 +52,155 @@ except Exception as e:
     ctx.stderr(1, f"Error loading local systems: {e}")
 
 failed_or_cancelled_job = None
-try:
-    total_jobs = len(job_defs)
-    i = 0
-    while i < total_jobs:
-        # Modify the first job definition to include the manifest as a file input
-        # and environment variables 
-        job_def = job_defs[i]
-        
-        file_inputs = job_def.get("fileInputs", [])
-        manifest_target_path = f"/tmp/{manifest.filename}"
-        file_inputs.append({
-            "name": "TAPIS_ETL_MANIFEST",
-            "description": "A file that contains a Tapis ETL manifest object. This object contains a list of the files to be processed by the first ETL Job in an ETL Pipeline.",
-            "sourceUrl": manifest.url,
-            "targetPath": manifest_target_path
-        })
-        job_def["fileInputs"] = file_inputs
+total_jobs = len(job_defs)
+i = 0
+while i < total_jobs:
+    # Modify the first job definition to include the manifest as a file input
+    # and environment variables 
+    unmodified_job_def = job_defs[i]
 
-        # Modify the Tapis Job definition's environement variables to include
-        # references to Tapis ETL data specific to this run
-        parameter_set = job_def.get("parameterSet", {})
-        env_variables = parameter_set.get("envVariables", [])
+    # Create a copy of the job defnition to modify
+    job_def = unmodified_job_def.copy()
+    
+    # Set the defaults of the job definition extensions
+    job_def["extensions"] = job_def.get("extensions", {})
+    job_def["extensions"]["tapis_etl"] = job_def["extensions"].get("tapis_etl", {})
 
-        tapis_etl_env_vars = {
-            "TAPIS_WORKFLOWS_TASK_ID": os.environ.get("_OWE_TASK_ID"),
-            "TAPIS_WORKFLOWS_PIPELINE_ID": os.environ.get("_OWE_PIPELINE_ID"),
-            "TAPIS_WORKFLOWS_PIPELINE_RUN_UUID": os.environ.get("_OWE_PIPELINE_RUN_UUID"),
-            "TAPIS_ETL_HOST_DATA_INPUT_DIR": os.path.join(
-                    f'/{local_inbox_data_system.rootDir.lstrip("/")}',
-                    local_inbox.get("data").get("path").lstrip("/")
-                ),
-            "TAPIS_ETL_HOST_DATA_OUTPUT_DIR": os.path.join(
-                    f'/{local_outbox_data_system.rootDir.lstrip("/")}',
-                    local_outbox.get("data").get("path").lstrip("/")
-                ),
-            "TAPIS_ETL_MANIFEST_FILENAME": manifest.filename,
-            "TAPIS_ETL_MANIFEST_PATH": manifest_target_path,
-            "TAPIS_ETL_MANIFEST_MIME_TYPE": "application/json"
+    # Set fileInputs to an empty array
+    job_def["fileInputs"] = job_def.get("fileInputs", [])
+    manifest_target_path = f"/tmp/{manifest.filename}"
+    job_def["fileInputs"].append({
+        "name": "TAPIS_ETL_MANIFEST",
+        "description": "A file that contains a Tapis ETL manifest object. This object contains a list of the files to be processed by the first ETL Job in an ETL Pipeline.",
+        "sourceUrl": manifest.url,
+        "targetPath": manifest_target_path
+    })
+
+    # Modify the Tapis Job definition's environement variables to include
+    # references to Tapis ETL data specific to this run
+    job_def["parameterSet"] = job_def.get("parameterSet", {})
+    job_def["parameterSet"]["envVariables"] = job_def["parameterSet"].get("envVariables", [])
+
+    tapis_etl_env_vars = {
+        "TAPIS_WORKFLOWS_TASK_ID": os.environ.get("_OWE_TASK_ID"),
+        "TAPIS_WORKFLOWS_PIPELINE_ID": os.environ.get("_OWE_PIPELINE_ID"),
+        "TAPIS_WORKFLOWS_PIPELINE_RUN_UUID": os.environ.get("_OWE_PIPELINE_RUN_UUID"),
+        "TAPIS_ETL_HOST_DATA_INPUT_DIR": os.path.join(
+            f'/{local_inbox_data_system.rootDir.lstrip("/")}',
+            local_inbox.get("data").get("path").lstrip("/")
+        ),
+        "TAPIS_ETL_HOST_DATA_OUTPUT_DIR": os.path.join(
+            f'/{local_outbox_data_system.rootDir.lstrip("/")}',
+            local_outbox.get("data").get("path").lstrip("/")
+        ),
+        "TAPIS_ETL_MANIFEST_FILENAME": manifest.filename,
+        "TAPIS_ETL_MANIFEST_PATH": manifest_target_path,
+        "TAPIS_ETL_MANIFEST_MIME_TYPE": "application/json"
+    }
+
+    job_def["parameterSet"]["envVariables"].extend([
+        {
+            "key": "TAPIS_WORKFLOWS_TASK_ID",
+            "value": tapis_etl_env_vars.get("TAPIS_WORKFLOWS_TASK_ID"),
+            "description": "Tapis Workflows Task ID",
+            "include": True,
+        },
+        {
+            "key": "TAPIS_WORKFLOWS_PIPELINE_ID",
+            "value": tapis_etl_env_vars.get("TAPIS_WORKFLOWS_PIPELINE_ID"),
+            "description": "Tapis Workflows Pipeline ID",
+            "include": True,
+        },
+        {
+            "key": "TAPIS_WORKFLOWS_PIPELINE_RUN_UUID",
+            "value": tapis_etl_env_vars.get("TAPIS_WORKFLOWS_PIPELINE_RUN_UUID"),
+            "description": "Tapis Workflows Pipeline Run UUID",
+            "include": True,
+        },
+        {
+            "key": "TAPIS_ETL_HOST_DATA_INPUT_DIR",
+            "value": tapis_etl_env_vars.get("TAPIS_ETL_HOST_DATA_INPUT_DIR"),
+            "description": "The directory that contains the initial data files to be processed",
+            "include": True,
+        },
+        {
+            "key": "TAPIS_ETL_HOST_DATA_OUTPUT_DIR",
+            "value": tapis_etl_env_vars.get("TAPIS_ETL_HOST_DATA_OUTPUT_DIR"),
+            "description": "The directory to which output data files should be placed",
+            "include": True,
+        },
+        {
+            "key": "TAPIS_ETL_MANIFEST_FILENAME",
+            "value": tapis_etl_env_vars.get("TAPIS_ETL_MANIFEST_FILENAME"),
+            "description": "The filename of the manifest file",
+            "include": True,
+        },
+        {
+            "key": "TAPIS_ETL_MANIFEST_PATH",
+            "value": tapis_etl_env_vars.get("TAPIS_ETL_MANIFEST_PATH"),
+            "description": "The path to the manifest file",
+            "include": True,
+        },
+        {
+            "key": "TAPIS_ETL_MANIFEST_MIME_TYPE",
+            "value": tapis_etl_env_vars.get("TAPIS_ETL_MANIFEST_MIME_TYPE"),
+            "description": "The MIME type of the manifest file",
+            "include": True,
         }
+    ])
 
-        env_variables.extend([
-            {
-                "key": "TAPIS_WORKFLOWS_TASK_ID",
-                "value": tapis_etl_env_vars.get("TAPIS_WORKFLOWS_TASK_ID"),
-                "description": "Tapis Workflows Task ID",
-                "include": True,
-            },
-            {
-                "key": "TAPIS_WORKFLOWS_PIPELINE_ID",
-                "value": tapis_etl_env_vars.get("TAPIS_WORKFLOWS_PIPELINE_ID"),
-                "description": "Tapis Workflows Pipeline ID",
-                "include": True,
-            },
-            {
-                "key": "TAPIS_WORKFLOWS_PIPELINE_RUN_UUID",
-                "value": tapis_etl_env_vars.get("TAPIS_WORKFLOWS_PIPELINE_RUN_UUID"),
-                "description": "Tapis Workflows Pipeline Run UUID",
-                "include": True,
-            },
-            {
-                "key": "TAPIS_ETL_HOST_DATA_INPUT_DIR",
-                "value": tapis_etl_env_vars.get("TAPIS_ETL_HOST_DATA_INPUT_DIR"),
-                "description": "The directory that contains the initial data files to be processed",
-                "include": True,
-            },
-            {
-                "key": "TAPIS_ETL_HOST_DATA_OUTPUT_DIR",
-                "value": tapis_etl_env_vars.get("TAPIS_ETL_HOST_DATA_OUTPUT_DIR"),
-                "description": "The directory to which output data files should be placed",
-                "include": True,
-            },
-            {
-                "key": "TAPIS_ETL_MANIFEST_FILENAME",
-                "value": tapis_etl_env_vars.get("TAPIS_ETL_MANIFEST_FILENAME"),
-                "description": "The filename of the manifest file",
-                "include": True,
-            },
-            {
-                "key": "TAPIS_ETL_MANIFEST_PATH",
-                "value": tapis_etl_env_vars.get("TAPIS_ETL_MANIFEST_PATH"),
-                "description": "The path to the manifest file",
-                "include": True,
-            },
-            {
-                "key": "TAPIS_ETL_MANIFEST_MIME_TYPE",
-                "value": tapis_etl_env_vars.get("TAPIS_ETL_MANIFEST_MIME_TYPE"),
-                "description": "The MIME type of the manifest file",
-                "include": True,
-            }
-        ])
+    # Add environment variables for user-defined mappings to tapis etl env vars
+    job_def["extensions"]["tapis_etl"]["env_mappings"] = job_def["extensions"]["tapis_etl"].get("env_mappings", {})
+    for user_defined_env_key, tapis_etl_env_key in job_def["extensions"]["tapis_etl"]["env_mappings"].items():
+        if tapis_etl_env_key not in tapis_etl_env_vars:
+            print(f"WARNING: Invalid environment variable mapping: '{tapis_etl_env_key}' does not exist")
 
-        # Add environment variables for user-defined mappings to tapis etl env vars
-        env_mappings = job_def.get("extensions", {}).get("tapis_etl", {}).get("env_mappings")
-        for user_defined_env_key, tapis_etl_env_key in env_mappings.items():
-            if tapis_etl_env_key not in tapis_etl_env_vars:
-                print(f"WARNING: Invalid environment variable mapping: '{tapis_etl_env_key}' does not exist")
-            env_variables.append({
-                "key": user_defined_env_key,
-                "value": tapis_etl_env_vars.get(tapis_etl_env_key),
-                "description": f"User-defined environment variable '{user_defined_env_key}' set to the value of environment variable '{tapis_etl_env_key}'",
-                "include": True,
-            })
-        
-        # Set the parameter set back to the job definition
-        parameter_set["envVariables"] = env_variables
-        job_def["parameterSet"] = parameter_set
+        job_def["parameterSet"]["envVariables"].append({
+            "key": user_defined_env_key,
+            "value": tapis_etl_env_vars.get(tapis_etl_env_key),
+            "description": f"User-defined environment variable '{user_defined_env_key}' set to the value of environment variable '{tapis_etl_env_key}'",
+            "include": True,
+        })
 
-        # Remove the 'extensions' property from the job definition to avoid any
-        # potential extraneous key errors
-        if "extensions" in job_def:
-            del job_def["extensions"]
+    # Remove the 'extensions' property from the copy to avoid extraneous key errors
+    del job_def["extensions"]
 
+    job = None
+    try:
         # Submit the Job
         job = client.jobs.submitJob(**job_def)
-        print("JOB", job)
+        
         # Poll the job until it reaches a terminal state
         job = poll_job(
             client,
             job,
             interval_sec=int(ctx.get_input("JOB_POLLING_INTERVAL", 300))
         )
-        print("JOB AFTER POLL", job)
+    except Exception as e:
+        manifest.set_status(EnumManifestStatus.Failed)
+        manifest.log(f"Error running Tapis Job(s): {e}")
 
-        # Update the status of the job in the manifest
-        manifest.jobs[i] = {**manifest.jobs[i], "status": job.status}
-        manifest.log(f"Job entered terminal state: {job.status}")
+    # Set the job status
+    job_status = "FAILED" if job == None else job.status
 
-        if job.status in ["FAILED", "CANCELLED"]:
-            manifest.set_status(EnumManifestStatus.Failed)
-            failed_or_cancelled_job = job
-            break
+    # Update the current job in the manifest and log the terminal state
+    curr_job = manifest.jobs[i]
+    manifest.jobs[i] = {
+        **curr_job,
+        "extensions": {
+            **curr_job["extensions"],
+            "tapis_etl": {
+                **curr_job["extensions"]["etl"],
+                "last_status": job_status
+            }
+        }
+    }
+    manifest.log(f"Job entered terminal state: {job_status}")
 
-except Exception as e:
-    manifest.set_status(EnumManifestStatus.Failed)
-    manifest.log(f"Error running Tapis Job(s): {e}")
+    if job_status in ["FAILED", "CANCELLED"]:
+        manifest.set_status(EnumManifestStatus.Failed)
+        failed_or_cancelled_job = job
+        break
 
 # Update the manifests with the new status
 try:

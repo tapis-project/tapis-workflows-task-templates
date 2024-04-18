@@ -31,7 +31,7 @@ except Exception as e:
     ctx.stderr(1, f"Error loading manifest: {e}")
 
 is_resubmission = bool(ctx.get_input("RESUBMIT_TRANSFORM"))
-job_defs = manifest.jobs
+job_defs = manifest.jobs.copy()
 if is_resubmission:
     job_defs = [
         job_def for job_def in job_defs
@@ -57,10 +57,7 @@ i = 0
 while i < total_jobs:
     # Modify the first job definition to include the manifest as a file input
     # and environment variables 
-    unmodified_job_def = job_defs[i]
-
-    # Create a copy of the job defnition to modify
-    job_def = unmodified_job_def.copy()
+    job_def = job_defs[i]
     
     # Set the defaults of the job definition extensions
     job_def["extensions"] = job_def.get("extensions", {})
@@ -188,9 +185,9 @@ while i < total_jobs:
     manifest.jobs[i] = {
         **curr_job,
         "extensions": {
-            **curr_job["extensions"],
+            **curr_job.get("extensions", {}),
             "tapis_etl": {
-                **curr_job["extensions"]["etl"],
+                **curr_job.get("extensions", {}).get("etl", {}),
                 "last_status": job_status
             }
         }

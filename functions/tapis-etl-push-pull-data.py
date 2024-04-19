@@ -115,7 +115,7 @@ for manifest in manifests:
             client
         )
     except Exception as e:
-        ctx.stderr(1, f"Error validating manifest: {e}")
+        ctx.stderr(1, f"Error validating data integrity: {e}")
 
     try:
         # Log the failed data integrity check in the manifest

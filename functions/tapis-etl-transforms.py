@@ -31,7 +31,7 @@ except Exception as e:
     ctx.stderr(1, f"Error loading manifest: {e}")
 
 is_resubmission = bool(ctx.get_input("RESUBMIT_TRANSFORM"))
-job_defs = manifest.jobs.copy()
+job_defs = [job_def.copy() for job_def in manifest.jobs]
 if is_resubmission:
     job_defs = [
         job_def for job_def in job_defs

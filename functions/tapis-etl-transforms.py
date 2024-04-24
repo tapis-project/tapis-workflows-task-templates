@@ -178,8 +178,13 @@ while i < total_jobs:
     job = None
     try:
         # Submit the Job
+        print(job_def)
         job = client.jobs.submitJob(**job_def)
-        
+    except Exception as e:
+        manifest.set_status(EnumManifestStatus.Failed)
+        manifest.log(f"Error submitting Tapis Job #{str(i + 1)}: {e}")
+    
+    try:
         # Poll the job until it reaches a terminal state
         job = poll_job(
             client,
@@ -188,7 +193,7 @@ while i < total_jobs:
         )
     except Exception as e:
         manifest.set_status(EnumManifestStatus.Failed)
-        manifest.log(f"Error running Tapis Job(s): {e}")
+        manifest.log(f"Error polling Tapis Job #{str(i + 1)}: {e}")
 
     # Set the job status
     job_status = "FAILED" if job == None else job.status

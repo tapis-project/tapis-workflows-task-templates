@@ -4,6 +4,8 @@ from owe_python_sdk.runtime import execution_context as ctx
 
 import json, os
 
+from copy import deepcopy
+
 from utils.etl import (
     ManifestsLock,
     ManifestModel,
@@ -30,20 +32,31 @@ try:
 except Exception as e:
     ctx.stderr(1, f"Error loading manifest: {e}")
 
+# Resubmission flag
 is_resubmission = bool(ctx.get_input("RESUBMIT_TRANSFORM"))
-job_defs = [job_def.copy() for job_def in manifest.jobs]
+
+# Create a deep copy of the job defs in the manifest. These definitions will have
+# data specific to this run added to it. The deep copying prevents us adding data
+# to the original job definition objects in the manifest.
+job_defs = [deepcopy(manifest_job) for manifest_job in manifest.jobs]
+
+# Check if this submission is a resubmission. If it is, filter out the jobs that
+# have been successfully completed so that only the pending, failed, and cancelled
+# jobs remain
 if is_resubmission:
     job_defs = [
         job_def for job_def in job_defs
         if job_def.get("extensions", {}).get("tapis_etl", {}).get("last_status", "PENDING") in ["FAILED", "CANCELLED"]
     ]
 
-try: 
+try:
+    # Fetch and serialize the local inbox from the task input
     local_inbox = json.loads(ctx.get_input("LOCAL_INBOX"))
     local_inbox_data_system = client.systems.getSystem(
         systemId=local_inbox.get("data").get("system_id")
     )
 
+    # Fetch and serialize the local outbox from the task input
     local_outbox = json.loads(ctx.get_input("LOCAL_OUTBOX"))
     local_outbox_data_system = client.systems.getSystem(
         systemId=local_outbox.get("data").get("system_id")

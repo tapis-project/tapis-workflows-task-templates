@@ -471,7 +471,7 @@ def validate_manifest_data_files(system, files_in_manifest, client):
     # operation (data processing or transfer) to be performed against them.
     validated = True
     if system.get("data").get("integrity_profile") == None:
-        return validated
+        return (validated, None)
     
     try: 
         data_integrity_profile = DataIntegrityProfile(

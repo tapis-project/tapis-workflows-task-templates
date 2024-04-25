@@ -15,6 +15,8 @@ from utils.etl import (
 from utils.tapis import poll_job, get_client
 
 
+logger = ctx.get_logger()
+
 # Instantiate a Tapis client
 try:
     client = get_client(
@@ -24,12 +26,14 @@ try:
         jwt=ctx.get_input("TAPIS_JWT")
     )
 except Exception as e:
-    ctx.stderr(1, str(e))
+    logger.exception("Tapis client error")
+    ctx.stderr(1, f"Error instantiating Tapis client: {str(e)}")
 
 # Load the manifest
 try: 
     manifest = ManifestModel(**json.loads(ctx.get_input("MANIFEST")))
 except Exception as e:
+    logger.exception("Tapis client error")
     ctx.stderr(1, f"Error loading manifest: {e}")
 
 # Resubmission flag
@@ -46,7 +50,7 @@ job_defs = [deepcopy(manifest_job) for manifest_job in manifest.jobs]
 if is_resubmission:
     job_defs = [
         job_def for job_def in job_defs
-        if job_def.get("extensions", {}).get("tapis_etl", {}).get("last_status", "PENDING") in ["FAILED", "CANCELLED"]
+        if job_def.get("extensions", {}).get("tapis_etl", {}).get("last_status", "PENDING") in ["PENDINGE", "FAILED", "CANCELLED"]
     ]
 
 try:
@@ -62,6 +66,7 @@ try:
         systemId=local_outbox.get("data").get("system_id")
     )
 except Exception as e:
+    logger.exception("Tapis client error")
     ctx.stderr(1, f"Error loading local systems: {e}")
 
 failed_or_cancelled_job = None
@@ -182,6 +187,7 @@ while i < total_jobs:
         job = client.jobs.submitJob(**job_def)
     except Exception as e:
         manifest.set_status(EnumManifestStatus.Failed)
+        logger.exception("Tapis client error")
         manifest.log(f"Error submitting Tapis Job #{str(i + 1)}: {e}")
     
     try:
@@ -193,6 +199,7 @@ while i < total_jobs:
         )
     except Exception as e:
         manifest.set_status(EnumManifestStatus.Failed)
+        logger.exception("Tapis client error")
         manifest.log(f"Error polling Tapis Job #{str(i + 1)}: {e}")
 
     # Set the job status
@@ -217,6 +224,8 @@ while i < total_jobs:
         failed_or_cancelled_job = job
         break
 
+    i += 1
+
 # Update the manifests with the new status
 try:
     # Lock the manifests directory to prevent other concurrent pipeline runs
@@ -228,6 +237,7 @@ try:
 
     manifest.save(local_inbox.get("manifests").get("system_id"), client)
 except Exception as e:
+    logger.exception("Tapis client error")
     ctx.stderr(1, f"Failed to update Manifest: {str(e)}")
 
 if failed_or_cancelled_job:

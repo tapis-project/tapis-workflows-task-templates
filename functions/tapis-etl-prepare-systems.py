@@ -90,12 +90,12 @@ try:
         path=local_inbox.get("control").get("path")
     )
 
-    control_manifest_exist = any([
+    control_manifest_exists = any([
         file.name == CONTROL_MANIFEST_FILENAME
         for file in manifest_files
     ])
 
-    if not control_manifest_exist:
+    if not control_manifest_exists:
         manifest = ManifestModel(
             filename=CONTROL_MANIFEST_FILENAME,
             path=os.path.join(

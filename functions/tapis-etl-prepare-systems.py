@@ -7,7 +7,7 @@ from owe_python_sdk.runtime import execution_context as ctx
 
 import json, os
 
-from constants.etl import ROOT_MANIFEST_FILENAME
+from constants.etl import CONTROL_MANIFEST_FILENAME
 from utils.etl import (
     ManifestModel,
     ManifestsLock,
@@ -81,7 +81,7 @@ except Exception as e:
     ctx.stderr(1, f"Failed to lock pipeline: {str(e)}")
 
 
-# Create the root manifest if it does not exist. The root manifest is used
+# Create the control manifest if it does not exist. The control manifest is used
 # to track which manifests have been transferred from the Remote Outbox's manifests
 # path
 try:
@@ -90,24 +90,24 @@ try:
         path=local_inbox.get("control").get("path")
     )
 
-    root_manifest_exist = any([
-        file.name == ROOT_MANIFEST_FILENAME
+    control_manifest_exist = any([
+        file.name == CONTROL_MANIFEST_FILENAME
         for file in manifest_files
     ])
 
-    if not root_manifest_exist:
+    if not control_manifest_exist:
         manifest = ManifestModel(
-            filename=ROOT_MANIFEST_FILENAME,
+            filename=CONTROL_MANIFEST_FILENAME,
             path=os.path.join(
                 local_inbox.get("control").get("path"),
-                ROOT_MANIFEST_FILENAME
+                CONTROL_MANIFEST_FILENAME
             ),
             url=None
         )
 
         manifest.create(local_inbox.get("control").get("system_id"), client)
 except Exception as e:
-    ctx.stderr(1, f"Failed to create root manifest file in the local inbox: {e}")
+    ctx.stderr(1, f"Failed to create control manifest file in the local inbox: {e}")
 
 cleanup(ctx)
 

@@ -6,7 +6,7 @@ from owe_python_sdk.runtime import execution_context as ctx
 
 import json, os
 
-from constants.etl import ROOT_MANIFEST_FILENAME, LOCKFILE_FILENAME
+from constants.etl import CONTROL_MANIFEST_FILENAME, LOCKFILE_FILENAME
 from utils.etl import (
     ManifestModel,
     ManifestsLock,
@@ -66,7 +66,7 @@ try:
 except Exception as e:
     ctx.stderr(1, f"Error handling remote iobox manifest generation: {e}")
 
-# Get the root manifest 
+# Get the control manifest 
 try:
     control_files = client.files.listFiles(
         systemId=ingress_system.get("control").get("system_id"),
@@ -75,30 +75,30 @@ try:
 except Exception as e:
     ctx.stderr(1, f"Failed to fetch manifest files: {e}")
 
-root_manifest_file = next(
-    filter(lambda file: file.name == ROOT_MANIFEST_FILENAME, control_files), 
+control_manifest_file = next(
+    filter(lambda file: file.name == CONTROL_MANIFEST_FILENAME, control_files), 
     None
 )
 
-if root_manifest_file == None:
-    ctx.stderr(1, f"Critical Error: Missing the root manifest file")
+if control_manifest_file == None:
+    ctx.stderr(1, f"Critical Error: Missing the control manifest file")
 
-# Intialize the root manifest model
+# Intialize the control manifest model
 try:
-    root_manifest = ManifestModel(
-        filename=root_manifest_file.name,
-        path=root_manifest_file.path,
+    control_manifest = ManifestModel(
+        filename=control_manifest_file.name,
+        path=control_manifest_file.path,
         url=None,
         **json.loads(
             get_tapis_file_contents_json(
                 client,
                 ingress_system.get("control").get("system_id"),
-                root_manifest_file.path
+                control_manifest_file.path
             )
         )
     )
 except Exception as e:
-    ctx.stderr(1, f"Failed to initialize root manifest | {e}")
+    ctx.stderr(1, f"Failed to initialize control manifest | {e}")
 
 # Load all manfiest files from the remote outbox
 try:
@@ -115,9 +115,9 @@ try:
 except Exception as e:
     ctx.stderr(1, f"Failed to fetch manifest files: {e}")
 
-# Check which manifest files are in the root manifest's local files list. Add all
+# Check which manifest files are in the control manifest's local files list. Add all
 # manifest files that are missing to the untracked manifests list
-tracked_manifest_filenames = [file["name"] for file in root_manifest.remote_files]
+tracked_manifest_filenames = [file["name"] for file in control_manifest.remote_files]
 untracked_remote_manifest_files = []
 for file in egress_manifest_files:
     # Prevent the from being tracked by including it with the list of tracked files
@@ -143,7 +143,7 @@ if len(elements) == 0:
 
 # Peform the file transfer
 try:
-    root_manifest.log(f"Starting transfer of {len(elements)} manifest(s) from the egress system to the ingress system")
+    control_manifest.log(f"Starting transfer of {len(elements)} manifest(s) from the egress system to the ingress system")
     task = client.files.createTransferTask(elements=elements)
     task = poll_transfer_task(client, task)
     
@@ -151,17 +151,17 @@ try:
 
     if task.status != "COMPLETED":
         task_err = f"Transfer task failed | Task UUID: {task.uuid} | Status '{task.status}' | Error message for transfer task: {task.errorMessage}"
-        root_manifest.log(task_err)
-        root_manifest.save(ingress_system.get("control").get("system_id"), client)
+        control_manifest.log(task_err)
+        control_manifest.save(ingress_system.get("control").get("system_id"), client)
         ctx.stderr(1, task_err)
 
-    root_manifest.remote_files.extend([
+    control_manifest.remote_files.extend([
         file.__dict__ for file in 
         untracked_remote_manifest_files
     ])
-    root_manifest.log(f"Transfer task completed | Task UUID: {task.uuid}")
-    root_manifest.transfers.append(task.uuid)
-    root_manifest.save(ingress_system.get("control").get("system_id"), client)
+    control_manifest.log(f"Transfer task completed | Task UUID: {task.uuid}")
+    control_manifest.transfers.append(task.uuid)
+    control_manifest.save(ingress_system.get("control").get("system_id"), client)
 except Exception as e:
     ctx.stderr(1, f"Error transferring files: {e}")
 

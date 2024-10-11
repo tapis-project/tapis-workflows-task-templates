@@ -115,8 +115,6 @@ unprocessed_manifests.sort(key=lambda m: m.created_at, reverse=True)
 # Set the next manifest to the manifest to be submitted
 # Default to oldest manifest
 manifest_priority = local_inbox.get("manifests").get("priority")
-print("LENGTH OF UNPROCESSED MANIFESTS", len(unprocessed_manifests), "\n\n")
-print(f"INDEX: {0 - int(manifest_priority != "oldest")}")
 next_manifest = unprocessed_manifests[0 - int(manifest_priority != "oldest")]
 if manifest_to_resubmit != None: # Is resubmission
     next_manifest = manifest_to_resubmit

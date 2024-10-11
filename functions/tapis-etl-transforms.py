@@ -195,7 +195,7 @@ while i < total_jobs:
         job = poll_job(
             client,
             job,
-            interval_sec=int(ctx.get_input("JOB_POLLING_INTERVAL", 300))
+            interval_sec=int(ctx.get_input("JOB_POLLING_INTERVAL", 30))
         )
     except Exception as e:
         manifest.set_status(EnumManifestStatus.Failed)

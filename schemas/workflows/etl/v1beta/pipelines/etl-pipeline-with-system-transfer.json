@@ -1,7 +1,7 @@
 {
     "description": "ETL Pipeline",
     "execution_profile": {
-        "duplicate_submission_policy": "deny"
+        "duplicate_submission_policy": "allow"
     },
     "params": {
         "TAPIS_BASE_URL": {

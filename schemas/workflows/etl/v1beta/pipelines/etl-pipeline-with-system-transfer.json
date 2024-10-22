@@ -10,11 +10,11 @@
         },
         "TAPIS_USERNAME": {
             "type": "string",
-            "required": true
+            "required": false
         },
         "TAPIS_PASSWORD": {
             "type": "string",
-            "required": true
+            "required": false
         },
         "TAPIS_JWT": {
             "type": "string",

@@ -26,7 +26,7 @@ try:
         jwt=ctx.get_input("TAPIS_JWT")
     )
 except Exception as e:
-    ctx.stderr(str(e))
+    ctx.stderr(1, str(e))
 
     # Deserialize system details
 try:

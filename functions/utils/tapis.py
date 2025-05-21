@@ -8,11 +8,19 @@ def get_client(base_url, username=None, password=None, jwt=None, **kwargs):
     if (username == None or password == None) and jwt == None:
         raise Exception("Unable to authenticate with tapis: Must provide either a username-password combination or a JWT")
 
-    auth_kwargs = {
-        "username": username,
-        "password": password,
-        "jwt": jwt
-    }
+    # If username and password are provided, use it. Same for jwt.
+    # But but username and password AND jwt are provided, use jwt only
+    auth_kwargs = {}
+    if username and password:
+        auth_kwargs = {
+            "username": username,
+            "password": password,
+        }
+        
+    if jwt:
+        auth_kwargs = {
+            "jwt": jwt,
+        }
 
     try:
         client = Tapis(
